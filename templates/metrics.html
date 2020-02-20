@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% block title %} {{ title }} {% endblock %}
+
+{% block content %}
+    <form class="form-control" method="post" action="{{ url_for('process_input') }}">
+        <legend> {{ legend }} </legend>
+        <div class="input-group mb-3 options">
+            <div class="input-group-prepend">
+                <label class="input-group-text" for="metric-select">Metrics</label>
+            </div>
+            <select class="custom-select" id="metric-select" name="metric" required>
+                <option selected disabled value="">Choose Metric</option>
+                {% for metric, metric_name in metrics.items() %}
+                    <option value="{{ metric }}">{{ metric_name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        {{ form.csrf_token }}
+        <div class="d-flex bd-highlight mb-3">
+            <div class="p-2 bd-highlight">Type your hypothesis translation here:
+                <p>{{ form.text_hypothesis }}</p>
+            </div>
+            <div class="ml-auto p-2 bd-highlight">Type your reference translation here:
+                <p>{{ form.text_reference }}</p>
+            </div>
+        </div>
+
+        <input class="btn btn-secondary mb-2" id="submit-button" type="submit" value="Submit">
+    </form>
+
+    <hr>
+
+    <div class="container-md">
+        <ul class="list-group">
+            <li class="list-group-item"> Some Metric Value </li>
+        </ul>
+    </div>
+{% endblock content %}
