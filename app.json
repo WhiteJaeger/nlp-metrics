@@ -1,0 +1,10 @@
+{
+  "environments": {
+    "test": {
+      "scripts": {
+        "lint-setup": "pip install pylint",
+        "test": "pylint project"
+      }
+    }
+  }
+}
