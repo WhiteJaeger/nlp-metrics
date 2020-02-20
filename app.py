@@ -13,7 +13,7 @@ app.secret_key = getenv('SECRET_KEY', secrets.token_urlsafe())
 
 @app.route('/')
 def hello_world():
-    return render_template('home.html')
+    return render_template('home.html', title='Home Page')
 
 
 @app.route('/metrics')
