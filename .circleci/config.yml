@@ -1,0 +1,29 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: circleci/python:3.6.1
+
+    working_directory: ~/myRepository
+
+    steps:
+      - checkout
+
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "requirements.txt" }}
+            - v1-dependencies-
+
+      - run:
+          name: install dependencies
+          command: |
+            sudo pip3 install -r requirements.txt
+
+      - run:
+          name: lint
+          command: |
+            pylint project
+#      - run:
+#          name: unitTests
+#          command: |
+#            python3 -m unittest discover -p "*Test.py"
