@@ -22,7 +22,7 @@ jobs:
       - run:
           name: lint
           command: |
-            pylint project
+            pylint ~/myRepository
 #      - run:
 #          name: unitTests
 #          command: |
