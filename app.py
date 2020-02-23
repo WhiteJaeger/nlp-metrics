@@ -3,7 +3,7 @@ from flask import Flask, render_template, redirect, url_for, request, json
 from forms import InputForm
 from os import getenv, path, remove
 from waitress import serve
-from constants import METRICS
+from constants import METRICS_MAP
 from NLP.text_utils import prepare_text
 
 
@@ -26,7 +26,7 @@ def metrics():
                            title='Metrics',
                            legend='Some Legend Example',
                            metric_value=metric_value,
-                           metrics=METRICS)
+                           metrics=METRICS_MAP)
 
 
 @app.route('/api/handle-input', methods=['POST'])
