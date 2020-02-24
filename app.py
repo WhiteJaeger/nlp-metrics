@@ -3,7 +3,7 @@ from flask import Flask, render_template, redirect, url_for, request, json
 from forms import InputForm
 from os import getenv, path, remove
 from waitress import serve
-from constants import METRICS
+from constants import METRICS_MAP, METRICS_FUNCTIONS
 from NLP.text_utils import prepare_text
 
 
@@ -16,31 +16,40 @@ def hello_world():
     return render_template('home.html', title='Home Page')
 
 
-@app.route('/metrics')
-def metrics():
+@app.route('/metrics-sentence-level')
+def sl_metrics():
     form = InputForm()
-    metric_value = read_metric_file()
+    output = read_metric_file()
 
     return render_template('metrics.html',
                            form=form,
                            title='Metrics',
                            legend='Some Legend Example',
-                           metric_value=metric_value,
-                           metrics=METRICS)
+                           metric_info=output,
+                           metrics=METRICS_MAP)
 
 
 @app.route('/api/handle-input', methods=['POST'])
 def process_input():
-    # TODO: Use prepare_text for specific metrics
-    hyp = request.form.get('text_hypothesis')
-    ref = request.form.get('text_reference')
+
     metric = request.form.get('metric')
 
-    # TODO: refactor
+    if metric == 'rouge' or metric == 'meteor' or metric == 'chrf':
+        hyp = request.form.get('text_hypothesis')
+        ref = request.form.get('text_reference')
+        result = METRICS_FUNCTIONS[metric](ref, hyp)
+    else:
+        hyp = request.form.get('text_hypothesis').split()
+        ref = request.form.get('text_reference').split()
+        result = METRICS_FUNCTIONS[metric]([ref], hyp)
+
+    output = {
+        'metric': METRICS_MAP[metric],
+        'value': result
+    }
     with open('temp.json', 'w') as temp:
-        json.dump(metric, temp)
-    print(hyp, ref, metric)
-    return redirect(url_for('metrics'))
+        json.dump(output, temp)
+    return redirect(url_for('sl_metrics'))
 
 
 def read_metric_file():
