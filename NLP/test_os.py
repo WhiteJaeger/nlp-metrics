@@ -1,2 +1,2 @@
-import os
-os.system('python -m spacy download en_core_web_md')
+# import os
+# os.system('python -m spacy download en_core_web_md')

@@ -4,7 +4,7 @@ from forms import InputForm
 from os import getenv, path, remove
 from waitress import serve
 from constants import METRICS_MAP, METRICS_FUNCTIONS
-from NLP.text_utils import prepare_text
+# from NLP.text_utils import prepare_text
 
 
 app = Flask(__name__)
