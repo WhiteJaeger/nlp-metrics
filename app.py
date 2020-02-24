@@ -127,5 +127,5 @@ def write_to_file(output):
         json.dump(output, temp)
 
 
-if __name__ == '__main__':
-    serve(APP, host='0.0.0.0', port=8080)
+# if __name__ == '__main__':
+#     serve(APP, host='0.0.0.0', port=8080)

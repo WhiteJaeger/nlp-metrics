@@ -1,1 +1,1 @@
-web: gunicorn app:app
+web: gunicorn -k gevent --graceful-timeout 100 --keep-alive 100 app:app
