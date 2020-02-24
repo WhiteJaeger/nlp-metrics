@@ -9,6 +9,8 @@ from os import path, remove, getenv
 from waitress import serve
 from constants import METRICS_MAP, METRICS_FUNCTIONS
 from NLP.pos import features
+
+
 # from NLP.text_utils import prepare_text
 
 def create_app():
