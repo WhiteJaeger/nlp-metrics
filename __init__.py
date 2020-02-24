@@ -4,7 +4,7 @@ import secrets
 import nltk
 import sklearn
 from sklearn_crfsuite import CRF
-from NLP.pos import prepareData, features
+from NLP.pos import prepareData
 
 
 def create_app():
@@ -26,15 +26,4 @@ def create_app():
     crf.fit(X_train, y_train)
 
     return app, crf
-
-
-# _, crf_ = create_app()
-# data = [['It', 'is', 'a', 'guide', 'to', 'action', 'that', 'ensures', 'that', 'the', 'military', 'will',
-#          'forever', 'heed', 'Party', 'commands']]
-# data_prepared = []
-# for sentences in data:
-#     data_prepared.append([features(sentences, index) for index in range(len(sentences))])
-#
-# y_pred_new = crf_.predict(data_prepared)
-# print(y_pred_new[0])
 
