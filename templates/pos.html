@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block title %} {{ title }} {% endblock %}
+
+{% block content %}
+    <form class="form-control" method="post" action="{{ url_for('process_pos') }}">
+        <legend> {{ legend }} </legend>
+        {{ form.csrf_token }}
+        <div class="d-flex bd-highlight mb-3">
+            <div class="p-2 bd-highlight">Type your sentence here:
+                <p>{{ form.text_pos }}</p>
+            </div>
+        </div>
+
+        <input class="btn btn-secondary mb-2" id="submit-button" type="submit" value="Submit">
+    </form>
+
+    <hr>
+
+    {% if output %}
+        <div class="container-md">
+            <ul class="list-group">
+                <li class="list-group-item"> {{ output.sentence }}: {{ output.pos }} </li>
+            </ul>
+        </div>
+    {% endif %}
+{% endblock content %}
