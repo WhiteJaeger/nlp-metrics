@@ -8,7 +8,7 @@
             <div class="input-group-prepend">
                 <label class="input-group-text" for="metric-select">Metrics</label>
             </div>
-            <select class="custom-select" id="metric-select" name="metric" required>
+            <select class="custom-select" id="metric-select" name="metric" required style="margin-right: 16px">
                 <option selected disabled value="">Choose Metric</option>
                 {% for metric, metric_name in metrics.items() %}
                     <option value="{{ metric }}">{{ metric_name }}</option>
@@ -30,9 +30,11 @@
 
     <hr>
 
-    <div class="container-md">
-        <ul class="list-group">
-            <li class="list-group-item"> Some Metric Value </li>
-        </ul>
-    </div>
+    {% if metric_info %}
+        <div class="container-md">
+            <ul class="list-group">
+                <li class="list-group-item"> {{ metric_info.metric }}: {{ metric_info.value }} </li>
+            </ul>
+        </div>
+    {% endif %}
 {% endblock content %}

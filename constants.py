@@ -16,7 +16,7 @@ METRICS_MAP = {
     'rouge':  'ROUGE'
 }
 
-METRICS_MAP_TO_FUNCTIONS = {
+METRICS_FUNCTIONS = {
     'bleu':   sentence_bleu,
     'gleu':   sentence_gleu,
     'chrf':   sentence_chrf,

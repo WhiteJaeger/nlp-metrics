@@ -88,17 +88,25 @@ print(metrics.flat_classification_report(
 # print(tagged_sentence[0], '\n', tagged_words[0])
 # print('*' * 10)
 # print(X_test[1], y_pred[1])
-data = [[('On', 'ADP'), ('Wall', 'NOUN'), ('Street', 'NOUN'), ('men', 'NOUN'), ('and', 'CONJ'), ('women', 'NOUN'),
-         ('walk', 'VERB'), ('with', 'ADP'), ('great', 'ADJ'), ('purpose', 'NOUN'), (',', '.'), ('*-2', 'X'),
-         ('noticing', 'VERB'), ('one', 'NUM'), ('another', 'DET'), ('only', 'ADV'), ('when', 'ADV'), ('they', 'PRON'),
-         ('jostle', 'VERB'), ('for', 'ADP'), ('cabs', 'NOUN'), ('*T*-1', 'X'), ('.', '.')]]
+data = [['It', 'is', 'a', 'guide', 'to', 'action', 'that', 'ensures', 'that', 'the', 'military', 'will',
+         'forever', 'heed', 'Party', 'commands'],
+        ['It', 'is', 'a', 'guide', 'to', 'action', 'which', 'ensures', 'that', 'the', 'military', 'always', 'obeys',
+         'the', 'commands', 'of', 'the', 'party'],
+        ['It', 'is', 'to', 'insure', 'the', 'troops', 'forever', 'hearing', 'the', 'activity',
+         'guidebook', 'that', 'party', 'direct']
+        ]
+
+# It is a guide to action that ensures that the military will forever heed Party commands
 
 data_prepared = []
 for sentences in data:
-    data_prepared.append([features(untag(sentences), index) for index in range(len(sentences))])
+    data_prepared.append([features(sentences, index) for index in range(len(sentences))])
 
 print(data_prepared)
-y_pred_new = crf.predict(data_prepared)
-print(y_pred_new)
 print('*' * 10)
-print(crf.classes_)
+y_pred_new = crf.predict(data_prepared)
+print(y_pred_new[0])
+print('*' * 10)
+print(y_pred_new[1])
+print('*' * 10)
+print(y_pred_new[2])
