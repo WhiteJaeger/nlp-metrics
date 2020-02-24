@@ -15,8 +15,6 @@ from NLP.pos import features
 
 def create_app():
     # Setup flask app
-    app = Flask(__name__)
-    app.secret_key = getenv('SECRET_KEY', secrets.token_urlsafe())
 
     # Setup pos-tagger
     tagged_sentence = nltk.corpus.treebank.tagged_sents(tagset='universal')
@@ -31,19 +29,22 @@ def create_app():
     )
     crf.fit(X_train, y_train)
 
+    app = Flask(__name__)
+    app.secret_key = getenv('SECRET_KEY', secrets.token_urlsafe())
+
     return app, crf
 
 
-app, crf = create_app()
+APP, CRF_ = create_app()
 
 
 # Metrics part
-@app.route('/')
+@APP.route('/')
 def hello_world():
     return render_template('home.html', title='Home Page')
 
 
-@app.route('/metrics-sentence-level')
+@APP.route('/metrics-sentence-level')
 def sl_metrics():
     form = InputForm()
     output = read_temp_file()
@@ -56,7 +57,7 @@ def sl_metrics():
                            metrics=METRICS_MAP)
 
 
-@app.route('/api/handle-input', methods=['POST'])
+@APP.route('/api/handle-input', methods=['POST'])
 def process_input():
     metric = request.form.get('metric')
 
@@ -78,7 +79,7 @@ def process_input():
 
 
 # POS-tagger part
-@app.route('/pos-tagger')
+@APP.route('/pos-tagger')
 def pos():
     form = InputForm()
     output = read_temp_file()
@@ -89,7 +90,7 @@ def pos():
                            output=output)
 
 
-@app.route('/api/handle-pos-input', methods=['POST'])
+@APP.route('/api/handle-pos-input', methods=['POST'])
 def process_pos():
     data = [request.form.get('text_pos').split()]
 
@@ -97,7 +98,7 @@ def process_pos():
     for sentences in data:
         data_prepared.append([features(sentences, index) for index in range(len(sentences))])
 
-    predicted_pos = crf.predict(data_prepared)[0]
+    predicted_pos = CRF_.predict(data_prepared)[0]
 
     output = {
         'sentence': data,
@@ -127,4 +128,4 @@ def write_to_file(output):
 
 
 if __name__ == '__main__':
-    serve(app, host='0.0.0.0', port=8080)
+    serve(APP, host='0.0.0.0', port=8080)
