@@ -1,2 +1,2 @@
 treebank
-universal
+universal_tagset
