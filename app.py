@@ -2,13 +2,14 @@ import secrets
 import nltk
 import sklearn
 from sklearn_crfsuite import CRF
-from NLP.pos import prepareData
+# from NLP.pos import prepareData
 from flask import Flask, render_template, redirect, url_for, request, json
 from forms import InputForm
 from os import path, remove, getenv
 from waitress import serve
 from constants import METRICS_MAP, METRICS_FUNCTIONS
-from NLP.pos import features
+# from NLP.pos import features
+from joblib import load
 
 
 # from NLP.text_utils import prepare_text
@@ -16,18 +17,33 @@ from NLP.pos import features
 def create_app():
     # Setup flask app
 
-    # Setup pos-tagger
-    tagged_sentence = nltk.corpus.treebank.tagged_sents(tagset='universal')
-    train_set, test_set = sklearn.model_selection.train_test_split(tagged_sentence, test_size=0.05, random_state=1234)
-    X_train, y_train = prepareData(train_set)
-    crf = CRF(
-        algorithm='lbfgs',
-        c1=0.01,
-        c2=0.1,
-        max_iterations=100,
-        all_possible_transitions=True
-    )
-    crf.fit(X_train, y_train)
+    # # Setup pos-tagger
+    # # TODO: move to the function
+    # tagged_sentence = nltk.corpus.masc_tagged.tagged_sents(tagset='universal')[:1000]
+    # tagged_sentence_clean = []
+    # for sentence in tagged_sentence:
+    #     cleaned_sentence = []
+    #     for word_tag in sentence:
+    #         if None in word_tag or word_tag is None:
+    #             print(1)
+    #             continue
+    #         else:
+    #             cleaned_sentence.append(word_tag)
+    #     tagged_sentence_clean.append(cleaned_sentence)
+    #
+    # train_set, test_set = sklearn.model_selection.train_test_split(tagged_sentence_clean,
+    #                                                                test_size=0.01, random_state=1234)
+    # X_train, y_train = prepareData(train_set)
+    # crf = CRF(
+    #     algorithm='lbfgs',
+    #     c1=0.01,
+    #     c2=0.1,
+    #     max_iterations=100,
+    #     all_possible_transitions=True
+    # )
+    # crf.fit(X_train, y_train)
+    # print('AAAAA')
+    crf = load('models/crfWJSModel.joblib')
 
     app = Flask(__name__)
     app.secret_key = getenv('SECRET_KEY', secrets.token_urlsafe())

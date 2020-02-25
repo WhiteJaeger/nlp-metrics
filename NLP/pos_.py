@@ -1,8 +1,8 @@
-# from abc import ABC
-#
+from abc import ABC
+
 # import nltk
 #
-# from NLP.text_utils import prepare_text
+# # from NLP.text_utils import prepare_text
 #
 # sentence = str('I am a student in the HSE university')
 #
@@ -11,17 +11,23 @@
 #
 # print(nltk_pos_tagged)
 #
-# from nltk.corpus import conll2000
+# # from nltk.corpus import conll2000
+# from nltk.corpus import LazyCorpusLoader, ConllChunkCorpusReader
 #
+# conll2000 = LazyCorpusLoader('conll2000', ConllChunkCorpusReader, ['train.txt', 'test.txt'],
+#                              ('NP', 'VP', 'PP', 'ADVP', 'ADJP'),
+#                              tagset='universal', encoding='ascii')
 # data = conll2000.chunked_sents()
+# print(len(data))
 # train_data = data[:5450]
 # test_data = data[5450:]
 #
 # print(len(train_data), len(test_data))
 # print(train_data[1])
-# from nltk.chunk.util import tree2conlltags, conlltags2tree
-#
+from nltk.chunk.util import tree2conlltags, conlltags2tree
+
 # wtc = tree2conlltags(train_data[1])
+# print(wtc)
 #
 #
 # def conll_tag_chunks(chunk_sents):
