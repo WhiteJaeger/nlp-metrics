@@ -8,7 +8,6 @@ Click==7.0
 colorama==0.4.3
 cymem==2.0.3
 dominate==2.4.0
-en-core-web-md==2.2.5
 Flask==1.1.1
 Flask-Bootstrap==3.3.7.1
 Flask-WTF==0.14.3
