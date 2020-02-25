@@ -8,7 +8,7 @@ from forms import InputForm
 from os import path, remove, getenv
 from waitress import serve
 from constants import METRICS_MAP, METRICS_FUNCTIONS
-# from NLP.pos import features
+from NLP.pos import features
 from joblib import load
 
 
