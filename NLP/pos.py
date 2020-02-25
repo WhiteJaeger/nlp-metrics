@@ -25,7 +25,6 @@ def features(sentence, index):
     # sentence is of the form [w1,w2,w3,..], index is the position of the word in the sentence
     try:
         return {
-            'word':                str(sentence[index]),
             'is_first_capital':    int(sentence[index][0].isupper()),
             'is_first_word':       int(index == 0),
             'is_last_word':        int(index == len(sentence) - 1),
@@ -95,7 +94,7 @@ def prepareData(tagged_sentences):
 # data_prepared = []
 # for sentences in data:
 #     data_prepared.append([features(sentences, index) for index in range(len(sentences))])
-
+#
 #
 # print(data_prepared)
 # print('*' * 10)
