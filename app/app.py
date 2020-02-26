@@ -8,22 +8,21 @@ from NLP.pos import features
 from joblib import load
 from app.utils import write_to_file, read_file
 import pathlib
-from . import create_app
 
 
 # from NLP.text_utils import prepare_text
 
-# def create_app():
-#     # Load pre-trained model
-#     project_path = str(pathlib.Path(__file__).parents[1])
-#     model_path = path.join(project_path, 'models', 'crfWJSModel90k.joblib')
-#     crf = load(model_path)
-#
-#     # Setup flask app
-#     app = Flask(__name__)
-#     app.secret_key = getenv('SECRET_KEY', secrets.token_urlsafe())
-#
-#     return app, crf
+def create_app():
+    # Load pre-trained model
+    project_path = str(pathlib.Path(__file__).parents[1])
+    model_path = path.join(project_path, 'models', 'crfWJSModel90k.joblib')
+    crf = load(model_path)
+
+    # Setup flask app
+    app = Flask(__name__)
+    app.secret_key = getenv('SECRET_KEY', secrets.token_urlsafe())
+
+    return app, crf
 
 
 APP, CRF_MODEL = create_app()
