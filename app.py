@@ -1,32 +1,31 @@
 import secrets
 # from NLP.pos import prepareData
 from flask import Flask, render_template, redirect, url_for, request
-from app.forms import InputForm
+from forms import InputForm
 from os import path, getenv
-from app.constants import METRICS_MAP, METRICS_FUNCTIONS
+from constants import METRICS_MAP, METRICS_FUNCTIONS
 from NLP.pos import features
 from joblib import load
-from app.utils import write_to_file, read_file
+from utils import write_to_file, read_file
 import pathlib
-from . import APP, CRF_MODEL
 
 
 # from NLP.text_utils import prepare_text
 
-# def create_app():
-#     # Load pre-trained model
-#     project_path = str(pathlib.Path(__file__).parents[1])
-#     model_path = path.join(project_path, 'models', 'crfWJSModel90k.joblib')
-#     crf = load(model_path)
-#
-#     # Setup flask app
-#     app = Flask(__name__)
-#     app.secret_key = getenv('SECRET_KEY', secrets.token_urlsafe())
-#
-#     return app, crf
-#
-#
-# APP, CRF_MODEL = create_app()
+def create_app():
+    # Load pre-trained model
+    project_path = str(pathlib.Path(__file__).parents[0])
+    model_path = path.join(project_path, 'models', 'crfWJSModel90k.joblib')
+    crf = load(model_path)
+
+    # Setup flask app
+    app = Flask(__name__)
+    app.secret_key = getenv('SECRET_KEY', secrets.token_urlsafe())
+
+    return app, crf
+
+
+APP, CRF_MODEL = create_app()
 
 
 # Metrics part
