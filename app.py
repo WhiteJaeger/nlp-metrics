@@ -43,7 +43,7 @@ def create_app():
     # )
     # crf.fit(X_train, y_train)
     # print('AAAAA')
-    crf = load('models/crfWJSModel.joblib')
+    crf = load('models/crfWJSModel90k.joblib')
 
     app = Flask(__name__)
     app.secret_key = getenv('SECRET_KEY', secrets.token_urlsafe())
