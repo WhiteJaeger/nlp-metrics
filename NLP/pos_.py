@@ -1,4 +1,4 @@
-from abc import ABC
+# from abc import ABC
 
 # import nltk
 #
@@ -11,7 +11,7 @@ from abc import ABC
 #
 # print(nltk_pos_tagged)
 #
-# # from nltk.corpus import conll2000
+# from nltk.corpus import conll2000
 # from nltk.corpus import LazyCorpusLoader, ConllChunkCorpusReader
 #
 # conll2000 = LazyCorpusLoader('conll2000', ConllChunkCorpusReader, ['train.txt', 'test.txt'],
