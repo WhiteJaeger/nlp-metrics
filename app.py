@@ -1,57 +1,31 @@
 import secrets
-import nltk
-import sklearn
-from sklearn_crfsuite import CRF
 # from NLP.pos import prepareData
-from flask import Flask, render_template, redirect, url_for, request, json
+from flask import Flask, render_template, redirect, url_for, request
 from forms import InputForm
-from os import path, remove, getenv
-from waitress import serve
+from os import path, getenv
 from constants import METRICS_MAP, METRICS_FUNCTIONS
 from NLP.pos import features
 from joblib import load
+from utils import write_to_file, read_file
+import pathlib
 
 
 # from NLP.text_utils import prepare_text
 
 def create_app():
+    # Load pre-trained model
+    project_path = str(pathlib.Path(__file__).parents[0])
+    model_path = path.join(project_path, 'models', 'crfWJSModel90k.joblib')
+    crf = load(model_path)
+
     # Setup flask app
-
-    # # Setup pos-tagger
-    # # TODO: move to the function
-    # tagged_sentence = nltk.corpus.masc_tagged.tagged_sents(tagset='universal')[:1000]
-    # tagged_sentence_clean = []
-    # for sentence in tagged_sentence:
-    #     cleaned_sentence = []
-    #     for word_tag in sentence:
-    #         if None in word_tag or word_tag is None:
-    #             print(1)
-    #             continue
-    #         else:
-    #             cleaned_sentence.append(word_tag)
-    #     tagged_sentence_clean.append(cleaned_sentence)
-    #
-    # train_set, test_set = sklearn.model_selection.train_test_split(tagged_sentence_clean,
-    #                                                                test_size=0.01, random_state=1234)
-    # X_train, y_train = prepareData(train_set)
-    # crf = CRF(
-    #     algorithm='lbfgs',
-    #     c1=0.01,
-    #     c2=0.1,
-    #     max_iterations=100,
-    #     all_possible_transitions=True
-    # )
-    # crf.fit(X_train, y_train)
-    # print('AAAAA')
-    crf = load('models/crfWJSModel90k.joblib')
-
     app = Flask(__name__)
     app.secret_key = getenv('SECRET_KEY', secrets.token_urlsafe())
 
     return app, crf
 
 
-APP, CRF_ = create_app()
+APP, CRF_MODEL = create_app()
 
 
 # Metrics part
@@ -63,12 +37,12 @@ def hello_world():
 @APP.route('/metrics-sentence-level')
 def sl_metrics():
     form = InputForm()
-    output = read_temp_file()
+    output = read_file()
 
     return render_template('metrics.html',
                            form=form,
                            title='Metrics',
-                           legend='Some Legend Example',
+                           legend='Sentence Level Metrics Evaluator',
                            metric_info=output,
                            metrics=METRICS_MAP)
 
@@ -77,6 +51,7 @@ def sl_metrics():
 def process_input():
     metric = request.form.get('metric')
 
+    # TODO: add text pre-processing?
     if metric == 'rouge' or metric == 'meteor' or metric == 'chrf':
         hyp = request.form.get('text_hypothesis')
         ref = request.form.get('text_reference')
@@ -98,11 +73,11 @@ def process_input():
 @APP.route('/pos-tagger')
 def pos():
     form = InputForm()
-    output = read_temp_file()
+    output = read_file()
     return render_template('pos.html',
                            form=form,
-                           title='POS-tagger',
-                           legend='SMTH',
+                           title='POS Tagger',
+                           legend='Context POS Tagger',
                            output=output)
 
 
@@ -110,11 +85,12 @@ def pos():
 def process_pos():
     data = [request.form.get('text_pos').split()]
 
+    # TODO: refactor - move to NLP, create function
     data_prepared = []
     for sentences in data:
         data_prepared.append([features(sentences, index) for index in range(len(sentences))])
 
-    predicted_pos = CRF_.predict(data_prepared)[0]
+    predicted_pos = CRF_MODEL.predict(data_prepared)[0]
 
     output = {
         'sentence': data,
@@ -123,25 +99,6 @@ def process_pos():
     write_to_file(output)
 
     return redirect(url_for('pos'))
-
-
-# Utils
-def read_temp_file():
-    data = None
-
-    # TODO: refactor
-    if path.exists('temp.json'):
-        with open('temp.json', 'r') as temp:
-            data = json.load(temp)
-        remove('temp.json')
-
-    return data
-
-
-def write_to_file(output):
-    with open('temp.json', 'w') as temp:
-        json.dump(output, temp)
-
 
 # if __name__ == '__main__':
 #     serve(APP, host='0.0.0.0', port=8080)
