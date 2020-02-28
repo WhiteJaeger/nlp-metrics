@@ -9,13 +9,13 @@ from joblib import load
 from utils import write_to_file, read_file
 import pathlib
 
+from NLP.text_utils import prepare_text
 
-# from NLP.text_utils import prepare_text
 
 def create_app():
     # Load pre-trained model
     project_path = str(pathlib.Path(__file__).parents[0])
-    model_path = path.join(project_path, 'models', 'crfWJSModel90k.joblib')
+    model_path = path.join(project_path, 'models', 'crfWJSModel900k.joblib')
     crf = load(model_path)
 
     # Setup flask app
@@ -48,7 +48,7 @@ def sl_metrics():
 
 
 @APP.route('/api/handle-input', methods=['POST'])
-def process_input():
+def process_input_metric():
     metric = request.form.get('metric')
 
     # TODO: add text pre-processing?
@@ -83,14 +83,10 @@ def pos():
 
 @APP.route('/api/handle-pos-input', methods=['POST'])
 def process_pos():
-    data = [request.form.get('text_pos').split()]
+    data = request.form.get('text_pos')
 
-    # TODO: refactor - move to NLP, create function
-    data_prepared = []
-    for sentences in data:
-        data_prepared.append([features(sentences, index) for index in range(len(sentences))])
-
-    predicted_pos = CRF_MODEL.predict(data_prepared)[0]
+    data_prepared = prepare_text(data, pos_preparation=True, special_char_removal=False)
+    predicted_pos = CRF_MODEL.predict(data_prepared)
 
     output = {
         'sentence': data,
