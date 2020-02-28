@@ -1,10 +1,8 @@
 import secrets
-# from NLP.pos import prepareData
 from flask import Flask, render_template, redirect, url_for, request
 from forms import InputForm
 from os import path, getenv
 from constants import METRICS_MAP, METRICS_FUNCTIONS
-from NLP.pos import features
 from joblib import load
 from utils import write_to_file, read_file
 import pathlib
