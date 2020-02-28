@@ -8,7 +8,7 @@ from nltk.chunk.util import tree2conlltags, conlltags2tree
 from nltk.corpus import conll2000
 from nltk.tag import UnigramTagger, BigramTagger
 
-from NLP.text_utils import prepare_text
+from NLP.text_utils import prepare_str
 
 data = list(conll2000.chunked_sents())
 print(len(data))
@@ -64,10 +64,10 @@ print(ntc.evaluate(test_data))
 
 # Testing predictions
 sentence = 'It is a guide to action that ensures that the military will forever heed Party commands'
-sentence_prepared = prepare_text(sentence, text_lower_case=False, stopword_removal=False, pos_preparation=True)
+sentence_prepared = prepare_str(sentence, text_lower_case=False, stopword_removal=False, pos_preparation=True)
 #
 sentence_2 = 'It is a guide to action which ensures that the military always obeys the commands of the party'
-sentence_2_prepared = prepare_text(sentence_2, text_lower_case=False, stopword_removal=False, pos_preparation=True)
+sentence_2_prepared = prepare_str(sentence_2, text_lower_case=False, stopword_removal=False, pos_preparation=True)
 
 project_path = str(pathlib.Path(__file__).parents[1])
 model_path = path.join(project_path, 'models', 'crfWJSModel900k.joblib')

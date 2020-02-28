@@ -9,9 +9,9 @@ stopword_list.remove('no')
 stopword_list.remove('not')
 
 
-def prepare_text(text: str, contraction_expansion=True, text_lower_case=False,
-                 special_char_removal=True,
-                 stopword_removal=False, remove_digits=False, pos_preparation=False):
+def prepare_str(text: str, contraction_expansion=True, text_lower_case=False,
+                special_char_removal=True,
+                stopword_removal=False, remove_digits=False, pos_preparation=False):
 
     # expand contractions
     if contraction_expansion:
@@ -92,3 +92,12 @@ def remove_stopwords(text, is_lower_case=False):
         filtered_tokens = [token for token in tokens if token.lower() not in stopword_list]
     filtered_text = ' '.join(filtered_tokens)
     return filtered_text
+
+
+def map_word_pos(prepared_sentence: str, pos_tags: list) -> list:
+
+    words = prepared_sentence.split()
+
+    mapped = zip(words, pos_tags)
+
+    return list(mapped)

@@ -7,7 +7,7 @@ from joblib import load
 from utils import write_to_file, read_file
 import pathlib
 
-from NLP.text_utils import prepare_text
+from NLP.text_utils import prepare_str, map_word_pos
 
 
 def create_app():
@@ -81,14 +81,14 @@ def pos():
 
 @APP.route('/api/handle-pos-input', methods=['POST'])
 def process_pos():
-    data = request.form.get('text_pos')
+    data = prepare_str(request.form.get('text_pos'), special_char_removal=True)
 
-    data_prepared = prepare_text(data, pos_preparation=True, special_char_removal=False)
-    predicted_pos = CRF_MODEL.predict(data_prepared)
+    data_prepared = prepare_str(data, pos_preparation=True)
+    predicted_pos = CRF_MODEL.predict(data_prepared)[0]
 
     output = {
         'sentence': data,
-        'pos': predicted_pos
+        'pos': map_word_pos(data, predicted_pos)
     }
     write_to_file(output)
 
