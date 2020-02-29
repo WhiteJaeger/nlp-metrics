@@ -6,7 +6,7 @@
         <legend> {{ legend }} </legend>
         {{ form.csrf_token }}
         <div class="d-flex bd-highlight mb-3">
-            <div class="p-2 bd-highlight">Type your sentence here:
+            <div class="p-2 bd-highlight">Type your text here:
                 <p>{{ form.text_pos }}</p>
             </div>
         </div>
@@ -19,7 +19,7 @@
     {% if output %}
         <div class="container-md">
             <ul class="list-group">
-                <li class="list-group-item"> <p><strong>Original Sentence:</strong></p> <p>{{ output.sentence }}</p> </li>
+                <li class="list-group-item"> <p><strong>Original Text:</strong></p> <p>{{ output.text }}</p> </li>
             </ul>
 
             <table class="table table-bordered table-sm">
@@ -40,6 +40,11 @@
             </table>
         </div>
     {% endif %}
+{#    {% if image %}#}
+{#        <div class="container">#}
+{#            <img src="/NLP/output.jpg" alt="smth">#}
+{#        </div>#}
+{#    {% endif %}#}
 {% endblock content %}
 
 {% block sidebar %}
