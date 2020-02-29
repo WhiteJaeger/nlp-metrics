@@ -16,19 +16,19 @@
                 {% endfor %}
             </select>
         </div>
-        <div class="container">
-            <p>Text pre-processing:</p>
+        <div class="container border-top border-bottom" id="preprocessing">
+            <p><strong>Text pre-processing:</strong></p>
             <div class="form-check form-check-inline">
-                <input class="form-check-input" type="checkbox" id="inlineCheckbox1" value="option1">
-                <label class="form-check-label" for="inlineCheckbox1">1</label>
+                <input class="form-check-input" type="checkbox" id="contractions" name="contractions" value="1">
+                <label class="form-check-label" for="contractions">Expand contractions (e.g. I`m -> I am)</label>
             </div>
             <div class="form-check form-check-inline">
-                <input class="form-check-input" type="checkbox" id="inlineCheckbox2" value="option2">
-                <label class="form-check-label" for="inlineCheckbox2">2</label>
+                <input class="form-check-input" type="checkbox" id="spec-chars" name="spec-chars" value="1">
+                <label class="form-check-label" for="spec-chars">Remove special characters (e.g. ",")</label>
             </div>
             <div class="form-check form-check-inline">
-                <input class="form-check-input" type="checkbox" id="inlineCheckbox3" value="option3" disabled>
-                <label class="form-check-label" for="inlineCheckbox3">3 (disabled)</label>
+                <input class="form-check-input" type="checkbox" id="lowercase" name="lowercase" value="1">
+                <label class="form-check-label" for="lowercase">Lowercase</label>
             </div>
         </div>
         {{ form.csrf_token }}
@@ -50,10 +50,10 @@
         <div class="container">
             <div class="row">
                 <div class="col border">
-                    Sample Text #1
+                    <strong>Hypothesis</strong>: <br>{{ metric_info.hyp }}
                 </div>
                 <div class="col border">
-                    Sample Text #2
+                    <strong>Reference</strong>: <br>{{ metric_info.ref }}
                 </div>
             </div>
         </div>

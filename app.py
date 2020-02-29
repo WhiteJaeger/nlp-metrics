@@ -48,8 +48,25 @@ def sl_metrics():
 @APP.route('/api/handle-input', methods=['POST'])
 def process_input_metric():
     metric = request.form.get('metric')
-    ref = prepare_str(request.form.get('text_reference'), special_char_removal=True)
-    hyp = prepare_str(request.form.get('text_hypothesis'), special_char_removal=True)
+
+    text_preparation_params = {
+        'contractions': request.form.get('contractions', 0),
+        'spec-chars': request.form.get('spec-chars', 0),
+        'lowercase': request.form.get('spec-chars', 0)
+    }
+
+    data = {
+        'ref': request.form.get('text_reference'),
+        'hyp': request.form.get('text_hypothesis')
+    }
+    ref = prepare_str(data['ref'],
+                      text_lower_case=text_preparation_params['lowercase'],
+                      special_char_removal=text_preparation_params['spec-chars'],
+                      contraction_expansion=text_preparation_params['contractions'])
+    hyp = prepare_str(data['hyp'],
+                      text_lower_case=text_preparation_params['lowercase'],
+                      special_char_removal=text_preparation_params['spec-chars'],
+                      contraction_expansion=text_preparation_params['contractions'])
 
     if metric in ('rouge', 'meteor', 'chrf'):
         result = METRICS_FUNCTIONS[metric](ref, hyp)
@@ -59,6 +76,8 @@ def process_input_metric():
         result = METRICS_FUNCTIONS[metric]([ref], hyp)
 
     output = {
+        'ref': data['ref'],
+        'hyp': data['hyp'],
         'metric': METRICS_MAP[metric],
         'value': result
     }
