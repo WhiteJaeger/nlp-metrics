@@ -11,19 +11,24 @@ from NLP.text_utils import prepare_str, map_word_pos
 
 
 def create_app():
-    # Load pre-trained model
     project_path = str(pathlib.Path(__file__).parents[0])
-    model_path = path.join(project_path, 'models', 'crfWJSModel900k.joblib')
-    crf = load(model_path)
+
+    # Load pre-trained POS Tagger model
+    crf_model_path = path.join(project_path, 'models', 'crfWJSModel900k.joblib')
+    crf = load(crf_model_path)
+
+    # Load pre-trained Sentence Chunker model
+    pos_model_path = path.join(project_path, 'models', 'sentenceChunker.joblib')
+    chunker = load(pos_model_path)
 
     # Setup flask app
     app = Flask(__name__)
     app.secret_key = getenv('SECRET_KEY', secrets.token_urlsafe())
 
-    return app, crf
+    return app, crf, chunker
 
 
-APP, CRF_MODEL = create_app()
+APP, CRF_MODEL, SENTENCE_CHUNKER = create_app()
 
 
 # Metrics part
@@ -59,6 +64,7 @@ def process_input_metric():
         'ref': request.form.get('text_reference'),
         'hyp': request.form.get('text_hypothesis')
     }
+
     ref = prepare_str(data['ref'],
                       text_lower_case=text_preparation_params['lowercase'],
                       special_char_removal=text_preparation_params['spec-chars'],
@@ -105,12 +111,31 @@ def process_pos():
     predicted_pos = CRF_MODEL.predict(data_prepared)[0]
 
     output = {
-        'sentence': data,
+        'text': data,
         'pos': map_word_pos(data, predicted_pos)
     }
     write_to_file(output)
 
     return redirect(url_for('pos'))
+
+
+# Sentence trees part
+@APP.route('/sentence-trees')
+def sentence_trees():
+    form = InputForm()
+    output = read_file()
+    return render_template('sentence-trees.html',
+                           legend='Sentence Trees',
+                           form=form,
+                           output=output)
+
+
+@APP.route('/api/process-sentence-tree')
+def process_sentence_tree():
+    data = request.form.get('text_tree')
+    # TODO: prepare incoming sentence
+    chunked_sentence = SENTENCE_CHUNKER.parse()
+    return redirect(url_for('sentence_trees'))
 
 # if __name__ == '__main__':
 #     serve(APP, host='0.0.0.0', port=8080)
