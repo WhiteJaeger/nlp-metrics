@@ -47,18 +47,22 @@
     <hr>
 
     {% if metric_info %}
+        <div class="container">
+            <div class="row">
+                <div class="col border">
+                    Sample Text #1
+                </div>
+                <div class="col border">
+                    Sample Text #2
+                </div>
+            </div>
+        </div>
         <div class="container-md">
             <ul class="list-group">
-                <li class="list-group-item"> {{ metric_info.metric }}: {{ metric_info.value }} </li>
+                <li class="list-group-item text-center"> <strong>{{ metric_info.metric }}</strong>: {{ metric_info.value }} </li>
             </ul>
         </div>
     {% endif %}
-
-    <ul class="list-group list-group-horizontal-md">
-        <li class="list-group-item flex-fill">Cras justo odio</li>
-        <li class="list-group-item flex-fill">Dapibus ac facilisis in</li>
-        <li class="list-group-item flex-fill">Morbi leo risus</li>
-    </ul>
 {% endblock content %}
 
 {% block sidebar %}
