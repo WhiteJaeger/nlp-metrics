@@ -48,15 +48,14 @@ def sl_metrics():
 @APP.route('/api/handle-input', methods=['POST'])
 def process_input_metric():
     metric = request.form.get('metric')
+    ref = prepare_str(request.form.get('text_reference'), special_char_removal=True)
+    hyp = prepare_str(request.form.get('text_hypothesis'), special_char_removal=True)
 
-    # TODO: add text pre-processing?
-    if metric == 'rouge' or metric == 'meteor' or metric == 'chrf':
-        hyp = request.form.get('text_hypothesis')
-        ref = request.form.get('text_reference')
+    if metric in ('rouge', 'meteor', 'chrf'):
         result = METRICS_FUNCTIONS[metric](ref, hyp)
     else:
-        hyp = request.form.get('text_hypothesis').split()
-        ref = request.form.get('text_reference').split()
+        hyp = hyp.split()
+        ref = ref.split()
         result = METRICS_FUNCTIONS[metric]([ref], hyp)
 
     output = {

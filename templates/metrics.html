@@ -4,6 +4,7 @@
 {% block content %}
     <form class="form-control" method="post" action="{{ url_for('process_input_metric') }}">
         <legend> {{ legend }} </legend>
+
         <div class="input-group mb-3 options">
             <div class="input-group-prepend">
                 <label class="input-group-text" for="metric-select">Metrics</label>
@@ -15,6 +16,21 @@
                 {% endfor %}
             </select>
         </div>
+        <div class="container">
+            <p>Text pre-processing:</p>
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="checkbox" id="inlineCheckbox1" value="option1">
+                <label class="form-check-label" for="inlineCheckbox1">1</label>
+            </div>
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="checkbox" id="inlineCheckbox2" value="option2">
+                <label class="form-check-label" for="inlineCheckbox2">2</label>
+            </div>
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="checkbox" id="inlineCheckbox3" value="option3" disabled>
+                <label class="form-check-label" for="inlineCheckbox3">3 (disabled)</label>
+            </div>
+        </div>
         {{ form.csrf_token }}
         <div class="d-flex bd-highlight mb-3">
             <div class="p-2 bd-highlight">Type your hypothesis translation here:
@@ -25,7 +41,7 @@
             </div>
         </div>
 
-        <input class="btn btn-secondary mb-2" id="submit-button" type="submit" value="Evaluate">
+        <input class="btn btn-outline-secondary mb-2" id="submit-button" type="submit" value="Evaluate">
     </form>
 
     <hr>
@@ -37,6 +53,12 @@
             </ul>
         </div>
     {% endif %}
+
+    <ul class="list-group list-group-horizontal-md">
+        <li class="list-group-item flex-fill">Cras justo odio</li>
+        <li class="list-group-item flex-fill">Dapibus ac facilisis in</li>
+        <li class="list-group-item flex-fill">Morbi leo risus</li>
+    </ul>
 {% endblock content %}
 
 {% block sidebar %}
