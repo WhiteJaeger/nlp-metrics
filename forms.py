@@ -7,3 +7,4 @@ class InputForm(FlaskForm):
     text_hypothesis = TextAreaField(validators=[DataRequired()])
     text_reference = TextAreaField(validators=[DataRequired()])
     text_pos = TextAreaField(validators=[DataRequired()])
+    text_tree = TextAreaField(validators=[DataRequired()])

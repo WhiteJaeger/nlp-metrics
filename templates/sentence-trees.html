@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% block content %}
+    <form class="form-control" method="post" action="{{ url_for('process_sentence_tree') }}">
+        <legend> {{ legend }} </legend>
+        {{ form.csrf_token }}
+        <div class="d-flex bd-highlight mb-3">
+            <div class="p-2 bd-highlight">Type your sentence here:
+                <p>{{ form.text_tree }}</p>
+            </div>
+        </div>
+
+        <input class="btn btn-outline-secondary mb-2" id="submit-button" type="submit" value="Submit">
+    </form>
+
+    <hr>
+
+    {% if output %}
+        <div class="container-md">
+            <ul class="list-group">
+                <li class="list-group-item"> <p><strong>Original Sentence:</strong></p> <p>{{ output.sentence }}</p> </li>
+                <li class="list-group-item"> <p><strong>Sentence Tree:</strong></p> <p>{{ output.sentence_tree }}</p> </li>
+            </ul>
+
+{#            <table class="table table-bordered table-sm">#}
+{#                <thead>#}
+{#                <tr>#}
+{#                    <th scope="col" class="text-center">Word</th>#}
+{#                    <th scope="col" class="text-center">POS Tag</th>#}
+{#                </tr>#}
+{#                </thead>#}
+{#                <tbody>#}
+{#                {% for word_tag in output.pos %}#}
+{#                    <tr>#}
+{#                        <td class="text-center">{{ word_tag[0] }}</td>#}
+{#                        <td class="text-center">{{ word_tag[1] }}</td>#}
+{#                    </tr>#}
+{#                {% endfor %}#}
+{#                </tbody>#}
+{#            </table>#}
+        </div>
+    {% endif %}
+{% endblock %}
+
+{% block sidebar %}
+    <div class="col-md-4">
+        <div class="content-section">
+            <h3>References</h3>
+            <p class='text-muted'>Placeholder Placeholder Placeholder
+            <ul class="list-group">
+                <li class="list-group-item list-group-item-light">Placeholder</li>
+                <li class="list-group-item list-group-item-light">Placeholder</li>
+                <li class="list-group-item list-group-item-light">Placeholder</li>
+                <li class="list-group-item list-group-item-light">Placeholder</li>
+            </ul>
+        </div>
+    </div>
+{% endblock %}
