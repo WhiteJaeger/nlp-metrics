@@ -8,6 +8,8 @@ from utils import write_to_file, read_file
 import pathlib
 
 from NLP.text_utils import prepare_str, map_word_pos
+from NLP.chunker import ntc as SENTENCE_CHUNKER
+from nltk.chunk.util import tree2conllstr, conllstr2tree
 
 
 def create_app():
@@ -17,18 +19,14 @@ def create_app():
     crf_model_path = path.join(project_path, 'models', 'crfWJSModel900k.joblib')
     crf = load(crf_model_path)
 
-    # Load pre-trained Sentence Chunker model
-    pos_model_path = path.join(project_path, 'models', 'sentenceChunker.joblib')
-    chunker = load(pos_model_path)
-
     # Setup flask app
     app = Flask(__name__)
     app.secret_key = getenv('SECRET_KEY', secrets.token_urlsafe())
 
-    return app, crf, chunker
+    return app, crf
 
 
-APP, CRF_MODEL, SENTENCE_CHUNKER = create_app()
+APP, CRF_MODEL = create_app()
 
 
 # Metrics part
@@ -124,17 +122,30 @@ def process_pos():
 def sentence_trees():
     form = InputForm()
     output = read_file()
+    if output:
+        output['sentence_tree'] = conllstr2tree(output['sentence_tree'])
     return render_template('sentence-trees.html',
                            legend='Sentence Trees',
+                           title='Sentence Trees',
                            form=form,
                            output=output)
 
 
-@APP.route('/api/process-sentence-tree')
+@APP.route('/api/process-sentence-tree', methods=['POST'])
 def process_sentence_tree():
-    data = request.form.get('text_tree')
-    # TODO: prepare incoming sentence
-    chunked_sentence = SENTENCE_CHUNKER.parse()
+    sentence = request.form.get('text_tree')
+
+    prepared_sentence = prepare_str(sentence, pos_preparation=True)
+    pos_tags = CRF_MODEL.predict(prepared_sentence)[0]
+    word_pos = map_word_pos(sentence, pos_tags)
+
+    sentence_tree = SENTENCE_CHUNKER.parse(word_pos)
+
+    output = {
+        'sentence': sentence,
+        'sentence_tree': tree2conllstr(sentence_tree)
+    }
+    write_to_file(output)
     return redirect(url_for('sentence_trees'))
 
 # if __name__ == '__main__':
