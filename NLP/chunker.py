@@ -15,25 +15,12 @@ data = list(conll2000.chunked_sents())
 train_data = data[:5450]
 test_data = data[5450:]
 
+
 # print(len(train_data), len(test_data))
 # print(train_data[1])
 # #
 # wtc = tree2conlltags(train_data[1])
 # print(wtc)
-
-
-# def conll_tag_chunks(chunk_sents):
-#     tagged_sents = [tree2conlltags(tree) for tree in chunk_sents]
-#     return [[(t, c) for (w, t, c) in sent] for sent in tagged_sents]
-#
-#
-# def combined_tagger(train_data, taggers, backoff=None):
-#     for tagger in taggers:
-#         backoff = tagger(train_data, backoff=backoff)
-#     return backoff
-
-
-#
 #
 # define the chunker class
 class NGramTagChunker(ChunkParserI, ABC):
