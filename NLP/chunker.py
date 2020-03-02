@@ -1,27 +1,15 @@
-import pathlib
 from abc import ABC
-from os import path
 
-from joblib import load
 from nltk.chunk import ChunkParserI
 from nltk.chunk.util import tree2conlltags, conlltags2tree
 from nltk.corpus import conll2000
 from nltk.tag import UnigramTagger, BigramTagger
 
-from NLP.text_utils import prepare_str, map_word_pos
-
 data = list(conll2000.chunked_sents())
-# print(len(data))
 train_data = data[:5450]
 test_data = data[5450:]
 
 
-# print(len(train_data), len(test_data))
-# print(train_data[1])
-# #
-# wtc = tree2conlltags(train_data[1])
-# print(wtc)
-#
 # define the chunker class
 class NGramTagChunker(ChunkParserI, ABC):
 
@@ -58,44 +46,3 @@ ntc = NGramTagChunker(train_data)
 #
 # evaluate chunker model performance
 # print(ntc.evaluate(test_data))
-#
-# # from joblib import dump
-# # dump(ntc, '../models/sentenceChunker.joblib')
-#
-# # Testing predictions
-# sentence = 'It is a guide to action that ensures that the military will forever heed Party commands'
-# sentence_prepared = prepare_str(sentence, text_lower_case=False, stopword_removal=False, pos_preparation=True)
-# #
-# sentence_2 = 'It is a guide to action which ensures that the military always obeys the commands of the party'
-# sentence_2_prepared = prepare_str(sentence_2, text_lower_case=False, stopword_removal=False, pos_preparation=True)
-#
-# project_path = str(pathlib.Path(__file__).parents[1])
-# model_path = path.join(project_path, 'models', 'crfWJSModel900k.joblib')
-# crf = load(model_path)
-# #
-# pos_tagged_1 = crf.predict(sentence_prepared)[0]
-# pos_tagged_2 = crf.predict(sentence_2_prepared)[0]
-# #
-# print(f'1 sentence tagged: {pos_tagged_1}')
-# print(f'2 sentence tagged: {pos_tagged_2}')
-# print('*' * 20)
-# #
-#
-# pos_tagged_1_prepared = map_word_pos(sentence, pos_tagged_1)
-#
-# pos_tagged_2_prepared = map_word_pos(sentence_2, pos_tagged_2)
-#
-# chunk_tree_1 = ntc.parse(pos_tagged_1_prepared)
-# print(f'1 chunk_tree: {chunk_tree_1}')
-# print(list(chunk_tree_1.subtrees()))
-# print('*' * 20)
-# chunk_tree_2 = ntc.parse(pos_tagged_2_prepared)
-# print(f'2 chunk_tree: {chunk_tree_2}')
-# print(list(chunk_tree_2.subtrees()))
-
-# from nltk.draw.tree import TreeView
-#
-# TreeView(chunk_tree_2)._cframe.print_to_file('output.ps')
-#
-# import os
-# os.system('convert output.ps output.jpg')

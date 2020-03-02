@@ -55,7 +55,7 @@ def process_input_metric():
     text_preparation_params = {
         'contractions': request.form.get('contractions', 0),
         'spec-chars': request.form.get('spec-chars', 0),
-        'lowercase': request.form.get('spec-chars', 0)
+        'lowercase': request.form.get('lowercase', 0)
     }
 
     data = {
