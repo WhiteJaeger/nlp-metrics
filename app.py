@@ -29,12 +29,12 @@ def create_app():
 APP, CRF_MODEL = create_app()
 
 
-# Metrics part
 @APP.route('/')
 def hello_world():
     return render_template('home.html', title='Home Page')
 
 
+# Metrics part
 @APP.route('/metrics-sentence-level')
 def sl_metrics():
     form = InputForm()
