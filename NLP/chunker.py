@@ -1,13 +1,13 @@
 from abc import ABC
 
+import sklearn
 from nltk.chunk import ChunkParserI
 from nltk.chunk.util import conlltags2tree, tree2conlltags
 from nltk.corpus import conll2000
 from nltk.tag import BigramTagger, UnigramTagger
 
 data = list(conll2000.chunked_sents())
-train_data = data[:5450]
-test_data = data[5450:]
+train_data, test_data = sklearn.model_selection.train_test_split(data, test_size=0.2, random_state=1234)
 
 
 # define the chunker class
