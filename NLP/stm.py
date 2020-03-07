@@ -18,18 +18,30 @@ Ding Liu and Daniel Gildea, 2005, Association for Computational Linguistics, Pag
 from nltk import Tree
 
 
-def extract_pos(tree_dict: dict) -> dict:
-    for subtree_len, subtrees in tree_dict.items():
-        for index_subtree, subtree in enumerate(subtrees):
-            posses = []
-            for word_pos in subtree['leaves']:
-                pos = word_pos.split('/')[1]
-                posses.append(pos)
-            tree_dict[subtree_len][index_subtree]['leaves'] = posses
-    return tree_dict
+def extract_pos(leaves: list) -> list:
+    """
+
+    :param leaves:
+    :type leaves:
+    :return:
+    :rtype:
+    """
+
+    pos_tags = []
+    for word_pos in leaves:
+        pos = word_pos.split('/')[1]
+        pos_tags.append(pos)
+    return pos_tags
 
 
 def extract_subtrees(tree: Tree) -> dict:
+    """
+
+    :param tree:
+    :type tree:
+    :return:
+    :rtype:
+    """
     subtrees = list(tree.subtrees())[1:]  # Starting from '1' since the first one is the sentence itself.
     subtrees_dict = {}
 
@@ -37,26 +49,47 @@ def extract_subtrees(tree: Tree) -> dict:
         tree_dict = {'label': subtree.label(), 'leaves': subtree.leaves()}
         tree_len = len(tree_dict['leaves'])
 
+        tree_dict['leaves'] = extract_pos(tree_dict['leaves'])
+
         if not subtrees_dict.get(tree_len, 0):
             subtrees_dict[tree_len] = [tree_dict]
         else:
             subtrees_dict[tree_len].append(tree_dict)
 
-    return extract_pos(subtrees_dict)
+    return subtrees_dict
 
 
 def count_subtree_in_tree(subtree: list, tree_dict: dict) -> int:
+    """
+
+    :param subtree:
+    :type subtree:
+    :param tree_dict:
+    :type tree_dict:
+    :return:
+    :rtype:
+    """
     subtree_len = len(subtree)
     count = 0
     for subtree_ in tree_dict[subtree_len]:
         if subtree == subtree_['leaves']:
-            # print(subtree, tree_dict[subtree_len])
             count += 1
 
     return count
 
 
 def stm(ref: Tree, hyp: Tree, depth: int = 2) -> [int, float]:
+    """
+
+    :param ref:
+    :type ref:
+    :param hyp:
+    :type hyp:
+    :param depth:
+    :type depth:
+    :return:
+    :rtype:
+    """
     ref_dict_tree = extract_subtrees(ref)
     hyp_dict_tree = extract_subtrees(hyp)
 
