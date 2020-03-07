@@ -55,10 +55,12 @@ def count_subtree_in_tree(subtree: list, tree_dict: dict) -> int:
     return count
 
 
-def stm(ref: Tree, hyp: Tree, depth: int = 2) -> int:
+def stm(ref: Tree, hyp: Tree, depth: int = 2) -> [int, float]:
     ref_dict_tree = extract_subtrees(ref)
     hyp_dict_tree = extract_subtrees(hyp)
 
+    count_ref = 0
+    count_hyp = 0
     for i in range(1, depth + 1):
         all_subtrees_ref = ref_dict_tree[i]
 
@@ -70,9 +72,12 @@ def stm(ref: Tree, hyp: Tree, depth: int = 2) -> int:
             if count_in_hyp > count_in_ref:
                 count_in_hyp = count_in_ref
 
+            count_ref += count_in_ref
+            count_hyp += count_in_hyp
+
             print(f'Leaf: {ab}, \n In ref: {count_in_ref}, \n In hyp: {count_in_hyp}')
 
-    return 0
+    return (count_ref / count_hyp) / depth
 
 
 a = Tree.fromstring('''(S
@@ -107,7 +112,7 @@ tree_dict_2 = extract_subtrees(b)
 print(tree_dict_2)
 print('*' * 30)
 # print(count_subtree_in_tree(['VB', 'TO', 'VB'], tree_dict_2))
-print(stm(b, a, 3))
+print(stm(b, a))
 
 #
 # '''
