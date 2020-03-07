@@ -42,7 +42,7 @@ class NGramTagChunker(ChunkParserI, ABC):
 
 #
 # train chunker model
-ntc = NGramTagChunker(train_data)
+SENTENCE_TREE_BUILDER = NGramTagChunker(train_data)
 #
 # evaluate chunker model performance
 # print(ntc.evaluate(test_data))

@@ -6,7 +6,7 @@ from flask import Flask, redirect, render_template, request, url_for
 from joblib import load
 from nltk.chunk.util import conllstr2tree, tree2conllstr
 
-from NLP.chunker import ntc as SENTENCE_CHUNKER
+from NLP.sentence_tree_builder import SENTENCE_TREE_BUILDER
 from NLP.text_utils import map_word_pos, prepare_str
 from constants import METRICS_FUNCTIONS, METRICS_MAP
 from forms import InputForm
@@ -27,7 +27,7 @@ def create_app():
     return app, crf
 
 
-APP, CRF_MODEL = create_app()
+APP, POS_TAGGING = create_app()
 
 
 @APP.route('/')
@@ -107,7 +107,7 @@ def process_pos():
     data = prepare_str(request.form.get('text_pos'), special_char_removal=True)
 
     data_prepared = prepare_str(data, pos_preparation=True)
-    predicted_pos = CRF_MODEL.predict(data_prepared)[0]
+    predicted_pos = POS_TAGGING.predict(data_prepared)[0]
 
     output = {
             'text': data,
@@ -137,10 +137,10 @@ def process_sentence_tree():
     sentence = request.form.get('text_tree')
 
     prepared_sentence = prepare_str(sentence, pos_preparation=True)
-    pos_tags = CRF_MODEL.predict(prepared_sentence)[0]
+    pos_tags = POS_TAGGING.predict(prepared_sentence)[0]
     word_pos = map_word_pos(sentence, pos_tags)
 
-    sentence_tree = SENTENCE_CHUNKER.parse(word_pos)
+    sentence_tree = SENTENCE_TREE_BUILDER.parse(word_pos)
 
     output = {
             'sentence':      sentence,
