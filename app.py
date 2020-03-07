@@ -55,8 +55,8 @@ def process_input_metric():
 
     text_preparation_params = {
             'contractions': request.form.get('contractions', 0),
-            'spec-chars'  : request.form.get('spec-chars', 0),
-            'lowercase'   : request.form.get('lowercase', 0)
+            'spec-chars':   request.form.get('spec-chars', 0),
+            'lowercase':    request.form.get('lowercase', 0)
     }
 
     data = {
@@ -81,10 +81,10 @@ def process_input_metric():
         result = METRICS_FUNCTIONS[metric]([ref], hyp)
 
     output = {
-            'ref'   : data['ref'],
-            'hyp'   : data['hyp'],
+            'ref':    data['ref'],
+            'hyp':    data['hyp'],
             'metric': METRICS_MAP[metric],
-            'value' : result
+            'value':  result
     }
     write_to_file(output)
     return redirect(url_for('sl_metrics'))
@@ -111,7 +111,7 @@ def process_pos():
 
     output = {
             'text': data,
-            'pos' : map_word_pos(data, predicted_pos)
+            'pos':  map_word_pos(data, predicted_pos)
     }
     write_to_file(output)
 
@@ -143,7 +143,7 @@ def process_sentence_tree():
     sentence_tree = SENTENCE_CHUNKER.parse(word_pos)
 
     output = {
-            'sentence'     : sentence,
+            'sentence':      sentence,
             'sentence_tree': tree2conllstr(sentence_tree)
     }
     write_to_file(output)

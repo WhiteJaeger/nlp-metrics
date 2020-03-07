@@ -5,7 +5,8 @@ Ding Liu and Daniel Gildea, 2005, Association for Computational Linguistics, Pag
     title = "Syntactic Features for Evaluation of Machine Translation",
     author = "Liu, Ding  and
       Gildea, Daniel",
-    booktitle = "Proceedings of the {ACL} Workshop on Intrinsic and Extrinsic Evaluation Measures for Machine Translation and/or Summarization",
+    booktitle = "Proceedings of the {ACL} Workshop on Intrinsic and Extrinsic Evaluation Measures for Machine
+    Translation and/or Summarization",
     month = jun,
     year = "2005",
     address = "Ann Arbor, Michigan",
