@@ -1,9 +1,9 @@
 from abc import ABC
 
 from nltk.chunk import ChunkParserI
-from nltk.chunk.util import tree2conlltags, conlltags2tree
+from nltk.chunk.util import conlltags2tree, tree2conlltags
 from nltk.corpus import conll2000
-from nltk.tag import UnigramTagger, BigramTagger
+from nltk.tag import BigramTagger, UnigramTagger
 
 data = list(conll2000.chunked_sents())
 train_data = data[:5450]

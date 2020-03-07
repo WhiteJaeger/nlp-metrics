@@ -1,7 +1,9 @@
 import re
+
 import nltk
-from constants import CONTRACTION_MAP
 from nltk.tokenize.toktok import ToktokTokenizer
+
+from constants import CONTRACTION_MAP
 
 stopword_list = nltk.corpus.stopwords.words('english')
 stopword_list.remove('no')
@@ -11,7 +13,6 @@ stopword_list.remove('not')
 def prepare_str(text: str, contraction_expansion=True, text_lower_case=False,
                 special_char_removal=True,
                 stopword_removal=False, remove_digits=False, pos_preparation=False):
-
     # expand contractions
     if contraction_expansion:
         text = expand_contractions(text)
@@ -94,7 +95,6 @@ def remove_stopwords(text, is_lower_case=False):
 
 
 def map_word_pos(prepared_sentence: str, pos_tags: list) -> list:
-
     words = prepared_sentence.split()
 
     mapped = zip(words, pos_tags)
@@ -117,29 +117,29 @@ def encode_word(sentence: list, index: int) -> dict:
     # If the given word is None or empty str -> return special tag
     if not sentence[index]:
         return {
-            'Not-a-word': 1
+                'Not-a-word': 1
         }
 
     return {
-        'is_first_capital': int(sentence[index][0].isupper()),
-        'is_first_word': int(index == 0),
-        'is_last_word': int(index == len(sentence) - 1),
-        'is_complete_capital': int(sentence[index].upper() == sentence[index]),
-        # Consider the information in the prev word
-        'prev_word': '' if index == 0 else sentence[index - 1],
-        # Consider the information in the next word
-        'next_word': '' if index == len(sentence) - 1 else sentence[index + 1],
-        'is_numeric': int(sentence[index].isdigit()),
-        # For ABC123 cases
-        'is_alphanumeric': int(bool((re.match('^(?=.*[0-9]$)(?=.*[a-zA-Z])', sentence[index])))),
-        # Extracting the morphological info of the given word
-        'prefix_1': sentence[index][0],
-        'prefix_2': sentence[index][:2],
-        'prefix_3': sentence[index][:3],
-        'prefix_4': sentence[index][:4],
-        'suffix_1': sentence[index][-1],
-        'suffix_2': sentence[index][-2:],
-        'suffix_3': sentence[index][-3:],
-        'suffix_4': sentence[index][-4:],
-        'word_has_hyphen': 1 if '-' in sentence[index] else 0
+            'is_first_capital'   : int(sentence[index][0].isupper()),
+            'is_first_word'      : int(index == 0),
+            'is_last_word'       : int(index == len(sentence) - 1),
+            'is_complete_capital': int(sentence[index].upper() == sentence[index]),
+            # Consider the information in the prev word
+            'prev_word'          : '' if index == 0 else sentence[index - 1],
+            # Consider the information in the next word
+            'next_word'          : '' if index == len(sentence) - 1 else sentence[index + 1],
+            'is_numeric'         : int(sentence[index].isdigit()),
+            # For ABC123 cases
+            'is_alphanumeric'    : int(bool((re.match('^(?=.*[0-9]$)(?=.*[a-zA-Z])', sentence[index])))),
+            # Extracting the morphological info of the given word
+            'prefix_1'           : sentence[index][0],
+            'prefix_2'           : sentence[index][:2],
+            'prefix_3'           : sentence[index][:3],
+            'prefix_4'           : sentence[index][:4],
+            'suffix_1'           : sentence[index][-1],
+            'suffix_2'           : sentence[index][-2:],
+            'suffix_3'           : sentence[index][-3:],
+            'suffix_4'           : sentence[index][-4:],
+            'word_has_hyphen'    : 1 if '-' in sentence[index] else 0
     }
