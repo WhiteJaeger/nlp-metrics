@@ -29,7 +29,7 @@ def extract_pos(leaves: list) -> list:
 
     pos_tags = []
     for word_pos in leaves:
-        pos = word_pos.split('/')[1]
+        pos = word_pos[1]
         pos_tags.append(pos)
     return pos_tags
 
@@ -78,28 +78,37 @@ def count_subtree_in_tree(subtree: list, tree_dict: dict) -> int:
     return count
 
 
-def stm(ref: Tree, hyp: Tree, depth: int = 2) -> [int, float]:
+def stm(ref: Tree, hyp: Tree, depth: int = 3) -> [int, float]:
     """
+    Calculate STM score as described in 'Syntactic Features for Evaluation of Machine Translation' by
+Ding Liu and Daniel Gildea, 2005, Association for Computational Linguistics
+    URL: https://www.aclweb.org/anthology/W05-0904,
+    Pages: 25-32
 
-    :param ref:
-    :type ref:
-    :param hyp:
-    :type hyp:
-    :param depth:
-    :type depth:
-    :return:
-    :rtype:
+    :param ref: reference syntax tree
+    :type ref: Tree
+    :param hyp: hypothesis syntax tree
+    :type hyp: Tree
+    :param depth: the length of trees which will be considered during computations
+    :type depth: int
+    :return: STM Score
+    :rtype: int, float
     """
+    if len(ref) < depth or len(hyp) < depth:
+        # TODO: Make a custom exception
+        return 0
+
     ref_dict_tree = extract_subtrees(ref)
     hyp_dict_tree = extract_subtrees(hyp)
-
     count_ref = 0
     count_hyp = 0
     for i in range(1, depth + 1):
-        all_subtrees_ref = ref_dict_tree[i]
+        all_subtrees_ref = ref_dict_tree.get(i)
+
+        if not all_subtrees_ref:
+            continue
 
         for subtree in all_subtrees_ref:
-            ab = subtree['leaves']
             count_in_ref = count_subtree_in_tree(subtree['leaves'], ref_dict_tree)
             count_in_hyp = count_subtree_in_tree(subtree['leaves'], hyp_dict_tree)
 
@@ -109,44 +118,41 @@ def stm(ref: Tree, hyp: Tree, depth: int = 2) -> [int, float]:
             count_ref += count_in_ref
             count_hyp += count_in_hyp
 
-            print(f'Leaf: {ab}, \n In ref: {count_in_ref}, \n In hyp: {count_in_hyp}')
-
     return (count_ref / count_hyp) / depth
 
-
-a = Tree.fromstring('''(S
-  (NP It/PRP)
-  (VP be/VB)
-  (NP a/DT guide/NN)
-  (VP to/TO)
-  (NP action/NN)
-  (PP that/IN)
-  (NP ensure/VB)
-  (PP that/IN)
-  (NP the/DT military/NN)
-  (VP will/MD forever/VB heed/VB)
-  (NP Party/NNP command/NN))''')
-b = Tree.fromstring('''(S
-  (NP It/PRP)
-  (VP be/VB to/TO insure/VB)
-  (NP the/DT troop/NN)
-  forever/RB
-  (VP hear/VBP)
-  (NP the/DT activity/NN guidebook/NN)
-  (NP that/WDT party/NN direct/NN))
-''')
-print(f'first: {a}')
-print('*' * 10)
-print(f'second: {b}')
-print('*' * 20)
-tree_dict_ = extract_subtrees(a)
-print(tree_dict_)
-print('*' * 30)
-tree_dict_2 = extract_subtrees(b)
-print(tree_dict_2)
-print('*' * 30)
-# print(count_subtree_in_tree(['VB', 'TO', 'VB'], tree_dict_2))
-print(stm(b, a))
+# a = Tree.fromstring('''(S
+#   (NP It/PRP)
+#   (VP be/VB)
+#   (NP a/DT guide/NN)
+#   (VP to/TO)
+#   (NP action/NN)
+#   (PP that/IN)
+#   (NP ensure/VB)
+#   (PP that/IN)
+#   (NP the/DT military/NN)
+#   (VP will/MD forever/VB heed/VB)
+#   (NP Party/NNP command/NN))''')
+# b = Tree.fromstring('''(S
+#   (NP It/PRP)
+#   (VP be/VB to/TO insure/VB)
+#   (NP the/DT troop/NN)
+#   forever/RB
+#   (VP hear/VBP)
+#   (NP the/DT activity/NN guidebook/NN)
+#   (NP that/WDT party/NN direct/NN))
+# ''')
+# print(f'first: {a}')
+# print('*' * 10)
+# print(f'second: {b}')
+# print('*' * 20)
+# tree_dict_ = extract_subtrees(a)
+# print(tree_dict_)
+# print('*' * 30)
+# tree_dict_2 = extract_subtrees(b)
+# print(tree_dict_2)
+# print('*' * 30)
+# # print(count_subtree_in_tree(['VB', 'TO', 'VB'], tree_dict_2))
+# print(stm(b, a))
 
 #
 # '''

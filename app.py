@@ -149,5 +149,49 @@ def process_sentence_tree():
     write_to_file(output)
     return redirect(url_for('sentence_trees'))
 
+
+# STM part
+@APP.route('/stm')
+def stm():
+    form = InputForm()
+    output = read_file()
+    return render_template('stm.html',
+                           title='STM',
+                           form=form,
+                           legend='Subtree Metric',
+                           metric_info=output)
+
+
+@APP.route('/api/handle-stm', methods=['POST'])
+def process_stm():
+    data = {
+            'ref': request.form.get('text_reference'),
+            'hyp': request.form.get('text_hypothesis')
+    }
+
+    ref = prepare_str(data['ref'], special_char_removal=True)
+    hyp = prepare_str(data['hyp'], special_char_removal=True)
+
+    ref_prepared = prepare_str(ref, pos_preparation=True)
+    hyp_prepared = prepare_str(hyp, pos_preparation=True)
+    pos_ref = POS_TAGGING.predict(ref_prepared)[0]
+    pos_hyp = POS_TAGGING.predict(hyp_prepared)[0]
+
+    word_pos_ref = map_word_pos(data['ref'], pos_ref)
+    word_pos_hyp = map_word_pos(data['hyp'], pos_hyp)
+
+    sentence_tree_ref = SENTENCE_TREE_BUILDER.parse(word_pos_ref)
+    sentence_tree_hyp = SENTENCE_TREE_BUILDER.parse(word_pos_hyp)
+
+    result = METRICS_FUNCTIONS['stm'](sentence_tree_ref, sentence_tree_hyp)
+
+    output = {
+            'ref':    data['ref'],
+            'hyp':    data['hyp'],
+            'metric': METRICS_MAP['stm'],
+            'value':  result
+    }
+    write_to_file(output)
+    return redirect(url_for('stm'))
 # if __name__ == '__main__':
 #     serve(APP, host='0.0.0.0', port=8080)

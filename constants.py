@@ -5,6 +5,8 @@ from nltk.translate.meteor_score import single_meteor_score
 from nltk.translate.nist_score import sentence_nist
 from rouge import Rouge
 
+from NLP.stm import stm
+
 ROUGE = Rouge()
 
 METRICS_MAP = {
@@ -13,7 +15,8 @@ METRICS_MAP = {
         'chrf':   'Character n-gram F-score',
         'nist':   'NIST',
         'meteor': 'METEOR',
-        'rouge':  'ROUGE'
+        'rouge':  'ROUGE',
+        'stm':    'STM'
 }
 
 METRICS_FUNCTIONS = {
@@ -22,7 +25,8 @@ METRICS_FUNCTIONS = {
         'chrf':   sentence_chrf,
         'nist':   sentence_nist,
         'meteor': single_meteor_score,
-        'rouge':  ROUGE.get_scores
+        'rouge':  ROUGE.get_scores,
+        'stm':    stm
 }
 
 CONTRACTION_MAP = {
