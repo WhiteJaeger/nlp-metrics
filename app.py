@@ -1,22 +1,23 @@
-import secrets
-from flask import Flask, render_template, redirect, url_for, request
-from forms import InputForm
-from os import path, getenv
-from constants import METRICS_MAP, METRICS_FUNCTIONS
-from joblib import load
-from utils import write_to_file, read_file
 import pathlib
+import secrets
+from os import getenv, path
 
-from NLP.text_utils import prepare_str, map_word_pos
-from NLP.chunker import ntc as SENTENCE_CHUNKER
-from nltk.chunk.util import tree2conllstr, conllstr2tree
+from flask import Flask, redirect, render_template, request, url_for
+from joblib import load
+from nltk.chunk.util import conllstr2tree, tree2conllstr
+
+from NLP.sentence_tree_builder import SENTENCE_TREE_BUILDER
+from NLP.text_utils import map_word_pos, prepare_str
+from constants import METRICS_FUNCTIONS, METRICS_MAP
+from forms import InputForm
+from utils import read_file, write_to_file
 
 
 def create_app():
     project_path = str(pathlib.Path(__file__).parents[0])
 
     # Load pre-trained POS Tagger model
-    crf_model_path = path.join(project_path, 'models', 'crfWJSModel900k.joblib')
+    crf_model_path = path.join(project_path, 'models', 'crfWJSModel.joblib')
     crf = load(crf_model_path)
 
     # Setup flask app
@@ -26,15 +27,15 @@ def create_app():
     return app, crf
 
 
-APP, CRF_MODEL = create_app()
+APP, POS_TAGGING = create_app()
 
 
-# Metrics part
 @APP.route('/')
 def hello_world():
     return render_template('home.html', title='Home Page')
 
 
+# Metrics part
 @APP.route('/metrics-sentence-level')
 def sl_metrics():
     form = InputForm()
@@ -53,14 +54,14 @@ def process_input_metric():
     metric = request.form.get('metric')
 
     text_preparation_params = {
-        'contractions': request.form.get('contractions', 0),
-        'spec-chars': request.form.get('spec-chars', 0),
-        'lowercase': request.form.get('lowercase', 0)
+            'contractions': request.form.get('contractions', 0),
+            'spec-chars':   request.form.get('spec-chars', 0),
+            'lowercase':    request.form.get('lowercase', 0)
     }
 
     data = {
-        'ref': request.form.get('text_reference'),
-        'hyp': request.form.get('text_hypothesis')
+            'ref': request.form.get('text_reference'),
+            'hyp': request.form.get('text_hypothesis')
     }
 
     ref = prepare_str(data['ref'],
@@ -80,10 +81,10 @@ def process_input_metric():
         result = METRICS_FUNCTIONS[metric]([ref], hyp)
 
     output = {
-        'ref': data['ref'],
-        'hyp': data['hyp'],
-        'metric': METRICS_MAP[metric],
-        'value': result
+            'ref':    data['ref'],
+            'hyp':    data['hyp'],
+            'metric': METRICS_MAP[metric],
+            'value':  result
     }
     write_to_file(output)
     return redirect(url_for('sl_metrics'))
@@ -106,11 +107,11 @@ def process_pos():
     data = prepare_str(request.form.get('text_pos'), special_char_removal=True)
 
     data_prepared = prepare_str(data, pos_preparation=True)
-    predicted_pos = CRF_MODEL.predict(data_prepared)[0]
+    predicted_pos = POS_TAGGING.predict(data_prepared)[0]
 
     output = {
-        'text': data,
-        'pos': map_word_pos(data, predicted_pos)
+            'text': data,
+            'pos':  map_word_pos(data, predicted_pos)
     }
     write_to_file(output)
 
@@ -136,17 +137,61 @@ def process_sentence_tree():
     sentence = request.form.get('text_tree')
 
     prepared_sentence = prepare_str(sentence, pos_preparation=True)
-    pos_tags = CRF_MODEL.predict(prepared_sentence)[0]
+    pos_tags = POS_TAGGING.predict(prepared_sentence)[0]
     word_pos = map_word_pos(sentence, pos_tags)
 
-    sentence_tree = SENTENCE_CHUNKER.parse(word_pos)
+    sentence_tree = SENTENCE_TREE_BUILDER.parse(word_pos)
 
     output = {
-        'sentence': sentence,
-        'sentence_tree': tree2conllstr(sentence_tree)
+            'sentence':      sentence,
+            'sentence_tree': tree2conllstr(sentence_tree)
     }
     write_to_file(output)
     return redirect(url_for('sentence_trees'))
 
+
+# STM part
+@APP.route('/stm')
+def stm():
+    form = InputForm()
+    output = read_file()
+    return render_template('stm.html',
+                           title='STM',
+                           form=form,
+                           legend='Subtree Metric',
+                           metric_info=output)
+
+
+@APP.route('/api/handle-stm', methods=['POST'])
+def process_stm():
+    data = {
+            'ref': request.form.get('text_reference'),
+            'hyp': request.form.get('text_hypothesis')
+    }
+
+    ref = prepare_str(data['ref'], special_char_removal=True)
+    hyp = prepare_str(data['hyp'], special_char_removal=True)
+
+    ref_prepared = prepare_str(ref, pos_preparation=True)
+    hyp_prepared = prepare_str(hyp, pos_preparation=True)
+    pos_ref = POS_TAGGING.predict(ref_prepared)[0]
+    pos_hyp = POS_TAGGING.predict(hyp_prepared)[0]
+
+    word_pos_ref = map_word_pos(data['ref'], pos_ref)
+    word_pos_hyp = map_word_pos(data['hyp'], pos_hyp)
+
+    sentence_tree_ref = SENTENCE_TREE_BUILDER.parse(word_pos_ref)
+    sentence_tree_hyp = SENTENCE_TREE_BUILDER.parse(word_pos_hyp)
+
+    result = METRICS_FUNCTIONS['stm'](sentence_tree_ref, sentence_tree_hyp)
+
+    output = {
+            'ref':    data['ref'],
+            'hyp':    data['hyp'],
+            'metric': METRICS_MAP['stm'],
+            'value':  result
+    }
+    write_to_file(output)
+    return redirect(url_for('stm'))
 # if __name__ == '__main__':
 #     serve(APP, host='0.0.0.0', port=8080)

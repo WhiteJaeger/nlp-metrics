@@ -1,5 +1,5 @@
-from os import path, remove
 import json
+from os import path, remove
 
 
 def read_file(filename: str = 'temp.json'):

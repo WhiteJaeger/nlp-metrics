@@ -27,9 +27,10 @@
           <div class="collapse navbar-collapse" id="navbarToggle">
             <div class="navbar-nav mr-auto">
               <a class="nav-item nav-link" href="/">Home</a>
-              <a class="nav-item nav-link" href="{{ url_for('sl_metrics') }}">Sentence Level Metrics</a>
+              <a class="nav-item nav-link" href="{{ url_for('sl_metrics') }}">N-Gram Metrics</a>
               <a class="nav-item nav-link" href="{{ url_for('pos') }}">Context POS tagger</a>
-                <a class="nav-item nav-link" href="{{ url_for('sentence_trees') }}">Sentence Trees</a>
+              <a class="nav-item nav-link" href="{{ url_for('sentence_trees') }}">Sentence Trees</a>
+              <a class="nav-item nav-link" href="{{ url_for('stm') }}">Subtree Metric</a>
             </div>
             <!-- Navbar Right Side -->
             <div class="navbar-nav">

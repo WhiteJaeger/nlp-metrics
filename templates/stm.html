@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+{% block title %} {{ title }} {% endblock %}
+
+{% block content %}
+    <form class="form-control" method="post" action="{{ url_for('process_stm') }}">
+        <legend> {{ legend }} </legend>
+        <div class="container border-top border-bottom" id="preprocessing">
+            <p><strong>Text pre-processing:</strong></p>
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="checkbox" id="contractions" name="contractions" value="1">
+                <label class="form-check-label" for="contractions">Expand contractions (e.g. I`m -> I am)</label>
+            </div>
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="checkbox" id="spec-chars" name="spec-chars" value="1">
+                <label class="form-check-label" for="spec-chars">Remove special characters (e.g. ",")</label>
+            </div>
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="checkbox" id="lowercase" name="lowercase" value="1">
+                <label class="form-check-label" for="lowercase">Lowercase</label>
+            </div>
+        </div>
+        {{ form.csrf_token }}
+        <div class="d-flex bd-highlight mb-3">
+            <div class="p-2 bd-highlight">Type your hypothesis translation here:
+                <p>{{ form.text_hypothesis }}</p>
+            </div>
+            <div class="ml-auto p-2 bd-highlight">Type your reference translation here:
+                <p>{{ form.text_reference }}</p>
+            </div>
+        </div>
+
+        <input class="btn btn-outline-secondary mb-2" id="submit-button" type="submit" value="Evaluate">
+    </form>
+
+    <hr>
+
+    {#TODO: Consider displaying the syntax trees#}
+    {% if metric_info %}
+        <div class="container">
+            <div class="row">
+                <div class="col border">
+                    <strong>Hypothesis</strong>: <br>{{ metric_info.hyp }}
+                </div>
+                <div class="col border">
+                    <strong>Reference</strong>: <br>{{ metric_info.ref }}
+                </div>
+            </div>
+        </div>
+        <div class="container-md">
+            <ul class="list-group">
+                <li class="list-group-item text-center">
+                    <strong>{{ metric_info.metric }}</strong>: {{ metric_info.value }} </li>
+            </ul>
+        </div>
+    {% endif %}
+{% endblock content %}
+
+{% block sidebar %}
+    <div class="col-md-4">
+        <div class="content-section">
+            <h3>References</h3>
+            <p class='text-muted'>Placeholder Placeholder Placeholder
+            <ul class="list-group">
+                <li class="list-group-item list-group-item-light">Placeholder</li>
+                <li class="list-group-item list-group-item-light">Placeholder</li>
+                <li class="list-group-item list-group-item-light">Placeholder</li>
+                <li class="list-group-item list-group-item-light">Placeholder</li>
+            </ul>
+        </div>
+    </div>
+{% endblock %}
