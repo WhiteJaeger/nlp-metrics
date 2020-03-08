@@ -17,7 +17,7 @@ def create_app():
     project_path = str(pathlib.Path(__file__).parents[0])
 
     # Load pre-trained POS Tagger model
-    crf_model_path = path.join(project_path, 'models', 'crfWJSModel900k.joblib')
+    crf_model_path = path.join(project_path, 'models', 'crfWJSModel.joblib')
     crf = load(crf_model_path)
 
     # Setup flask app
