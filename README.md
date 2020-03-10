@@ -3,7 +3,7 @@ N-gram based and Syntactic.
 
 This repository contains Flask web application which aims to help with measuring the performance of machine & human translaion.
 
-This app could be accessed either remotely - it is deployed at http://nlp-metrics.herokuapp.com/ - or locally - by following below steps.
+This app could be accessed either remotely - it is deployed at http://nlp-metrics.herokuapp.com/ - or locally - by following these steps.
 
 Running app locally:
 
@@ -14,6 +14,15 @@ Python version >= 3.6.
 It is strongly advised to run the app in [virtual environment](https://docs.python.org/3/library/venv.html).
 
 1. Install dependencies by running the following command:
-  `pip install -r requirements.txt`
-  
-2. 
+    
+    `pip install -r requirements.txt`
+2. Download the following corpora: stopwords, conll2000 with NLTK downloader:
+
+    `python -m nltk.downloader stopwords conll2000`
+3. Run the application:
+    
+    1. In production mode: `python app.py`
+    2. In development mode:
+        1. Set env variables: `set or export FLASK_APP=app.py`
+        2. Run the app: `flask run`
+4. Head to the `localhost:5000`.
