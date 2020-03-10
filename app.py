@@ -11,6 +11,7 @@ from NLP.text_utils import map_word_pos, prepare_str
 from constants import METRICS_FUNCTIONS, METRICS_MAP
 from forms import InputForm
 from utils import read_file, write_to_file
+from waitress import serve
 
 
 def create_app():
@@ -193,5 +194,6 @@ def process_stm():
     }
     write_to_file(output)
     return redirect(url_for('stm'))
-# if __name__ == '__main__':
-#     serve(APP, host='0.0.0.0', port=8080)
+
+if __name__ == '__main__':
+    serve(APP, host='0.0.0.0', port=8080)
