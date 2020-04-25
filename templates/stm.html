@@ -2,6 +2,9 @@
 {% block title %} {{ title }} {% endblock %}
 
 {% block content %}
+    <div class="content-section">
+        <p>This page provides interface to measure the performance of the given translation with sentence based subtree metric.</p>
+    </div>
     <form class="form-control" method="post" action="{{ url_for('process_stm') }}">
         <legend> {{ legend }} </legend>
         <div class="container border-top border-bottom" id="preprocessing">
@@ -59,12 +62,9 @@
     <div class="col-md-4">
         <div class="content-section">
             <h3>References</h3>
-            <p class='text-muted'>Placeholder Placeholder Placeholder
             <ul class="list-group">
-                <li class="list-group-item list-group-item-light">Placeholder</li>
-                <li class="list-group-item list-group-item-light">Placeholder</li>
-                <li class="list-group-item list-group-item-light">Placeholder</li>
-                <li class="list-group-item list-group-item-light">Placeholder</li>
+                <li class="list-group-item list-group-item-light"><a class="btn-link" target="_blank" href="https://en.wikipedia.org/wiki/Sentence_diagram#Constituency_and_dependency">Sentence Trees Explanation</a></li>
+                <li class="list-group-item list-group-item-light"><a class="btn-link" href="https://www.aclweb.org/anthology/W05-0904/" target="_blank">Paper</a></li>
             </ul>
         </div>
     </div>

@@ -189,7 +189,7 @@ def process_stm():
     output = {
             'ref':    data['ref'],
             'hyp':    data['hyp'],
-            'metric': METRICS_MAP['stm'],
+            'metric': 'STM',
             'value':  result
     }
     write_to_file(output)

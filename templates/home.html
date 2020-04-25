@@ -1,15 +1,57 @@
 {% extends 'base.html' %}
 
+{% block content %}
+    <div class="content-section">
+        <h3>Introduction</h3>
+        <div class="container main-content">
+            <p>This site provides interface for interaction with different Natural Language Processing metrics and other NLP helping tools.</p>
+            <p>NLP metrics include:</p>
+            <ul>
+                <li>N-Gram based:
+                    <ul>
+                        <li>BLEU</li>
+                        <li>GLEU</li>
+                        <li>Character n-gram F-score</li>
+                        <li>NIST</li>
+                        <li>METEOR</li>
+                        <li>METEOR</li>
+                    </ul>
+                </li>
+                <li>Sentence Trees based:
+                    <ul>
+                        <li>Subtree metric</li>
+                    </ul>
+                </li>
+            </ul>
+            <p>Other NLP tools:</p>
+            <ul>
+                <li>Context POS tagger</li>
+                <li>Sentence trees builder</li>
+            </ul>
+            <p>These lists are expected to expand.</p>
+        </div>
+    </div>
+    <footer>
+        <div class="content-section">
+            <h4>Contribution</h4>
+            <div class="container main-footer">
+                <p>If you find or encounter errors and ambiguity, please contact me via:</p>
+                    <ul>
+                        <li>Submitting an issue on <a class="btn-link" href="https://github.com/WhiteJaeger/nlp-metrics" target="_blank">Github repository</a></li>
+                        <li>Emailing me: logerk3@gmail.com</li>
+                    </ul>
+            </div>
+        </div>
+    </footer>
+{% endblock %}
+
 {% block sidebar %}
     <div class="col-md-4">
         <div class="content-section">
             <h3>References</h3>
-            <p class='text-muted'>Placeholder Placeholder Placeholder
             <ul class="list-group">
-                <li class="list-group-item list-group-item-light">Placeholder</li>
-                <li class="list-group-item list-group-item-light">Placeholder</li>
-                <li class="list-group-item list-group-item-light">Placeholder</li>
-                <li class="list-group-item list-group-item-light">Placeholder</li>
+                <li class="list-group-item list-group-item-light"><a class="btn-link" href="https://github.com/WhiteJaeger/nlp-metrics" target="_blank">Repository</a></li>
+                <li class="list-group-item list-group-item-light"><a class="btn-link" href="#" target="_blank">Paper</a></li>
             </ul>
         </div>
     </div>

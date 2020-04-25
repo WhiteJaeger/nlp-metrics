@@ -15,8 +15,7 @@ METRICS_MAP = {
         'chrf':   'Character n-gram F-score',
         'nist':   'NIST',
         'meteor': 'METEOR',
-        'rouge':  'ROUGE',
-        'stm':    'STM'
+        'rouge':  'ROUGE'
 }
 
 METRICS_FUNCTIONS = {
