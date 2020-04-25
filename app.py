@@ -32,7 +32,7 @@ APP, POS_TAGGING = create_app()
 
 
 @APP.route('/')
-def hello_world():
+def home_page():
     return render_template('home.html', title='Home Page')
 
 
@@ -40,13 +40,13 @@ def hello_world():
 @APP.route('/metrics-sentence-level')
 def sl_metrics():
     form = InputForm()
-    output = read_file()
+    metric_info = read_file()
 
     return render_template('metrics.html',
                            form=form,
                            title='Metrics',
                            legend='Sentence Level Metrics Evaluator',
-                           metric_info=output,
+                           metric_info=metric_info,
                            metrics=METRICS_MAP)
 
 
@@ -189,11 +189,12 @@ def process_stm():
     output = {
             'ref':    data['ref'],
             'hyp':    data['hyp'],
-            'metric': METRICS_MAP['stm'],
+            'metric': 'STM',
             'value':  result
     }
     write_to_file(output)
     return redirect(url_for('stm'))
 
+
 if __name__ == '__main__':
-    serve(APP, host='0.0.0.0', port=8080)
+    serve(APP, host='0.0.0.0', port=5000)

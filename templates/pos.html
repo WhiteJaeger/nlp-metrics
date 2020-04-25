@@ -2,6 +2,11 @@
 {% block title %} {{ title }} {% endblock %}
 
 {% block content %}
+    <div class="content-section">
+        <p>This Part-of-Speech tagger is based on the Continuous Random Fields model.</p>
+        <p>It was trained on the following NLTK corpora: conll2000, Treebank subset, masc. </p>
+        <p>Training set consisted of ~60000 sentences, testing set of ~25000 sentences.</p>
+    </div>
     <form class="form-control" method="post" action="{{ url_for('process_pos') }}">
         <legend> {{ legend }} </legend>
         {{ form.csrf_token }}
@@ -46,12 +51,10 @@
     <div class="col-md-4">
         <div class="content-section">
             <h3>References</h3>
-            <p class='text-muted'>Placeholder Placeholder Placeholder</p>
             <ul class="list-group">
-                <li class="list-group-item list-group-item-light"><a class="btn-link" href="https://www.clips.uantwerpen.be/pages/mbsp-tags#content-header" target="_blank">Penn Treebank II Tagset Reference</a></li>
-                <li class="list-group-item list-group-item-light">Placeholder</li>
-                <li class="list-group-item list-group-item-light">Placeholder</li>
-                <li class="list-group-item list-group-item-light">Placeholder</li>
+                <li class="list-group-item list-group-item-light"><a class="btn-link" href="https://www.clips.uantwerpen.be/pages/mbsp-tags#content-header" target="_blank">Penn Treebank II Tagset</a></li>
+                <li class="list-group-item list-group-item-light"><a class="btn-link" href="https://en.wikipedia.org/wiki/Conditional_random_field" target="_blank">Continuous Random Fields Model</a></li>
+                <li class="list-group-item list-group-item-light"><a class="btn-link" href="https://github.com/nltk/nltk_data" target="_blank">NLTK Data</a></li>
             </ul>
         </div>
     </div>
