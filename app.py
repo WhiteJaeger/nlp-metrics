@@ -3,6 +3,7 @@ import secrets
 from os import getenv, path
 
 from flask import Flask, redirect, render_template, request, url_for
+from flask_sqlalchemy import SQLAlchemy
 from joblib import load
 from nltk.chunk.util import conllstr2tree, tree2conllstr
 
@@ -21,14 +22,32 @@ def create_app():
     crf_model_path = path.join(project_path, 'models', 'crfWJSModel.joblib')
     crf = load(crf_model_path)
 
+    # Setup env
+    dev = getenv('DEV', False)
+
     # Setup flask app
     app = Flask(__name__)
     app.secret_key = getenv('SECRET_KEY', secrets.token_urlsafe())
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:1234@localhost/nlp'
+    # app.config['SQLALCHEMY_DATABASE_URI'] = getenv('db') if dev else ''
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
     return app, crf
 
 
 APP, POS_TAGGING = create_app()
+
+db = SQLAlchemy(APP)
+
+
+class SomeTable(db.Model):
+    __tablename__ = 'anotherTable'
+    entry = db.Column(db.Integer, primary_key=True)
+    customer = db.Column(db.String(200))
+
+    def __init__(self, entry, customer):
+        self.entry = entry
+        self.customer = customer
 
 
 @APP.route('/')
