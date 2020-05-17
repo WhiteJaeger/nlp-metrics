@@ -3,7 +3,7 @@ import secrets
 from os import getenv, path
 
 from flask import Flask, redirect, render_template, request, url_for
-from flask_sqlalchemy import SQLAlchemy
+from database import init_db_app
 from joblib import load
 from nltk.chunk.util import conllstr2tree, tree2conllstr
 
@@ -32,22 +32,13 @@ def create_app():
     # app.config['SQLALCHEMY_DATABASE_URI'] = getenv('db') if dev else ''
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
+    # Setup database
+    init_db_app(app)
+
     return app, crf
 
 
 APP, POS_TAGGING = create_app()
-
-db = SQLAlchemy(APP)
-
-
-class SomeTable(db.Model):
-    __tablename__ = 'anotherTable'
-    entry = db.Column(db.Integer, primary_key=True)
-    customer = db.Column(db.String(200))
-
-    def __init__(self, entry, customer):
-        self.entry = entry
-        self.customer = customer
 
 
 @APP.route('/')
