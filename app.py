@@ -8,7 +8,7 @@ from nltk.chunk.util import conllstr2tree, tree2conllstr
 
 from NLP.sentence_tree_builder import SENTENCE_TREE_BUILDER
 from NLP.text_utils import map_word_pos, prepare_str
-from constants import METRICS_FUNCTIONS, METRICS_MAP
+from NLP.constants import METRICS_FUNCTIONS, METRICS_MAP
 from forms import InputForm
 from utils import read_file, write_to_file
 from waitress import serve
