@@ -7,7 +7,7 @@ This repository contains Flask web application which aims to help with measuring
 
 * Prerequisites:
 
-    * Python version >= 3.6.
+    * Python version >= 3.7.
 
     * It is strongly advised to create a [virtual environment](https://docs.python.org/3/library/venv.html) for the app.
 

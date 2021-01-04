@@ -3,7 +3,7 @@ import re
 import nltk
 from nltk.tokenize.toktok import ToktokTokenizer
 
-from constants import CONTRACTION_MAP
+from NLP.constants import CONTRACTION_MAP
 
 stopword_list = nltk.corpus.stopwords.words('english')
 stopword_list.remove('no')
