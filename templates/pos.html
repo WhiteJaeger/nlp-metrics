@@ -24,23 +24,24 @@
     {% if output %}
         <div class="container-md">
             <ul class="list-group">
-                <li class="list-group-item"> <p><strong>Original Text:</strong></p> <p>{{ output.text }}</p> </li>
+                <li class="list-group-item"><p><strong>Original Text:</strong></p>
+                    <p>{{ output.text }}</p></li>
             </ul>
 
             <table class="table table-bordered table-sm">
                 <thead>
-                    <tr>
-                        <th scope="col" class="text-center">Word</th>
-                        <th scope="col" class="text-center">POS Tag</th>
-                    </tr>
+                <tr>
+                    <th scope="col" class="text-center">Word</th>
+                    <th scope="col" class="text-center">POS Tag</th>
+                </tr>
                 </thead>
                 <tbody>
-                    {% for word_tag in output.pos %}
-                        <tr>
-                            <td class="text-center">{{ word_tag[0] }}</td>
-                            <td class="text-center">{{ word_tag[1] }}</td>
-                        </tr>
-                    {% endfor %}
+                {% for word_tag in output.pos %}
+                    <tr>
+                        <td class="text-center">{{ word_tag[0] }}</td>
+                        <td class="text-center">{{ word_tag[1] }}</td>
+                    </tr>
+                {% endfor %}
                 </tbody>
             </table>
         </div>
@@ -52,9 +53,16 @@
         <div class="content-section">
             <h3>References</h3>
             <ul class="list-group">
-                <li class="list-group-item list-group-item-light"><a class="btn-link" href="https://gist.github.com/nlothian/9240750#word-level" target="_blank">Penn Treebank II Tagset</a></li>
-                <li class="list-group-item list-group-item-light"><a class="btn-link" href="https://en.wikipedia.org/wiki/Conditional_random_field" target="_blank">Continuous Random Fields Model</a></li>
-                <li class="list-group-item list-group-item-light"><a class="btn-link" href="https://github.com/nltk/nltk_data" target="_blank">NLTK Data</a></li>
+                <li class="list-group-item list-group-item-light"><a class="btn-link"
+                                                                     href="https://gist.github.com/nlothian/9240750#word-level"
+                                                                     target="_blank">Penn Treebank II Tagset</a></li>
+                <li class="list-group-item list-group-item-light"><a class="btn-link"
+                                                                     href="https://en.wikipedia.org/wiki/Conditional_random_field"
+                                                                     target="_blank">Continuous Random Fields Model</a>
+                </li>
+                <li class="list-group-item list-group-item-light"><a class="btn-link"
+                                                                     href="https://github.com/nltk/nltk_data"
+                                                                     target="_blank">NLTK Data</a></li>
             </ul>
         </div>
     </div>

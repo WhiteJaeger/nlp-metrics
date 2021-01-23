@@ -117,29 +117,29 @@ def encode_word(sentence: list, word_index: int) -> dict:
     # If the given word is None or empty str -> return special tag
     if not sentence[word_index]:
         return {
-                'Not-a-word': 1
+            'Not-a-word': 1
         }
 
     return {
-            'is_first_capital':    int(sentence[word_index][0].isupper()),
-            'is_first_word':       int(word_index == 0),
-            'is_last_word':        int(word_index == len(sentence) - 1),
-            'is_complete_capital': int(sentence[word_index].upper() == sentence[word_index]),
-            # Consider the information in the prev word
-            'prev_word':           '' if word_index == 0 else sentence[word_index - 1],
-            # Consider the information in the next word
-            'next_word':           '' if word_index == len(sentence) - 1 else sentence[word_index + 1],
-            'is_numeric':          int(sentence[word_index].isdigit()),
-            # For ABC123 cases
-            'is_alphanumeric':     int(bool((re.match('^(?=.*[0-9]$)(?=.*[a-zA-Z])', sentence[word_index])))),
-            # Extracting the morphological info of the given word
-            'prefix_1':            sentence[word_index][0],
-            'prefix_2':            sentence[word_index][:2],
-            'prefix_3':            sentence[word_index][:3],
-            'prefix_4':            sentence[word_index][:4],
-            'suffix_1':            sentence[word_index][-1],
-            'suffix_2':            sentence[word_index][-2:],
-            'suffix_3':            sentence[word_index][-3:],
-            'suffix_4':            sentence[word_index][-4:],
-            'word_has_hyphen':     1 if '-' in sentence[word_index] else 0
+        'is_first_capital': int(sentence[word_index][0].isupper()),
+        'is_first_word': int(word_index == 0),
+        'is_last_word': int(word_index == len(sentence) - 1),
+        'is_complete_capital': int(sentence[word_index].upper() == sentence[word_index]),
+        # Consider the information in the prev word
+        'prev_word': '' if word_index == 0 else sentence[word_index - 1],
+        # Consider the information in the next word
+        'next_word': '' if word_index == len(sentence) - 1 else sentence[word_index + 1],
+        'is_numeric': int(sentence[word_index].isdigit()),
+        # For ABC123 cases
+        'is_alphanumeric': int(bool((re.match('^(?=.*[0-9]$)(?=.*[a-zA-Z])', sentence[word_index])))),
+        # Extracting the morphological info of the given word
+        'prefix_1': sentence[word_index][0],
+        'prefix_2': sentence[word_index][:2],
+        'prefix_3': sentence[word_index][:3],
+        'prefix_4': sentence[word_index][:4],
+        'suffix_1': sentence[word_index][-1],
+        'suffix_2': sentence[word_index][-2:],
+        'suffix_3': sentence[word_index][-3:],
+        'suffix_4': sentence[word_index][-4:],
+        'word_has_hyphen': 1 if '-' in sentence[word_index] else 0
     }

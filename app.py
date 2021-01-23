@@ -5,13 +5,13 @@ from os import getenv, path
 from flask import Flask, redirect, render_template, request, url_for
 from joblib import load
 from nltk.chunk.util import conllstr2tree, tree2conllstr
+from waitress import serve
 
+from NLP.constants import METRICS_FUNCTIONS, METRICS_MAP
 from NLP.sentence_tree_builder import SENTENCE_TREE_BUILDER
 from NLP.text_utils import map_word_pos, prepare_str
-from NLP.constants import METRICS_FUNCTIONS, METRICS_MAP
 from forms import InputForm
 from utils import read_file, write_to_file
-from waitress import serve
 
 
 def create_app():
@@ -55,14 +55,14 @@ def process_input_metric():
     metric = request.form.get('metric')
 
     text_preparation_params = {
-            'contractions': request.form.get('contractions', 0),
-            'spec-chars':   request.form.get('spec-chars', 0),
-            'lowercase':    request.form.get('lowercase', 0)
+        'contractions': request.form.get('contractions', 0),
+        'spec-chars': request.form.get('spec-chars', 0),
+        'lowercase': request.form.get('lowercase', 0)
     }
 
     data = {
-            'ref': request.form.get('text_reference'),
-            'hyp': request.form.get('text_hypothesis')
+        'ref': request.form.get('text_reference'),
+        'hyp': request.form.get('text_hypothesis')
     }
 
     ref = prepare_str(data['ref'],
@@ -82,10 +82,10 @@ def process_input_metric():
         result = METRICS_FUNCTIONS[metric]([ref], hyp)
 
     output = {
-            'ref':    data['ref'],
-            'hyp':    data['hyp'],
-            'metric': METRICS_MAP[metric],
-            'value':  result
+        'ref': data['ref'],
+        'hyp': data['hyp'],
+        'metric': METRICS_MAP[metric],
+        'value': result
     }
     write_to_file(output)
     return redirect(url_for('sl_metrics'))
@@ -111,8 +111,8 @@ def process_pos():
     predicted_pos = POS_TAGGING.predict(data_prepared)[0]
 
     output = {
-            'text': data,
-            'pos':  map_word_pos(data, predicted_pos)
+        'text': data,
+        'pos': map_word_pos(data, predicted_pos)
     }
     write_to_file(output)
 
@@ -144,8 +144,8 @@ def process_sentence_tree():
     sentence_tree = SENTENCE_TREE_BUILDER.parse(word_pos)
 
     output = {
-            'sentence':      sentence,
-            'sentence_tree': tree2conllstr(sentence_tree)
+        'sentence': sentence,
+        'sentence_tree': tree2conllstr(sentence_tree)
     }
     write_to_file(output)
     return redirect(url_for('sentence_trees'))
@@ -166,8 +166,8 @@ def stm():
 @APP.route('/api/handle-stm', methods=['POST'])
 def process_stm():
     data = {
-            'ref': request.form.get('text_reference'),
-            'hyp': request.form.get('text_hypothesis')
+        'ref': request.form.get('text_reference'),
+        'hyp': request.form.get('text_hypothesis')
     }
 
     ref = prepare_str(data['ref'], special_char_removal=True)
@@ -187,10 +187,10 @@ def process_stm():
     result = METRICS_FUNCTIONS['stm'](sentence_tree_ref, sentence_tree_hyp)
 
     output = {
-            'ref':    data['ref'],
-            'hyp':    data['hyp'],
-            'metric': 'STM',
-            'value':  result
+        'ref': data['ref'],
+        'hyp': data['hyp'],
+        'metric': 'STM',
+        'value': result
     }
     write_to_file(output)
     return redirect(url_for('stm'))
