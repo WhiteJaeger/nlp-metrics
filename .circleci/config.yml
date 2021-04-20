@@ -2,7 +2,7 @@ version: 2
 jobs:
   build:
     docker:
-      - image: circleci/python:3.6.1
+      - image: circleci/python:3.9.4
 
     working_directory: ~/myRepository
 
@@ -17,13 +17,5 @@ jobs:
       - run:
           name: install dependencies
           command: |
-            sudo pip3 install -r requirements.txt
-
-#       - run:
-#           name: lint
-#           command: |
-#             pylint project
-#      - run:
-#          name: unitTests
-#          command: |
-#            python3 -m unittest discover -p "*Test.py"
+            python3.9 -m pip install --upgrade pip
+            python3.9 -m pip install --user -r requirements.txt
