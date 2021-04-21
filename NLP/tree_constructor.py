@@ -1,51 +1,46 @@
-from typing import Any
-
 import spacy
 from spacy.tokens import Doc
 from spacy.tokens import Token
 
-nlp: spacy.Language = spacy.load('en_core_web_sm')
-doc: Doc = nlp(u'Diplomatic staff would go home in a fifth plane')
-print('*' * 100)
 
+class SyntaxTreeHeadsExtractor:
+    """
+    Class for syntax trees heads extraction.
+    Extracts ONLY HEADS from a given SpaCy Doc. From these heads 1-, 2-, 3-level trees can be built.
+    """
+    def __init__(self, parsed_doc: Doc):
+        self.__parsed_doc = parsed_doc
+        self.first_level_heads = self.__extract_heads_1_length()
+        self.second_level_heads = self.__extract_heads_2_length()
+        self.third_level_heads = self.__extract_heads_3_length()
 
-def extract_1_length(parsed_doc: Doc) -> tuple[Any, ...]:
-    return tuple(token for token in parsed_doc)
+    def __extract_heads_1_length(self) -> tuple:
+        return tuple(token for token in self.__parsed_doc)
 
-
-def extract_2_length(parsed_doc: Doc) -> tuple[Any, ...]:
-    result = []
-    for token in parsed_doc:
-        if list(token.children):
-            result.append(token)
-    return tuple(result)
-
-
-print(f'2-LENGTH: {extract_2_length(doc)}')
-print(f'CHILDREN OF {extract_2_length(doc)[0]}: {list(extract_2_length(doc)[0].children)}')
-print(f'CHILDREN OF {extract_2_length(doc)[1]}: {list(extract_2_length(doc)[1].children)}')
-print('*' * 100)
-
-
-def extract_3_length(parsed_doc: Doc) -> tuple[Any, ...]:
-    result = []
-    two_length: tuple = extract_2_length(parsed_doc)
-    for token in two_length:
-        for child in token.children:
-            if list(child.children):
+    def __extract_heads_2_length(self) -> tuple:
+        result = []
+        for token in self.__parsed_doc:
+            if tuple(token.children):
                 result.append(token)
-                break
+        return tuple(result)
 
-    return tuple(result)
+    def __extract_heads_3_length(self) -> tuple:
+        result = []
+        two_length: tuple = self.__extract_heads_2_length()
+        for token in two_length:
+            for child in token.children:
+                if tuple(child.children):
+                    result.append(token)
+                    break
+
+        return tuple(result)
 
 
-print(f'3-LENGTH: {extract_3_length(doc)}')
-print('*' * 100)
-
-print('*' * 100)
-
-
-class SyntaxTreeParser:
+class SyntaxTreeElementsExtractor:
+    """
+    Class for syntax trees elements extraction.
+    Builds a syntax tree from a given head token and extracts children and grandchildren (if exist).
+    """
     def __init__(self, head_token: Token):
         self.head_token = head_token
         self.children = self.__get_2_level_deep()
@@ -61,7 +56,7 @@ class SyntaxTreeParser:
             return 1
 
     @property
-    def head(self):
+    def head(self) -> Token:
         return self.head_token
 
     def __get_2_level_deep(self) -> tuple:
@@ -81,23 +76,47 @@ class SyntaxTreeParser:
         return tuple(result)
 
 
-# a = SyntaxTreeParser(extract_2_length(doc)[1])
-# print(a.head)
-# print(a.length)
-# print(a.children)
-# print(a.grand_children)
-# print('*' * 100)
-#
-# a = SyntaxTreeParser(extract_3_length(doc)[1])
-# print(a.head)
-# print(a.length)
-# print(a.children)
-# print(a.grand_children)
-# print('*' * 100)
-#
-# a = SyntaxTreeParser(doc[0])
-# print(a.head)
-# print(a.length)
-# print(a.children)
-# print(a.grand_children)
-# print('*' * 100)
+if __name__ == '__main__':
+
+    # Usage example
+    nlp: spacy.Language = spacy.load('en_core_web_sm')
+    doc: Doc = nlp(u'Diplomatic staff would go home in a fifth plane')
+
+    heads_extractor = SyntaxTreeHeadsExtractor(doc)
+
+    print(f'1-LENGTH: {heads_extractor.first_level_heads}')
+    print('*' * 100)
+    print(f'2-LENGTH: {heads_extractor.second_level_heads}')
+    print(f'CHILDREN OF {heads_extractor.second_level_heads[0]}: {list(heads_extractor.second_level_heads[0].children)}')
+    print(f'CHILDREN OF {heads_extractor.second_level_heads[1]}: {list(heads_extractor.second_level_heads[1].children)}')
+    print('*' * 100)
+    print(f'3-LENGTH: {heads_extractor.third_level_heads}')
+    print('*' * 100)
+
+    a = SyntaxTreeElementsExtractor(doc[0])
+    print(a.head)
+    print(a.length)
+    print(a.children)
+    print(a.grand_children)
+    print('*' * 100)
+
+    a = SyntaxTreeElementsExtractor(heads_extractor.second_level_heads[1])
+    print(a.head)
+    print(a.length)
+    print(a.children)
+    print(a.grand_children)
+    print('*' * 100)
+
+    a = SyntaxTreeElementsExtractor(heads_extractor.second_level_heads[1])
+    print(a.head)
+    print(a.length)
+    print(a.children)
+    print(a.grand_children)
+    print('*' * 100)
+
+    a = SyntaxTreeElementsExtractor(doc[-1])
+    print(a.head)
+    print(a.length)
+    print(a.children)
+    print(a.grand_children)
+    print('*' * 100)
