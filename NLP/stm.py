@@ -15,186 +15,165 @@ Ding Liu and Daniel Gildea, 2005, Association for Computational Linguistics, Pag
     pages = "25--32",
 }
 """
-from nltk import Tree
+import spacy
+from spacy import Language
+
+from NLP.tree_constructor import SyntaxTreeHeadsExtractor, SyntaxTreeElementsExtractor
 
 
-def extract_pos(leaves: list) -> list:
-    """
-
-    :param leaves:
-    :type leaves:
-    :return:
-    :rtype:
-    """
-
-    pos_tags = []
-    for word_pos in leaves:
-        pos = word_pos[1]
-        pos_tags.append(pos)
-    return pos_tags
+def transform_into_tags(tokens: tuple) -> tuple:
+    # TODO: align some tags: e.g. VBZ - VB
+    return tuple([token.tag_ for token in tokens])
 
 
-def extract_subtrees(tree: Tree) -> dict:
-    """
-
-    :param tree:
-    :type tree:
-    :return:
-    :rtype:
-    """
-    subtrees = list(tree.subtrees())[1:]  # Starting from '1' since the first one is the sentence itself.
-    subtrees_dict = {}
-
-    for subtree in subtrees:
-        tree_dict = {'label': subtree.label(), 'leaves': subtree.leaves()}
-        tree_len = len(tree_dict['leaves'])
-
-        tree_dict['leaves'] = extract_pos(tree_dict['leaves'])
-
-        if not subtrees_dict.get(tree_len, 0):
-            subtrees_dict[tree_len] = [tree_dict]
-        else:
-            subtrees_dict[tree_len].append(tree_dict)
-
-    return subtrees_dict
+def get_freq_dict_for_tags(tags: tuple) -> dict:
+    result = {}
+    for tag in tags:
+        result[tag] = result.get(tag, 0) + 1
+    return result
 
 
-def count_subtree_in_tree(subtree: list, tree_dict: dict) -> int:
-    """
+def are_descendants_identical(ref_extractor: SyntaxTreeElementsExtractor, hyp_extractor: SyntaxTreeElementsExtractor):
+    ref_children_tags = transform_into_tags(ref_extractor.children)
+    hyp_children_tags = transform_into_tags(hyp_extractor.children)
 
-    :param subtree:
-    :type subtree:
-    :param tree_dict:
-    :type tree_dict:
-    :return:
-    :rtype:
-    """
-    subtree_len = len(subtree)
+    ref_grandchildren_tags = transform_into_tags(ref_extractor.grand_children)
+    hyp_grandchildren_tags = transform_into_tags(hyp_extractor.grand_children)
+
+    are_children_identical = sorted(ref_children_tags) == sorted(hyp_children_tags)
+    are_grandchildren_identical = sorted(ref_grandchildren_tags) == sorted(hyp_grandchildren_tags)
+
+    return are_children_identical and are_grandchildren_identical
+
+
+def sentence_stm(reference: str, hypothesis: str, model: Language, depth: int = 3):
+    # TODO: introduce depth argument
+    # TODO: remove 'prints'
+    score = 0
+    reference_preprocessed = model(reference)
+    hypothesis_preprocessed = model(hypothesis)
+
+    sentence_tree_heads_reference = SyntaxTreeHeadsExtractor(reference_preprocessed)
+    sentence_tree_heads_hypothesis = SyntaxTreeHeadsExtractor(hypothesis_preprocessed)
+    # print('FIRST LEVEL HEADS:')
+    # print(sentence_tree_heads_hypothesis.first_level_heads)
+    # print(sentence_tree_heads_reference.first_level_heads)
+    # print('*' * 100)
+    # print('SECOND LEVEL HEADS:')
+    # print(sentence_tree_heads_hypothesis.second_level_heads)
+    # print(sentence_tree_heads_reference.second_level_heads)
+    # print('*' * 100)
+    # print('THIRD LEVEL HEADS:')
+    # print(sentence_tree_heads_hypothesis.third_level_heads)
+    # print(sentence_tree_heads_reference.third_level_heads)
+    # print('*' * 100)
+    # tree_elements = SyntaxTreeElementsExtractor(sentence_tree_heads_hypothesis.third_level_heads[0])
+    # tree_elements_2 = SyntaxTreeElementsExtractor(sentence_tree_heads_reference.third_level_heads[0])
+    # print(tree_elements.children)
+    # print(tree_elements_2.children)
+    # print('*' * 100)
+    # print(tree_elements.grand_children)
+    # print(tree_elements_2.grand_children)
+
+    # Compute for 1-level-trees
+    # print('*' * 100)
+    # print('FIRST LEVEL:')
+    tags_first_level_ref = transform_into_tags(sentence_tree_heads_reference.first_level_heads)
+    tags_first_level_hyp = transform_into_tags(sentence_tree_heads_hypothesis.first_level_heads)
+    # print(tags_first_level_ref)
+    # print(tags_first_level_hyp)
+
+    tags_frequencies_ref = get_freq_dict_for_tags(transform_into_tags(sentence_tree_heads_reference.first_level_heads))
+    tags_frequencies_hyp = get_freq_dict_for_tags(transform_into_tags(sentence_tree_heads_hypothesis.first_level_heads))
+
+    # print(tags_frequencies_ref)
+    # print(tags_frequencies_hyp)
     count = 0
-    for subtree_ in tree_dict[subtree_len]:
-        if subtree == subtree_['leaves']:
-            count += 1
+    for tag in tags_frequencies_hyp:
+        # Get already clipped value - number of times a tag appears in reference
+        count += tags_frequencies_ref.get(tag, 0)
+    result = count / len(tags_first_level_hyp)
+    # print(result)
+    score += result
+    # Compute for 2-level-trees
+    # print('*' * 100)
+    # print('TWO LEVEL:')
+    # print(sentence_tree_heads_reference.second_level_heads[0])
+    # print(sentence_tree_heads_hypothesis.second_level_heads[0])
+    # el_ref = SyntaxTreeElementsExtractor(sentence_tree_heads_reference.second_level_heads[0])
+    # el_hyp = SyntaxTreeElementsExtractor(sentence_tree_heads_hypothesis.second_level_heads[0])
+    # print(el_ref.children)
+    # print(el_hyp.children)
 
-    return count
+    used_heads_indexes = []
+    count = 0
+    for two_level_head_hyp in sentence_tree_heads_hypothesis.second_level_heads:
+        for idx, two_level_head_ref in enumerate(sentence_tree_heads_reference.second_level_heads):
+            if idx in used_heads_indexes:
+                continue
+            if two_level_head_hyp.tag_ == two_level_head_ref.tag_:
+                # Get children
+                ref_children_tags = transform_into_tags(SyntaxTreeElementsExtractor(two_level_head_ref).children)
+                hyp_children_tags = transform_into_tags(SyntaxTreeElementsExtractor(two_level_head_hyp).children)
+                # Check if their children are identical
+                if sorted(ref_children_tags) == sorted(hyp_children_tags):
+                    count += 1
+                    used_heads_indexes.append(idx)
+    # print(count)
+    # print(count / len(sentence_tree_heads_hypothesis.second_level_heads))
+    score += count / len(sentence_tree_heads_hypothesis.second_level_heads)
+    #############################################################################
+    # Compute for 3-level-trees
+    # print('*' * 100)
+    # print('THIRD LEVEL:')
+    count = 0
+    third_level_hyp = sentence_tree_heads_hypothesis.third_level_heads
+    third_level_ref = sentence_tree_heads_reference.third_level_heads
+    used_heads_indexes = []
+    for third_level_head_hyp in third_level_hyp:
+        # Same as in 2-level
+        for idx, third_level_head_ref in enumerate(third_level_ref):
+            if idx in used_heads_indexes:
+                continue
+            if third_level_head_hyp.tag_ == third_level_head_ref.tag_:
+                # Get children & grandchildren
+                extractor_ref = SyntaxTreeElementsExtractor(third_level_head_ref)
+                extractor_hyp = SyntaxTreeElementsExtractor(third_level_head_hyp)
+                # Check if their children & grandchildren are identical
+                if are_descendants_identical(extractor_ref, extractor_hyp):
+                    count += 1
+                    used_heads_indexes.append(idx)
+                # else:
+                #     print('|' * 100)
+                #     print(third_level_head_hyp)
+                #     print(extractor_hyp.children)
+                #     print(transform_into_tags(extractor_hyp.children))
+                #     print(extractor_hyp.grand_children)
+                #     print(transform_into_tags(extractor_hyp.grand_children))
+                #     print()
+                #     print(third_level_head_ref)
+                #     print(extractor_ref.children)
+                #     print(transform_into_tags(extractor_ref.children))
+                #     print(extractor_ref.grand_children)
+                #     print(transform_into_tags(extractor_ref.grand_children))
+                #     print('|' * 100)
+    # print(count)
+    # print(count / len(third_level_hyp))
+    score += count / len(third_level_hyp)
+    return round(score / depth, 4)
 
 
-def stm(ref: Tree, hyp: Tree, depth: int = 3) -> [int, float]:
-    """
-    Calculate STM score as described in 'Syntactic Features for Evaluation of Machine Translation' by
-Ding Liu and Daniel Gildea, 2005, Association for Computational Linguistics
-    URL: https://www.aclweb.org/anthology/W05-0904,
-    Pages: 25-32
+if __name__ == '__main__':
+    # Usage example
+    nlp: Language = spacy.load('en_core_web_sm')
+    ref = 'It is a guide to action that ensures that the military will forever heed Party commands'
+    hyp = 'It is a guide to action which ensures that the military always obeys the commands of the party'
+    sentence_stm(ref,
+                 hyp,
+                 nlp)
 
-    :param ref: reference syntax tree
-    :type ref: Tree
-    :param hyp: hypothesis syntax tree
-    :type hyp: Tree
-    :param depth: the length of trees which will be considered during computations
-    :type depth: int
-    :return: STM Score
-    :rtype: int, float
-    """
-    if len(ref) < depth or len(hyp) < depth:
-        # TODO: Make a custom exception
-        return 0
-
-    ref_dict_tree = extract_subtrees(ref)
-    hyp_dict_tree = extract_subtrees(hyp)
-    count_ref = 0
-    count_hyp = 0
-    for i in range(1, depth + 1):
-        all_subtrees_ref = ref_dict_tree.get(i)
-
-        if not all_subtrees_ref:
-            continue
-
-        for subtree in all_subtrees_ref:
-            count_in_ref = count_subtree_in_tree(subtree['leaves'], ref_dict_tree)
-            count_in_hyp = count_subtree_in_tree(subtree['leaves'], hyp_dict_tree)
-
-            if count_in_hyp > count_in_ref:
-                count_in_hyp = count_in_ref
-
-            count_ref += count_in_ref
-            count_hyp += count_in_hyp
-
-    return (count_ref / count_hyp) / depth
-
-# a = Tree.fromstring('''(S
-#   (NP It/PRP)
-#   (VP be/VB)
-#   (NP a/DT guide/NN)
-#   (VP to/TO)
-#   (NP action/NN)
-#   (PP that/IN)
-#   (NP ensure/VB)
-#   (PP that/IN)
-#   (NP the/DT military/NN)
-#   (VP will/MD forever/VB heed/VB)
-#   (NP Party/NNP command/NN))''')
-# b = Tree.fromstring('''(S
-#   (NP It/PRP)
-#   (VP be/VB to/TO insure/VB)
-#   (NP the/DT troop/NN)
-#   forever/RB
-#   (VP hear/VBP)
-#   (NP the/DT activity/NN guidebook/NN)
-#   (NP that/WDT party/NN direct/NN))
-# ''')
-# print(f'first: {a}')
-# print('*' * 10)
-# print(f'second: {b}')
-# print('*' * 20)
-# tree_dict_ = extract_subtrees(a)
-# print(tree_dict_)
-# print('*' * 30)
-# tree_dict_2 = extract_subtrees(b)
-# print(tree_dict_2)
-# print('*' * 30)
-# # print(count_subtree_in_tree(['VB', 'TO', 'VB'], tree_dict_2))
-# print(stm(b, a))
-
-#
-# '''
-# 1 chunk_tree: $(S
-#   (NP It/PRP)
-#   (VP be/VB)
-#   (NP a/DT guide/NN)
-#   (VP to/TO)
-#   (NP action/NN)
-#   (PP that/IN)
-#   (NP ensure/VB)
-#   (PP that/IN)
-#   (NP the/DT military/NN)
-#   (VP will/MD forever/VB heed/VB)
-#   (NP Party/NNP command/NN))
-#   '''
-#
-# '''
-# 2 chunk_tree: $(S
-#   (NP It/PRP)
-#   (VP be/VB to/TO insure/VB)
-#   (NP the/DT troop/NN)
-#   forever/RB
-#   (VP hear/VBP)
-#   (NP the/DT activity/NN guidebook/NN)
-#   (NP that/WDT party/NN direct/NN))
-# '''
-#
-# '''
-# (S
-#   (NP It/PRP)
-#   (VP be/VB)
-#   (NP a/DT guide/NN)
-#   (VP to/TO)
-#   (NP action/NN)
-#   (NP which/WDT)
-#   (VP ensure/VB)
-#   (PP that/IN)
-#   (NP the/DT military/JJ)
-#   always/RB
-#   (VP obey/VBP)
-#   (NP the/DT command/NN)
-#   (PP of/IN)
-#   (NP the/DT party/NN))
-# '''
+    ref = 'It is a guide to action that ensures that the military will forever heed Party commands'
+    hyp = 'It is to insure the troops forever hearing the activity guidebook that party direct'
+    sentence_stm(ref,
+                 hyp,
+                 nlp)
