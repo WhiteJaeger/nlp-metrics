@@ -16,9 +16,9 @@ This repository contains Flask web application which aims to help with measuring
     ```bash
     pip install -r requirements.txt
     ```
-2. Download the following corpora: stopwords, conll2000 with NLTK downloader:
+2. Download the following corpora: stopwords with NLTK downloader:
     ```bash
-    python -m nltk.downloader stopwords conll2000
+    python -m nltk.downloader stopwords
     ```
 3. Run the application:
     1. In production mode: `python app.py`

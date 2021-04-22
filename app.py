@@ -187,17 +187,6 @@ def process_stm():
     ref = prepare_str(data['ref'], special_char_removal=True)
     hyp = prepare_str(data['hyp'], special_char_removal=True)
 
-    # ref_prepared = prepare_str(ref)
-    # hyp_prepared = prepare_str(hyp)
-    # pos_ref = POS_TAGGING.predict(ref_prepared)[0]
-    # pos_hyp = POS_TAGGING.predict(hyp_prepared)[0]
-    #
-    # word_pos_ref = map_word_pos(data['ref'], pos_ref)
-    # word_pos_hyp = map_word_pos(data['hyp'], pos_hyp)
-    #
-    # sentence_tree_ref = SENTENCE_TREE_BUILDER.parse(word_pos_ref)
-    # sentence_tree_hyp = SENTENCE_TREE_BUILDER.parse(word_pos_hyp)
-
     result = METRICS_FUNCTIONS['stm'](ref, hyp, MODEL)
 
     output = {
