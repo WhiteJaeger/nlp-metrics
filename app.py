@@ -6,6 +6,7 @@ from flask import Flask, redirect, render_template, request, url_for
 from joblib import load
 from nltk.chunk.util import conllstr2tree, tree2conllstr
 from waitress import serve
+import spacy
 
 from NLP.constants import METRICS_FUNCTIONS, METRICS_MAP
 from NLP.sentence_tree_builder import SENTENCE_TREE_BUILDER
@@ -21,14 +22,17 @@ def create_app():
     crf_model_path = path.join(project_path, 'models', 'crfWJSModel.joblib')
     crf = load(crf_model_path)
 
+    # Load SpaCy model
+    spacy_model: spacy.Language = spacy.load('en_core_web_sm')
+
     # Setup flask app
     app = Flask(__name__)
     app.secret_key = getenv('SECRET_KEY', secrets.token_urlsafe())
 
-    return app, crf
+    return app, crf, spacy_model
 
 
-APP, POS_TAGGING = create_app()
+APP, POS_TAGGING, MODEL = create_app()
 
 
 @APP.route('/')
