@@ -7,12 +7,13 @@ from joblib import load
 from nltk.chunk.util import conllstr2tree, tree2conllstr
 from waitress import serve
 import spacy
+from spacy import displacy
 
 from NLP.constants import METRICS_FUNCTIONS, METRICS_MAP
 from NLP.sentence_tree_builder import SENTENCE_TREE_BUILDER
 from NLP.text_utils import map_word_pos, prepare_str
 from forms import InputForm
-from utils import read_file, write_to_file
+from utils import read_tmp_file, write_to_tmp_file, generate_salt
 
 
 def create_app():
@@ -44,7 +45,7 @@ def home_page():
 @APP.route('/metrics-sentence-level')
 def sl_metrics():
     form = InputForm()
-    metric_info = read_file()
+    metric_info = read_tmp_file()
 
     return render_template('metrics.html',
                            form=form,
@@ -91,7 +92,7 @@ def process_input_metric():
         'metric': METRICS_MAP[metric],
         'value': result
     }
-    write_to_file(output)
+    write_to_tmp_file(output)
     return redirect(url_for('sl_metrics'))
 
 
@@ -99,7 +100,7 @@ def process_input_metric():
 @APP.route('/pos-tagger')
 def pos():
     form = InputForm()
-    output = read_file()
+    output = read_tmp_file()
     return render_template('pos.html',
                            form=form,
                            title='POS Tagger',
@@ -118,7 +119,7 @@ def process_pos():
         'text': data,
         'pos': map_word_pos(data, predicted_pos)
     }
-    write_to_file(output)
+    write_to_tmp_file(output)
 
     return redirect(url_for('pos'))
 
@@ -127,7 +128,8 @@ def process_pos():
 @APP.route('/sentence-trees')
 def sentence_trees():
     form = InputForm()
-    output = read_file()
+    output = read_tmp_file()
+
     if output:
         output['sentence_tree'] = conllstr2tree(output['sentence_tree'])
     return render_template('sentence-trees.html',
@@ -141,17 +143,19 @@ def sentence_trees():
 def process_sentence_tree():
     sentence = request.form.get('text_tree')
 
-    prepared_sentence = prepare_str(sentence, pos_preparation=True)
-    pos_tags = POS_TAGGING.predict(prepared_sentence)[0]
-    word_pos = map_word_pos(sentence, pos_tags)
-
-    sentence_tree = SENTENCE_TREE_BUILDER.parse(word_pos)
+    # prepared_sentence = prepare_str(sentence, pos_preparation=True)
+    # pos_tags = POS_TAGGING.predict(prepared_sentence)[0]
+    # word_pos = map_word_pos(sentence, pos_tags)
+    #
+    # sentence_tree = SENTENCE_TREE_BUILDER.parse(word_pos)
+    doc = MODEL(sentence)
+    output_path = pathlib.Path('')
 
     output = {
         'sentence': sentence,
-        'sentence_tree': tree2conllstr(sentence_tree)
+        'syntax_tree_svg_path': tree2conllstr(sentence_tree)
     }
-    write_to_file(output)
+    write_to_tmp_file(output)
     return redirect(url_for('sentence_trees'))
 
 
@@ -159,7 +163,7 @@ def process_sentence_tree():
 @APP.route('/stm')
 def stm():
     form = InputForm()
-    output = read_file()
+    output = read_tmp_file()
     return render_template('stm.html',
                            title='STM',
                            form=form,
@@ -177,18 +181,18 @@ def process_stm():
     ref = prepare_str(data['ref'], special_char_removal=True)
     hyp = prepare_str(data['hyp'], special_char_removal=True)
 
-    ref_prepared = prepare_str(ref, pos_preparation=True)
-    hyp_prepared = prepare_str(hyp, pos_preparation=True)
-    pos_ref = POS_TAGGING.predict(ref_prepared)[0]
-    pos_hyp = POS_TAGGING.predict(hyp_prepared)[0]
+    # ref_prepared = prepare_str(ref)
+    # hyp_prepared = prepare_str(hyp)
+    # pos_ref = POS_TAGGING.predict(ref_prepared)[0]
+    # pos_hyp = POS_TAGGING.predict(hyp_prepared)[0]
+    #
+    # word_pos_ref = map_word_pos(data['ref'], pos_ref)
+    # word_pos_hyp = map_word_pos(data['hyp'], pos_hyp)
+    #
+    # sentence_tree_ref = SENTENCE_TREE_BUILDER.parse(word_pos_ref)
+    # sentence_tree_hyp = SENTENCE_TREE_BUILDER.parse(word_pos_hyp)
 
-    word_pos_ref = map_word_pos(data['ref'], pos_ref)
-    word_pos_hyp = map_word_pos(data['hyp'], pos_hyp)
-
-    sentence_tree_ref = SENTENCE_TREE_BUILDER.parse(word_pos_ref)
-    sentence_tree_hyp = SENTENCE_TREE_BUILDER.parse(word_pos_hyp)
-
-    result = METRICS_FUNCTIONS['stm'](sentence_tree_ref, sentence_tree_hyp)
+    result = METRICS_FUNCTIONS['stm'](ref, hyp, MODEL)
 
     output = {
         'ref': data['ref'],
@@ -196,7 +200,7 @@ def process_stm():
         'metric': 'STM',
         'value': result
     }
-    write_to_file(output)
+    write_to_tmp_file(output)
     return redirect(url_for('stm'))
 
 

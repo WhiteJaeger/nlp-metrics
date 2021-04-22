@@ -48,6 +48,7 @@ def are_descendants_identical(ref_extractor: SyntaxTreeElementsExtractor, hyp_ex
 
 def sentence_stm(reference: str, hypothesis: str, model: Language, depth: int = 3):
     # TODO: introduce depth argument
+    # TODO: remove 'prints'
     score = 0
     reference_preprocessed = model(reference)
     hypothesis_preprocessed = model(hypothesis)

@@ -8,6 +8,7 @@ class SyntaxTreeHeadsExtractor:
     Class for syntax trees heads extraction.
     Extracts ONLY HEADS from a given SpaCy Doc. From these heads 1-, 2-, 3-level trees can be built.
     """
+
     def __init__(self, parsed_doc: Doc):
         self.__parsed_doc = parsed_doc
         self.first_level_heads = self.__extract_heads_1_length()
@@ -41,6 +42,7 @@ class SyntaxTreeElementsExtractor:
     Class for syntax trees elements extraction.
     Builds a syntax tree from a given head token and extracts children and grandchildren (if exist).
     """
+
     def __init__(self, head_token: Token):
         self.head_token = head_token
         self.children = self.__get_2_level_deep()
@@ -77,7 +79,6 @@ class SyntaxTreeElementsExtractor:
 
 
 if __name__ == '__main__':
-
     # Usage example
     nlp: spacy.Language = spacy.load('en_core_web_sm')
     doc: Doc = nlp(u'Diplomatic staff would go home in a fifth plane')
@@ -87,8 +88,10 @@ if __name__ == '__main__':
     print(f'1-LENGTH: {heads_extractor.first_level_heads}')
     print('*' * 100)
     print(f'2-LENGTH: {heads_extractor.second_level_heads}')
-    print(f'CHILDREN OF {heads_extractor.second_level_heads[0]}: {list(heads_extractor.second_level_heads[0].children)}')
-    print(f'CHILDREN OF {heads_extractor.second_level_heads[1]}: {list(heads_extractor.second_level_heads[1].children)}')
+    print(
+        f'CHILDREN OF {heads_extractor.second_level_heads[0]}: {list(heads_extractor.second_level_heads[0].children)}')
+    print(
+        f'CHILDREN OF {heads_extractor.second_level_heads[1]}: {list(heads_extractor.second_level_heads[1].children)}')
     print('*' * 100)
     print(f'3-LENGTH: {heads_extractor.third_level_heads}')
     print('*' * 100)
