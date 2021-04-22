@@ -1,16 +1,14 @@
+import os
 import pathlib
 import secrets
-from os import getenv, path
 
+import spacy
 from flask import Flask, redirect, render_template, request, url_for
 from joblib import load
-from nltk.chunk.util import conllstr2tree, tree2conllstr
-from waitress import serve
-import spacy
 from spacy import displacy
+from waitress import serve
 
 from NLP.constants import METRICS_FUNCTIONS, METRICS_MAP
-from NLP.sentence_tree_builder import SENTENCE_TREE_BUILDER
 from NLP.text_utils import map_word_pos, prepare_str
 from forms import InputForm
 from utils import read_tmp_file, write_to_tmp_file, generate_salt
@@ -20,15 +18,18 @@ def create_app():
     project_path = str(pathlib.Path(__file__).parents[0])
 
     # Load pre-trained POS Tagger model
-    crf_model_path = path.join(project_path, 'models', 'crfWJSModel.joblib')
+    crf_model_path = os.path.join(project_path, 'models', 'crfWJSModel.joblib')
     crf = load(crf_model_path)
 
     # Load SpaCy model
     spacy_model: spacy.Language = spacy.load('en_core_web_sm')
 
+    # Create images directory
+    os.makedirs(os.path.join('static', 'images'), exist_ok=True)
+
     # Setup flask app
     app = Flask(__name__)
-    app.secret_key = getenv('SECRET_KEY', secrets.token_urlsafe())
+    app.secret_key = os.getenv('SECRET_KEY', secrets.token_urlsafe())
 
     return app, crf, spacy_model
 
@@ -130,8 +131,6 @@ def sentence_trees():
     form = InputForm()
     output = read_tmp_file()
 
-    if output:
-        output['sentence_tree'] = conllstr2tree(output['sentence_tree'])
     return render_template('sentence-trees.html',
                            legend='Sentence Trees',
                            title='Sentence Trees',
@@ -143,17 +142,24 @@ def sentence_trees():
 def process_sentence_tree():
     sentence = request.form.get('text_tree')
 
-    # prepared_sentence = prepare_str(sentence, pos_preparation=True)
-    # pos_tags = POS_TAGGING.predict(prepared_sentence)[0]
-    # word_pos = map_word_pos(sentence, pos_tags)
-    #
-    # sentence_tree = SENTENCE_TREE_BUILDER.parse(word_pos)
     doc = MODEL(sentence)
-    output_path = pathlib.Path('')
+
+    svg_dir = os.path.join('static', 'images')
+
+    output_path = os.path.join(svg_dir, f'syntax_tree_{generate_salt()}.svg')
+    svg_tree = displacy.render(doc, style='dep', options={'bg': '#fafafa'})
+
+    old_svgs = os.listdir(os.path.dirname(output_path))
+    if len(old_svgs) > 10:
+        for old_svg in old_svgs:
+            os.remove(os.path.join(svg_dir, old_svg))
+
+    with open(output_path, 'w', encoding='utf-8') as tree_file:
+        tree_file.write(svg_tree)
 
     output = {
         'sentence': sentence,
-        'syntax_tree_svg_path': tree2conllstr(sentence_tree)
+        'syntax_tree_svg_path': output_path
     }
     write_to_tmp_file(output)
     return redirect(url_for('sentence_trees'))
