@@ -8,7 +8,6 @@ from utils import read_tmp_file, write_to_tmp_file
 bp = Blueprint('metrics', __name__, url_prefix='/')
 
 
-# Metrics part
 @bp.route('/metrics-sentence-level')
 def sl_metrics():
     form = InputForm()

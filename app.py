@@ -21,7 +21,7 @@ def create_app():
     app.config['UPLOAD_PATH'] = 'uploads'
 
     # Blueprints & Routes
-    from .main import n_gram_metrics, sentence_trees, stm, pos
+    from main import n_gram_metrics, sentence_trees, stm, pos
     app.register_blueprint(n_gram_metrics.bp)
     app.register_blueprint(sentence_trees.bp)
     app.register_blueprint(stm.bp)

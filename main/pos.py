@@ -8,7 +8,6 @@ from utils import read_tmp_file, write_to_tmp_file
 bp = Blueprint('pos', __name__, url_prefix='/')
 
 
-# POS-tagger part
 @bp.route('/pos-tagger')
 def pos():
     form = InputForm()

@@ -10,7 +10,6 @@ from utils import read_tmp_file, write_to_tmp_file, generate_salt
 bp = Blueprint('sentence_trees', __name__, url_prefix='/')
 
 
-# Sentence trees part
 @bp.route('/sentence-trees')
 def sentence_trees():
     form = InputForm()

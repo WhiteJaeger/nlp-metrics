@@ -11,7 +11,6 @@ from utils import read_tmp_file, write_to_tmp_file, generate_salt
 bp = Blueprint('stm', __name__, url_prefix='/')
 
 
-# STM part
 @bp.route('/stm')
 def stm():
     form = InputForm()
