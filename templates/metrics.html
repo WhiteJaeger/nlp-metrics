@@ -2,8 +2,14 @@
 {% block title %} {{ title }} {% endblock %}
 
 {% block content %}
+    <legend> {{ legend }} </legend>
+
+    <div class="content-section">
+        <p style="margin: 0">This page provides an interface to measure the performance of the given translation with N-gram based
+            metrics.</p>
+    </div>
+
     <form class="form-control" method="post" action="{{ url_for('process_input_metric') }}">
-        <legend> {{ legend }} </legend>
 
         <div class="input-group mb-3 options">
             <div class="input-group-prepend">
@@ -17,7 +23,7 @@
             </select>
         </div>
         <div class="container border-top border-bottom" id="preprocessing">
-            <p><strong>Text pre-processing:</strong></p>
+            <h5 class="display-5">Text pre-processing:</h5>
             <div class="form-check form-check-inline">
                 <input class="form-check-input" type="checkbox" id="contractions" name="contractions" value="1">
                 <label class="form-check-label" for="contractions">Expand contractions (e.g. I`m -> I am)</label>

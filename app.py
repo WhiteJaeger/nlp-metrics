@@ -7,6 +7,7 @@ from flask import Flask, redirect, render_template, request, url_for
 from joblib import load
 from spacy import displacy
 from waitress import serve
+from werkzeug.utils import secure_filename
 
 from NLP.constants import METRICS_FUNCTIONS, METRICS_MAP
 from NLP.text_utils import map_word_pos, prepare_str
@@ -157,7 +158,7 @@ def process_sentence_tree():
     svg_tree = displacy.render(doc, style='dep', options={'bg': '#fafafa'})
 
     old_svgs = os.listdir(os.path.dirname(output_path))
-    if len(old_svgs) > 10:
+    if len(old_svgs) > 20:
         for old_svg in old_svgs:
             os.remove(os.path.join(svg_dir, old_svg))
 
@@ -212,10 +213,22 @@ def process_stm_corpus():
     hypotheses_file = request.files['hypothesis-file']
     references_file = request.files['references-file']
 
-    # TODO: Make file names unique
-    hypotheses_file.save(os.path.join('uploads', hypotheses_file.filename))
-    references_file.save(os.path.join('uploads', references_file.filename))
+    # Rm old files
+    old_corpora = os.listdir(APP.config['UPLOAD_PATH'])
+    if len(old_corpora) > 20:
+        for old_corpus in old_corpora:
+            os.remove(os.path.join(APP.config['UPLOAD_PATH'], old_corpus))
 
+    # Save hypotheses file
+    # if not secure_filename(hypotheses_file.filename).split('.')[-1] in APP.config['UPLOAD_EXTENSIONS']:
+    #     # TODO: error handling
+    #     raise Exception
+    hypotheses_file.save(os.path.join(APP.config['UPLOAD_PATH'], f'{generate_salt()}.txt'))
+
+    # Save references file
+    references_file.save(os.path.join(APP.config['UPLOAD_PATH'], f'{generate_salt()}.txt'))
+
+    # TODO: count score
     # with open(os.path.join('uploads', hypotheses_file.filename), 'r') as f:
     #     print(f.read())
 
