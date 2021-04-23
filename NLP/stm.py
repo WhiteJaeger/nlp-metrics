@@ -17,11 +17,12 @@ Ding Liu and Daniel Gildea, 2005, Association for Computational Linguistics, Pag
 """
 import spacy
 from spacy import Language
+from spacy.tokens import Token
 
 from NLP.tree_constructor import SyntaxTreeHeadsExtractor, SyntaxTreeElementsExtractor
 
 
-def transform_into_tags(tokens: tuple) -> tuple:
+def transform_into_tags(tokens: tuple[Token]) -> tuple:
     # TODO: align some tags: e.g. VBZ - VB
     return tuple([token.tag_ for token in tokens])
 
@@ -33,7 +34,8 @@ def get_freq_dict_for_tags(tags: tuple) -> dict:
     return result
 
 
-def are_descendants_identical(ref_extractor: SyntaxTreeElementsExtractor, hyp_extractor: SyntaxTreeElementsExtractor):
+def are_descendants_identical(ref_extractor: SyntaxTreeElementsExtractor,
+                              hyp_extractor: SyntaxTreeElementsExtractor):
     ref_children_tags = transform_into_tags(ref_extractor.children)
     hyp_children_tags = transform_into_tags(hyp_extractor.children)
 
@@ -46,8 +48,21 @@ def are_descendants_identical(ref_extractor: SyntaxTreeElementsExtractor, hyp_ex
     return are_children_identical and are_grandchildren_identical
 
 
-def sentence_stm(reference: str, hypothesis: str, model: Language, depth: int = 3):
-    # TODO: introduce depth argument
+def sentence_stm(reference: str, hypothesis: str, model: Language, depth: int = 3) -> float:
+    """
+
+    @param reference:
+    @type reference:
+    @param hypothesis:
+    @type hypothesis:
+    @param model:
+    @type model:
+    @param depth:
+    @type depth:
+    @return:
+    @rtype:
+    """
+    # TODO: adapt for depth
     # TODO: remove 'prints'
     score = 0
     reference_preprocessed = model(reference)
@@ -55,56 +70,19 @@ def sentence_stm(reference: str, hypothesis: str, model: Language, depth: int = 
 
     sentence_tree_heads_reference = SyntaxTreeHeadsExtractor(reference_preprocessed)
     sentence_tree_heads_hypothesis = SyntaxTreeHeadsExtractor(hypothesis_preprocessed)
-    # print('FIRST LEVEL HEADS:')
-    # print(sentence_tree_heads_hypothesis.first_level_heads)
-    # print(sentence_tree_heads_reference.first_level_heads)
-    # print('*' * 100)
-    # print('SECOND LEVEL HEADS:')
-    # print(sentence_tree_heads_hypothesis.second_level_heads)
-    # print(sentence_tree_heads_reference.second_level_heads)
-    # print('*' * 100)
-    # print('THIRD LEVEL HEADS:')
-    # print(sentence_tree_heads_hypothesis.third_level_heads)
-    # print(sentence_tree_heads_reference.third_level_heads)
-    # print('*' * 100)
-    # tree_elements = SyntaxTreeElementsExtractor(sentence_tree_heads_hypothesis.third_level_heads[0])
-    # tree_elements_2 = SyntaxTreeElementsExtractor(sentence_tree_heads_reference.third_level_heads[0])
-    # print(tree_elements.children)
-    # print(tree_elements_2.children)
-    # print('*' * 100)
-    # print(tree_elements.grand_children)
-    # print(tree_elements_2.grand_children)
 
-    # Compute for 1-level-trees
-    # print('*' * 100)
-    # print('FIRST LEVEL:')
-    tags_first_level_ref = transform_into_tags(sentence_tree_heads_reference.first_level_heads)
     tags_first_level_hyp = transform_into_tags(sentence_tree_heads_hypothesis.first_level_heads)
-    # print(tags_first_level_ref)
-    # print(tags_first_level_hyp)
 
     tags_frequencies_ref = get_freq_dict_for_tags(transform_into_tags(sentence_tree_heads_reference.first_level_heads))
     tags_frequencies_hyp = get_freq_dict_for_tags(transform_into_tags(sentence_tree_heads_hypothesis.first_level_heads))
 
-    # print(tags_frequencies_ref)
-    # print(tags_frequencies_hyp)
     count = 0
     for tag in tags_frequencies_hyp:
         # Get already clipped value - number of times a tag appears in reference
         count += tags_frequencies_ref.get(tag, 0)
-    result = count / len(tags_first_level_hyp)
-    # print(result)
-    score += result
-    # Compute for 2-level-trees
-    # print('*' * 100)
-    # print('TWO LEVEL:')
-    # print(sentence_tree_heads_reference.second_level_heads[0])
-    # print(sentence_tree_heads_hypothesis.second_level_heads[0])
-    # el_ref = SyntaxTreeElementsExtractor(sentence_tree_heads_reference.second_level_heads[0])
-    # el_hyp = SyntaxTreeElementsExtractor(sentence_tree_heads_hypothesis.second_level_heads[0])
-    # print(el_ref.children)
-    # print(el_hyp.children)
+    score += count / len(tags_first_level_hyp)
 
+    # Compute for 2-level-trees
     used_heads_indexes = []
     count = 0
     for two_level_head_hyp in sentence_tree_heads_hypothesis.second_level_heads:
@@ -119,13 +97,9 @@ def sentence_stm(reference: str, hypothesis: str, model: Language, depth: int = 
                 if sorted(ref_children_tags) == sorted(hyp_children_tags):
                     count += 1
                     used_heads_indexes.append(idx)
-    # print(count)
-    # print(count / len(sentence_tree_heads_hypothesis.second_level_heads))
     score += count / len(sentence_tree_heads_hypothesis.second_level_heads)
-    #############################################################################
+
     # Compute for 3-level-trees
-    # print('*' * 100)
-    # print('THIRD LEVEL:')
     count = 0
     third_level_hyp = sentence_tree_heads_hypothesis.third_level_heads
     third_level_ref = sentence_tree_heads_reference.third_level_heads
@@ -143,24 +117,62 @@ def sentence_stm(reference: str, hypothesis: str, model: Language, depth: int = 
                 if are_descendants_identical(extractor_ref, extractor_hyp):
                     count += 1
                     used_heads_indexes.append(idx)
-                # else:
-                #     print('|' * 100)
-                #     print(third_level_head_hyp)
-                #     print(extractor_hyp.children)
-                #     print(transform_into_tags(extractor_hyp.children))
-                #     print(extractor_hyp.grand_children)
-                #     print(transform_into_tags(extractor_hyp.grand_children))
-                #     print()
-                #     print(third_level_head_ref)
-                #     print(extractor_ref.children)
-                #     print(transform_into_tags(extractor_ref.children))
-                #     print(extractor_ref.grand_children)
-                #     print(transform_into_tags(extractor_ref.grand_children))
-                #     print('|' * 100)
-    # print(count)
-    # print(count / len(third_level_hyp))
+
     score += count / len(third_level_hyp)
     return round(score / depth, 4)
+
+
+def sentence_stm_several_references(references: list[str],
+                                    hypothesis: str,
+                                    model: Language,
+                                    depth: int = 3) -> float:
+    """
+
+    @param references:
+    @type references:
+    @param hypothesis:
+    @type hypothesis:
+    @param model:
+    @type model:
+    @param depth:
+    @type depth:
+    @return:
+    @rtype:
+    """
+    nominator = 0
+    denominator = len(references)
+    for reference in references:
+        nominator += sentence_stm(reference, hypothesis, model, depth)
+    return round(nominator / denominator, 4)
+
+
+def corpus_stm(references: list[list[str]],
+               hypotheses: list[str],
+               model: Language,
+               depth: int = 3) -> float:
+    """
+
+    @param references:
+    @type references:
+    @param hypotheses:
+    @type hypotheses:
+    @param model:
+    @type model:
+    @param depth:
+    @type depth:
+    @return:
+    @rtype:
+    """
+    if len(references) != len(hypotheses):
+        # TODO: error-handling
+        raise AssertionError
+
+    # There can be several references for one hypothesis
+    nominator = 0
+    denominator = len(references)
+    for refs, hypothesis in zip(references, hypotheses):
+        nominator += sentence_stm_several_references(refs, hypothesis, model, depth)
+    return round(nominator / denominator, 4)
 
 
 if __name__ == '__main__':
