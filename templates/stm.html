@@ -6,7 +6,8 @@
     <legend> {{ legend }} </legend>
 
     <div class="content-section">
-        <p style="margin: 0">This page provides an interface to measure the performance of the given translation with sentence based subtree
+        <p style="margin: 0">This page provides an interface to measure the performance of the given translation with
+            sentence based subtree
             metric.</p>
     </div>
 
@@ -22,7 +23,7 @@
         </div>
     </div>
 
-    <form id="sentence-level" class="form-control" method="post" action="{{ url_for('process_stm') }}">
+    <form id="sentence-level" class="form-control" method="post" action="{{ url_for('stm.process_stm') }}">
         <div class="container border-bottom" id="preprocessing">
             <h5 class="display-5">Text pre-processing:</h5>
             <div class="form-check form-check-inline">
@@ -53,7 +54,8 @@
         <input class="btn btn-outline-secondary mb-2" id="submit-button" type="submit" value="Evaluate">
     </form>
 
-    <form id="corpus-level" class="content-section d-none" method="post" action="{{ url_for('process_stm_corpus') }}" enctype="multipart/form-data">
+    <form id="corpus-level" class="content-section d-none" method="post" action="{{ url_for('stm.process_stm_corpus') }}"
+          enctype="multipart/form-data">
         <div class="content-section" style="">
             <h5 class="display-5">Notes on the file structure:</h5>
             <ul style="margin-bottom: 0">
@@ -72,14 +74,17 @@
 
         <div class="form-group content-section">
             <label for="hypotheses-upload">Upload file with hypotheses</label>
-            <input type="file" name="hypothesis-file" class="form-control-file" required id="hypotheses-upload" accept=".txt">
+            <input type="file" name="hypothesis-file" class="form-control-file" required id="hypotheses-upload"
+                   accept=".txt">
         </div>
 
         <div class="form-group content-section">
             <label for="references-upload">Upload file with references</label>
-            <input type="file" name="references-file" class="form-control-file" required id="references-upload" accept=".txt">
+            <input type="file" name="references-file" class="form-control-file" required id="references-upload"
+                   accept=".txt">
         </div>
-        <input class="btn btn-outline-secondary mb-2" id="submit-button" type="submit" value="Evaluate" style="margin: 0">
+        <input class="btn btn-outline-secondary mb-2" id="submit-button" type="submit" value="Evaluate"
+               style="margin: 0">
     </form>
 
     <hr>
