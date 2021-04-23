@@ -3,12 +3,27 @@
 
 {% block content %}
     <div class="content-section">
-        <p>This page provides interface to measure the performance of the given translation with sentence based subtree
+        <p style="margin: 0">This page provides interface to measure the performance of the given translation with sentence based subtree
             metric.</p>
     </div>
-    <form class="form-control" method="post" action="{{ url_for('process_stm') }}">
-        <legend> {{ legend }} </legend>
-        <div class="container border-top border-bottom" id="preprocessing">
+
+    <legend> {{ legend }} </legend>
+
+    <div class="container" id="text-type" style="padding: 0">
+        <div class="input-group mb-3 options" style="margin-left: 0">
+            <div class="input-group-prepend">
+                <label class="input-group-text" for="metric-select">Text Type</label>
+            </div>
+            <select class="custom-select" id="text-type-select" name="text-type" required style="margin-right: 16px">
+                <option selected disabled value="">Choose Type</option>
+                <option value="corpus" id="corpus">Corpus-level</option>
+                <option value="sentence" id="sentence">Sentence-level</option>
+            </select>
+        </div>
+    </div>
+
+    <form id="sentence-level" class="form-control" method="post" action="{{ url_for('process_stm') }}">
+        <div class="container border-bottom" id="preprocessing">
             <p><strong>Text pre-processing:</strong></p>
             <div class="form-check form-check-inline">
                 <input class="form-check-input" type="checkbox" id="contractions" name="contractions" value="1">
@@ -23,8 +38,10 @@
                 <label class="form-check-label" for="lowercase">Lowercase</label>
             </div>
         </div>
+
         {{ form.csrf_token }}
-        <div class="d-flex bd-highlight mb-3">
+
+        <div class="d-flex bd-highlight mb-3" id="sentence-boxes">
             <div class="p-2 bd-highlight">Type your hypothesis translation here:
                 <p>{{ form.text_hypothesis }}</p>
             </div>
@@ -36,9 +53,23 @@
         <input class="btn btn-outline-secondary mb-2" id="submit-button" type="submit" value="Evaluate">
     </form>
 
+    <form id="corpus-level" class="content-section" method="post" action="{{ url_for('process_stm_corpus') }}" enctype="multipart/form-data">
+
+        <div class="form-group content-section">
+            <label for="hypotheses-upload">Upload file with hypotheses</label>
+            <input type="file" name="hypothesis-file" class="form-control-file" required id="hypotheses-upload" accept=".txt">
+        </div>
+
+        <div class="form-group content-section">
+            <label for="references-upload">Upload file with references</label>
+            <input type="file" name="references-file" class="form-control-file" required id="references-upload" accept=".txt">
+        </div>
+        <input class="btn btn-outline-secondary mb-2" id="submit-button" type="submit" value="Evaluate">
+    </form>
+
     <hr>
 
-    {#TODO: Consider displaying the syntax trees#}
+    {# TODO: Consider displaying the syntax trees #}
     {% if metric_info %}
         <div class="container">
             <div class="row">
@@ -57,6 +88,7 @@
             </ul>
         </div>
     {% endif %}
+    <script type="text/javascript" src="{{ url_for('static', filename='js/metrics.js') }}"></script>
 {% endblock content %}
 
 {% block sidebar %}

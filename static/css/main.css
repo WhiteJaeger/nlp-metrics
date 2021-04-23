@@ -65,3 +65,8 @@ legend {
   border-radius: 3px;
   margin-bottom: 20px;
 }
+
+.input-group {
+  margin-top: 16px;
+  margin-bottom: 16px;
+}

@@ -30,6 +30,13 @@ def create_app():
     # Setup flask app
     app = Flask(__name__)
     app.secret_key = os.getenv('SECRET_KEY', secrets.token_urlsafe())
+    # Max of 5MB
+    app.config['MAX_CONTENT_LENGTH'] = 5 * 1024 * 1024
+    # Allowed ext
+    app.config['UPLOAD_EXTENSIONS'] = ['.txt']
+    # Uploads folder
+    os.makedirs('uploads', exist_ok=True)
+    app.config['UPLOAD_PATH'] = 'uploads'
 
     return app, crf, spacy_model
 
@@ -196,6 +203,22 @@ def process_stm():
         'value': result
     }
     write_to_tmp_file(output)
+    return redirect(url_for('stm'))
+
+
+@APP.route('/api/handle-stm-corpus', methods=['POST'])
+def process_stm_corpus():
+    # TODO: MAKE SAFE
+    hypotheses_file = request.files['hypothesis-file']
+    references_file = request.files['references-file']
+
+    # TODO: Make file names unique
+    hypotheses_file.save(os.path.join('uploads', hypotheses_file.filename))
+    references_file.save(os.path.join('uploads', references_file.filename))
+
+    # with open(os.path.join('uploads', hypotheses_file.filename), 'r') as f:
+    #     print(f.read())
+
     return redirect(url_for('stm'))
 
 
