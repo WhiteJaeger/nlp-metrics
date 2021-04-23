@@ -22,7 +22,7 @@ def create_app():
     crf = load(crf_model_path)
 
     # Load SpaCy model
-    spacy_model: spacy.Language = spacy.load('en_core_web_sm')
+    spacy_model: spacy.Language = spacy.load('en_core_web_md')
 
     # Create images directory
     os.makedirs(os.path.join('static', 'images'), exist_ok=True)
