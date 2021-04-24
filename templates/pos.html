@@ -2,13 +2,18 @@
 {% block title %} {{ title }} {% endblock %}
 
 {% block content %}
+    <legend> {{ legend }} </legend>
+
     <div class="content-section">
-        <p>This Part-of-Speech tagger is based on the Continuous Random Fields model.</p>
-        <p>It was trained on the following NLTK corpora: conll2000, Treebank subset, masc. </p>
-        <p>Training set consisted of ~60000 sentences, testing set of ~25000 sentences.</p>
+        <p style="margin: 0">This Part-of-Speech tagger is based on the Continuous Random Fields model.
+            <br>
+            It was trained on the following NLTK corpora: conll2000, Treebank subset, masc.
+            <br>
+            Training set consisted of ~60000 sentences, testing set of ~25000 sentences.
+        </p>
     </div>
-    <form class="form-control" method="post" action="{{ url_for('process_pos') }}">
-        <legend> {{ legend }} </legend>
+
+    <form class="form-control" method="post" action="{{ url_for('pos.process_pos') }}">
         {{ form.csrf_token }}
         <div class="d-flex bd-highlight mb-3">
             <div class="p-2 bd-highlight">Type your text here:

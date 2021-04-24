@@ -51,74 +51,80 @@ def are_descendants_identical(ref_extractor: SyntaxTreeElementsExtractor,
 def sentence_stm(reference: str, hypothesis: str, model: Language, depth: int = 3) -> float:
     """
 
-    @param reference:
-    @type reference:
-    @param hypothesis:
-    @type hypothesis:
-    @param model:
-    @type model:
-    @param depth:
-    @type depth:
-    @return:
-    @rtype:
+    :param reference:
+    :type reference:
+    :param hypothesis:
+    :type hypothesis:
+    :param model:
+    :type model:
+    :param depth:
+    :type depth:
+    :return:
+    :rtype:
     """
-    # TODO: adapt for depth
-    # TODO: remove 'prints'
     score = 0
+    # Get output from SpaCy model
     reference_preprocessed = model(reference)
     hypothesis_preprocessed = model(hypothesis)
 
+    # Get heads of syntax trees
     sentence_tree_heads_reference = SyntaxTreeHeadsExtractor(reference_preprocessed)
     sentence_tree_heads_hypothesis = SyntaxTreeHeadsExtractor(hypothesis_preprocessed)
 
     tags_first_level_hyp = transform_into_tags(sentence_tree_heads_hypothesis.first_level_heads)
 
+    # Get frequencies of individual tags
     tags_frequencies_ref = get_freq_dict_for_tags(transform_into_tags(sentence_tree_heads_reference.first_level_heads))
     tags_frequencies_hyp = get_freq_dict_for_tags(transform_into_tags(sentence_tree_heads_hypothesis.first_level_heads))
 
+    # Compute for 1-level-trees, i.e. individual tags
     count = 0
     for tag in tags_frequencies_hyp:
         # Get already clipped value - number of times a tag appears in reference
         count += tags_frequencies_ref.get(tag, 0)
-    score += count / len(tags_first_level_hyp)
+    score += count / len(tags_first_level_hyp) if len(tags_first_level_hyp) else 0
 
-    # Compute for 2-level-trees
-    used_heads_indexes = []
-    count = 0
-    for two_level_head_hyp in sentence_tree_heads_hypothesis.second_level_heads:
-        for idx, two_level_head_ref in enumerate(sentence_tree_heads_reference.second_level_heads):
-            if idx in used_heads_indexes:
-                continue
-            if two_level_head_hyp.tag_ == two_level_head_ref.tag_:
-                # Get children
-                ref_children_tags = transform_into_tags(SyntaxTreeElementsExtractor(two_level_head_ref).children)
-                hyp_children_tags = transform_into_tags(SyntaxTreeElementsExtractor(two_level_head_hyp).children)
-                # Check if their children are identical
-                if sorted(ref_children_tags) == sorted(hyp_children_tags):
-                    count += 1
-                    used_heads_indexes.append(idx)
-    score += count / len(sentence_tree_heads_hypothesis.second_level_heads)
+    if depth >= 2:
+        # Compute for 2-level-trees
+        used_heads_indexes = []
+        count = 0
+        for two_level_head_hyp in sentence_tree_heads_hypothesis.second_level_heads:
+            for idx, two_level_head_ref in enumerate(sentence_tree_heads_reference.second_level_heads):
+                if idx in used_heads_indexes:
+                    continue
+                if two_level_head_hyp.tag_ == two_level_head_ref.tag_:
+                    # Get children
+                    ref_children_tags = transform_into_tags(SyntaxTreeElementsExtractor(two_level_head_ref).children)
+                    hyp_children_tags = transform_into_tags(SyntaxTreeElementsExtractor(two_level_head_hyp).children)
+                    # Check if their children are identical
+                    if sorted(ref_children_tags) == sorted(hyp_children_tags):
+                        count += 1
+                        used_heads_indexes.append(idx)
+        score += count / len(sentence_tree_heads_hypothesis.second_level_heads) \
+            if len(sentence_tree_heads_hypothesis.second_level_heads) else 0
 
-    # Compute for 3-level-trees
-    count = 0
-    third_level_hyp = sentence_tree_heads_hypothesis.third_level_heads
-    third_level_ref = sentence_tree_heads_reference.third_level_heads
-    used_heads_indexes = []
-    for third_level_head_hyp in third_level_hyp:
-        # Same as in 2-level
-        for idx, third_level_head_ref in enumerate(third_level_ref):
-            if idx in used_heads_indexes:
-                continue
-            if third_level_head_hyp.tag_ == third_level_head_ref.tag_:
-                # Get children & grandchildren
-                extractor_ref = SyntaxTreeElementsExtractor(third_level_head_ref)
-                extractor_hyp = SyntaxTreeElementsExtractor(third_level_head_hyp)
-                # Check if their children & grandchildren are identical
-                if are_descendants_identical(extractor_ref, extractor_hyp):
-                    count += 1
-                    used_heads_indexes.append(idx)
+    if depth >= 3:
+        # Compute for 3-level-trees
+        count = 0
+        third_level_hyp = sentence_tree_heads_hypothesis.third_level_heads
+        third_level_ref = sentence_tree_heads_reference.third_level_heads
+        used_heads_indexes = []
+        for third_level_head_hyp in third_level_hyp:
+            # Same as in 2-level
+            for idx, third_level_head_ref in enumerate(third_level_ref):
+                if idx in used_heads_indexes:
+                    continue
+                if third_level_head_hyp.tag_ == third_level_head_ref.tag_:
+                    # Get children & grandchildren
+                    extractor_ref = SyntaxTreeElementsExtractor(third_level_head_ref)
+                    extractor_hyp = SyntaxTreeElementsExtractor(third_level_head_hyp)
+                    # Check if their children & grandchildren are identical
+                    if are_descendants_identical(extractor_ref, extractor_hyp):
+                        count += 1
+                        used_heads_indexes.append(idx)
 
-    score += count / len(third_level_hyp)
+        score += count / len(third_level_hyp) if len(third_level_hyp) else 0
+
     return round(score / depth, 4)
 
 
@@ -128,16 +134,16 @@ def sentence_stm_several_references(references: list[str],
                                     depth: int = 3) -> float:
     """
 
-    @param references:
-    @type references:
-    @param hypothesis:
-    @type hypothesis:
-    @param model:
-    @type model:
-    @param depth:
-    @type depth:
-    @return:
-    @rtype:
+    :param references:
+    :type references:
+    :param hypothesis:
+    :type hypothesis:
+    :param model:
+    :type model:
+    :param depth:
+    :type depth:
+    :return:
+    :rtype:
     """
     nominator = 0
     denominator = len(references)
@@ -152,16 +158,16 @@ def corpus_stm(references: list[list[str]],
                depth: int = 3) -> float:
     """
 
-    @param references:
-    @type references:
-    @param hypotheses:
-    @type hypotheses:
-    @param model:
-    @type model:
-    @param depth:
-    @type depth:
-    @return:
-    @rtype:
+    :param references:
+    :type references:
+    :param hypotheses:
+    :type hypotheses:
+    :param model:
+    :type model:
+    :param depth:
+    :type depth:
+    :return:
+    :rtype:
     """
     if len(references) != len(hypotheses):
         # TODO: error-handling
