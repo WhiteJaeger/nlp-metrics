@@ -3,9 +3,9 @@ import os
 from flask import Blueprint, render_template, request, redirect, url_for
 from spacy import displacy
 
-from forms import InputForm
+from main.forms import InputForm
 from main.models import MODEL
-from utils import read_tmp_file, write_to_tmp_file, generate_salt
+from main.utils import read_tmp_file, write_to_tmp_file, generate_salt
 
 bp = Blueprint('sentence_trees', __name__, url_prefix='/')
 
@@ -16,7 +16,7 @@ def sentence_trees():
     output = read_tmp_file()
 
     return render_template('sentence-trees.html',
-                           legend='Sentence Trees',
+                           legend='Sentence Trees Builder',
                            title='Sentence Trees',
                            form=form,
                            output=output)

@@ -12,7 +12,7 @@ def create_app():
     # Setup flask app
     app = Flask(__name__)
     app.secret_key = os.getenv('SECRET_KEY', secrets.token_urlsafe())
-    # Max of 5MB
+    # Max of 5MB for files
     app.config['MAX_CONTENT_LENGTH'] = 5 * 1024 * 1024
     # Allowed ext
     app.config['UPLOAD_EXTENSIONS'] = ['.txt']

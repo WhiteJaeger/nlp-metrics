@@ -1,6 +1,6 @@
 import json
-import string
 import random
+import string
 from os import path, remove
 
 

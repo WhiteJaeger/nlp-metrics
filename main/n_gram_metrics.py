@@ -2,8 +2,8 @@ from flask import Blueprint, render_template, request, redirect, url_for
 
 from NLP.constants import METRICS_FUNCTIONS, METRICS_MAP
 from NLP.text_utils import prepare_str
-from forms import InputForm
-from utils import read_tmp_file, write_to_tmp_file
+from main.forms import InputForm
+from main.utils import read_tmp_file, write_to_tmp_file
 
 bp = Blueprint('metrics', __name__, url_prefix='/')
 
@@ -26,9 +26,9 @@ def process_input_metric():
     metric = request.form.get('metric')
 
     text_preparation_params = {
-        'contractions': request.form.get('contractions', 0),
-        'spec-chars': request.form.get('spec-chars', 0),
-        'lowercase': request.form.get('lowercase', 0)
+        'contractions': bool(request.form.get('contractions', 0)),
+        'spec-chars': bool(request.form.get('spec-chars', 0)),
+        'lowercase': bool(request.form.get('lowercase', 0))
     }
 
     data = {

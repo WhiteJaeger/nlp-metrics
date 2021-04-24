@@ -1,9 +1,9 @@
 from flask import Blueprint, render_template, request, redirect, url_for
 
 from NLP.text_utils import prepare_str, map_word_pos
-from forms import InputForm
+from main.forms import InputForm
 from main.models import POS_TAGGING
-from utils import read_tmp_file, write_to_tmp_file
+from main.utils import read_tmp_file, write_to_tmp_file
 
 bp = Blueprint('pos', __name__, url_prefix='/')
 
