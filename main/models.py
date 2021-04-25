@@ -9,3 +9,6 @@ MODEL: spacy.Language = spacy.load('en_core_web_md')
 # Load pre-trained POS Tagger model
 crf_model_path = os.path.join('models', 'crfWJSModel.joblib')
 POS_TAGGING = load(crf_model_path)
+
+# Load sentiment classifier
+CLASSIFIER = load(os.path.join('models', 'classifier.joblib'))

@@ -25,6 +25,9 @@ def stm():
 
 @bp.route('/api/handle-stm', methods=['POST'])
 def process_stm():
+
+    # TODO: add sentiment
+
     data = {
         'ref': request.form.get('text_reference'),
         'hyp': request.form.get('text_hypothesis'),
@@ -89,14 +92,14 @@ def process_stm_corpus():
     corpora = read_corpora(hypotheses_file_name, references_file_name)
 
     # TODO: Introduce errors
-    if not is_corpora_structure_correct(corpora):
+    if not are_corpora_structure_correct(corpora):
         pass
 
     # Prepare corpora
     corpora = prepare_corpora(corpora, text_preparation_params)
 
     # TODO: Rollback if something is wrong
-    if not is_corpora_structure_correct(corpora):
+    if not are_corpora_structure_correct(corpora):
         pass
 
     score = calculate_stm_score_corpora(corpora, MODEL, depth)
@@ -149,7 +152,7 @@ def prepare_corpora(corpora: dict[str, str], params: dict[str, bool]) -> dict[st
     return result
 
 
-def is_corpora_structure_correct(corpora: dict) -> bool:
+def are_corpora_structure_correct(corpora: dict) -> bool:
     return len(corpora['hypotheses']) == len(corpora['references'])
 
 
