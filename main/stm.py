@@ -6,7 +6,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, curren
 from NLP.constants import METRICS_FUNCTIONS
 from NLP.text_utils import prepare_str
 from main.forms import InputForm
-from main.models import MODEL
+from main.models import MODEL, SENTIMENT_MODEL
 from main.utils import read_tmp_file, write_to_tmp_file, generate_salt
 
 bp = Blueprint('stm', __name__, url_prefix='/')
@@ -15,6 +15,7 @@ bp = Blueprint('stm', __name__, url_prefix='/')
 @bp.route('/stm')
 def stm():
     form = InputForm()
+    SENTIMENT_MODEL('nothing to see here.')
     output = read_tmp_file()
     return render_template('stm.html',
                            title='STM',
