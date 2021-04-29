@@ -35,7 +35,7 @@ def get_freq_dict_for_tags(tags: tuple) -> dict:
 
 
 def are_descendants_identical(ref_extractor: SyntaxTreeElementsExtractor,
-                              hyp_extractor: SyntaxTreeElementsExtractor):
+                              hyp_extractor: SyntaxTreeElementsExtractor) -> bool:
     ref_children_tags = transform_into_tags(ref_extractor.children)
     hyp_children_tags = transform_into_tags(hyp_extractor.children)
 

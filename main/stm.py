@@ -6,7 +6,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, curren
 from NLP.constants import METRICS_FUNCTIONS
 from NLP.text_utils import prepare_str
 from main.forms import InputForm
-from main.models import MODEL, GENRE_CLASSIFIER
+from main.models import MODEL
 from main.utils import read_tmp_file, write_to_tmp_file, generate_salt
 
 bp = Blueprint('stm', __name__, url_prefix='/')
@@ -25,7 +25,6 @@ def stm():
 
 @bp.route('/api/handle-stm', methods=['POST'])
 def process_stm():
-
     # TODO: add sentiment
     # TODO: add genre
 
@@ -65,7 +64,6 @@ def process_stm():
 
 @bp.route('/api/handle-stm-corpus', methods=['POST'])
 def process_stm_corpus():
-
     # TODO: add sentiment
     # TODO: add genre
 

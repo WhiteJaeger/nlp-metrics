@@ -1,13 +1,13 @@
 import re
 import string
 
+from nltk import NaiveBayesClassifier
 from nltk.stem.wordnet import WordNetLemmatizer
 from nltk.tag import pos_tag
 from nltk.tokenize import word_tokenize
-from nltk import NaiveBayesClassifier
 
 
-def remove_noise(tweet_tokens, stop_words=()):
+def remove_noise(tweet_tokens, stop_words=()) -> list:
     cleaned_tokens = []
 
     for token, tag in pos_tag(tweet_tokens):
