@@ -57,14 +57,14 @@
             </div>
         </div>
 
-        <div class="container border-bottom" id="sentiment-analysis" style="padding: 10px">
+        <div class="container border-bottom" id="sentiment-analysis-sentence" style="padding: 10px">
             <h5 class="display-5">Sentiment Analysis</h5>
             <p style="margin-bottom: 0">Use sentiment analysis classifier:</p>
-            <label class="switch" for="sentiment">
-                <input type="checkbox" id="sentiment" name="sentiment" value="1">
+            <label class="switch" for="sentiment-sentence">
+                <input type="checkbox" id="sentiment-sentence" name="sentiment-sentence" value="1">
                 <span class="slider round"></span>
             </label>
-            <p>Trivia about sentiment analyzer</p>
+            <p class="analyzer-trivia">Trivia about sentiment analyzer</p>
         </div>
 
         <div class="d-flex bd-highlight mb-3" id="sentence-boxes">
@@ -119,7 +119,17 @@
                 <input type="checkbox" id="sentiment" name="sentiment" value="1">
                 <span class="slider round"></span>
             </label>
-            <p>Trivia about sentiment analyzer</p>
+            <p class="analyzer-trivia">Trivia about sentiment analyzer</p>
+        </div>
+
+        <div class="container border-top" id="genre-analysis" style="padding: 10px">
+            <h5 class="display-5">Genre Analysis</h5>
+            <p style="margin-bottom: 0">Use genre analysis classifier:</p>
+            <label class="switch" for="genre">
+                <input type="checkbox" id="genre" name="genre" value="1">
+                <span class="slider round"></span>
+            </label>
+            <p class="analyzer-trivia">Trivia about genre analyzer</p>
         </div>
 
         <div class="form-group content-section">
@@ -156,8 +166,19 @@
             {% endif %}
             <div class="container-md">
                 <ul class="list-group">
+                    {% if metric_info.sentiment %}
+                        <li class="list-group-item text-center">
+                            <strong>Sentiment analysis enabled:</strong> Yes
+                        </li>
+                    {% endif %}
+                    {% if metric_info.genre %}
+                        <li class="list-group-item text-center">
+                            <strong>Genre analysis enabled:</strong> Yes
+                        </li>
+                    {% endif %}
                     <li class="list-group-item text-center">
-                        <strong>{{ metric_info.metric }} Score</strong>: {{ metric_info.value }} </li>
+                        <strong>{{ metric_info.metric }} Score</strong>: {{ metric_info.value }}
+                    </li>
                 </ul>
             </div>
         </div>

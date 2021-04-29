@@ -77,6 +77,8 @@ legend {
   display: inline-block;
   width: 44px;
   height: 18px;
+  margin-bottom: 0;
+  margin-top: 10px;
 }
 
 /* Hide default HTML checkbox */
@@ -132,4 +134,8 @@ input:checked + .slider:before {
 
 .slider.round:before {
   border-radius: 50%;
+}
+
+.analyzer-trivia {
+  margin-bottom: 0;
 }

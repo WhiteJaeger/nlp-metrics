@@ -19,7 +19,11 @@ import spacy
 from spacy import Language
 from spacy.tokens import Token
 
+from nltk import NaiveBayesClassifier
+from sklearn.pipeline import Pipeline
+
 from NLP.tree_constructor import SyntaxTreeHeadsExtractor, SyntaxTreeElementsExtractor
+from NLP.classifier_utils import predict
 
 
 def transform_into_tags(tokens: tuple[Token]) -> tuple:
@@ -48,15 +52,15 @@ def are_descendants_identical(ref_extractor: SyntaxTreeElementsExtractor,
     return are_children_identical and are_grandchildren_identical
 
 
-def sentence_stm(reference: str, hypothesis: str, model: Language, depth: int = 3) -> float:
+def sentence_stm(reference: str, hypothesis: str, nlp_model: Language, depth: int = 3) -> float:
     """
 
     :param reference:
     :type reference:
     :param hypothesis:
     :type hypothesis:
-    :param model:
-    :type model:
+    :param nlp_model:
+    :type nlp_model:
     :param depth:
     :type depth:
     :return:
@@ -64,8 +68,8 @@ def sentence_stm(reference: str, hypothesis: str, model: Language, depth: int = 
     """
     score = 0
     # Get output from SpaCy model
-    reference_preprocessed = model(reference)
-    hypothesis_preprocessed = model(hypothesis)
+    reference_preprocessed = nlp_model(reference)
+    hypothesis_preprocessed = nlp_model(hypothesis)
 
     # Get heads of syntax trees
     sentence_tree_heads_reference = SyntaxTreeHeadsExtractor(reference_preprocessed)
@@ -130,7 +134,7 @@ def sentence_stm(reference: str, hypothesis: str, model: Language, depth: int = 
 
 def sentence_stm_several_references(references: list[str],
                                     hypothesis: str,
-                                    model: Language,
+                                    nlp_model: Language,
                                     depth: int = 3) -> float:
     """
 
@@ -138,8 +142,8 @@ def sentence_stm_several_references(references: list[str],
     :type references:
     :param hypothesis:
     :type hypothesis:
-    :param model:
-    :type model:
+    :param nlp_model:
+    :type nlp_model:
     :param depth:
     :type depth:
     :return:
@@ -148,14 +152,54 @@ def sentence_stm_several_references(references: list[str],
     nominator = 0
     denominator = len(references)
     for reference in references:
-        nominator += sentence_stm(reference, hypothesis, model, depth)
+        nominator += sentence_stm(reference, hypothesis, nlp_model, depth)
     return round(nominator / denominator, 4)
 
 
-def corpus_stm(references: list[list[str]],
-               hypotheses: list[str],
-               model: Language,
-               depth: int = 3) -> float:
+def corpus_stm(corpora: dict,
+               nlp_model: Language,
+               depth: int) -> float:
+    # TODO: add per-sentence report with lowest scores
+
+    score = 0
+
+    for reference_sentence, hypothesis_sentence in zip(corpora['references'], corpora['hypotheses']):
+        score += sentence_stm(reference_sentence, hypothesis_sentence, nlp_model, depth)
+
+    return round(score / len(corpora['references']), 4)
+
+
+def corpus_stm_augmented(corpora: dict,
+                         nlp_model: Language,
+                         sentiment_classifier: NaiveBayesClassifier = None,
+                         genre_classifier: Pipeline = None,
+                         depth: int = 3) -> float:
+    score = 0
+
+    for reference_sentence, hypothesis_sentence in zip(corpora['references'], corpora['hypotheses']):
+        stm_score = sentence_stm(reference_sentence, hypothesis_sentence, nlp_model, depth)
+        # TODO: move to a dedicated func
+        if sentiment_classifier:
+            sentiment_ref = predict(reference_sentence, sentiment_classifier)
+            sentiment_hyp = predict(hypothesis_sentence, sentiment_classifier)
+            sentiment_score = int(sentiment_ref == sentiment_hyp)
+            score += 0.5 * sentiment_score
+
+        if genre_classifier:
+            genre_ref = genre_classifier.predict([reference_sentence])[0]
+            genre_hyp = genre_classifier.predict([hypothesis_sentence])[0]
+            genre_score = int(genre_ref == genre_hyp)
+            score += 0.5 * genre_score
+
+        score += stm_score
+
+    return round(score / len(corpora['references']), 4)
+
+
+def corpus_stm_several_references(references: list[list[str]],
+                                  hypotheses: list[str],
+                                  model: Language,
+                                  depth: int = 3) -> float:
     """
 
     :param references:

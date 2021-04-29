@@ -1,12 +1,11 @@
 import os
 
-import spacy
 from flask import Blueprint, render_template, request, redirect, url_for, current_app
 
 from NLP.constants import METRICS_FUNCTIONS
 from NLP.text_utils import prepare_str
 from main.forms import InputForm
-from main.models import MODEL
+from main.models import MODEL, SENTIMENT_CLASSIFIER, GENRE_CLASSIFIER
 from main.utils import read_tmp_file, write_to_tmp_file, generate_salt
 
 bp = Blueprint('stm', __name__, url_prefix='/')
@@ -26,7 +25,6 @@ def stm():
 @bp.route('/api/handle-stm', methods=['POST'])
 def process_stm():
     # TODO: add sentiment
-    # TODO: add genre
 
     data = {
         'ref': request.form.get('text_reference'),
@@ -105,12 +103,32 @@ def process_stm_corpus():
     if not are_corpora_structure_correct(corpora):
         pass
 
-    score = calculate_stm_score_corpora(corpora, MODEL, depth)
+    if request.form.get('genre') and request.form.get('sentiment'):
+        score = METRICS_FUNCTIONS['stm_augmented'](corpora=corpora,
+                                                   nlp_model=MODEL,
+                                                   sentiment_classifier=SENTIMENT_CLASSIFIER,
+                                                   genre_classifier=GENRE_CLASSIFIER,
+                                                   depth=depth)
+    elif request.form.get('sentiment'):
+        score = METRICS_FUNCTIONS['stm_augmented'](corpora=corpora,
+                                                   nlp_model=MODEL,
+                                                   sentiment_classifier=SENTIMENT_CLASSIFIER,
+                                                   depth=depth)
+    elif request.form.get('genre'):
+        score = METRICS_FUNCTIONS['stm_augmented'](corpora=corpora,
+                                                   nlp_model=MODEL,
+                                                   genre_classifier=GENRE_CLASSIFIER,
+                                                   depth=depth)
+    else:
+        score = METRICS_FUNCTIONS['stm_corpora'](corpora, MODEL, depth)
 
+    # TODO: add flags whether sentiment/genre were enabled
     output = {
         'metric': 'STM',
         'value': score,
-        'depth': depth
+        'depth': depth,
+        'genre': request.form.get('genre'),
+        'sentiment': request.form.get('sentiment')
     }
     write_to_tmp_file(output)
 
@@ -157,16 +175,3 @@ def prepare_corpora(corpora: dict[str, str], params: dict[str, bool]) -> dict[st
 
 def are_corpora_structure_correct(corpora: dict) -> bool:
     return len(corpora['hypotheses']) == len(corpora['references'])
-
-
-def calculate_stm_score_corpora(corpora: dict,
-                                model: spacy.Language,
-                                depth: int) -> float:
-    # TODO: add per-sentence report with lowest scores
-
-    score = 0
-
-    for reference_sentence, hypothesis_sentence in zip(corpora['references'], corpora['hypotheses']):
-        score += METRICS_FUNCTIONS['stm'](reference_sentence, hypothesis_sentence, model, depth)
-
-    return round(score / len(corpora['references']), 4)
