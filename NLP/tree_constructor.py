@@ -1,6 +1,5 @@
 import spacy
-from spacy.tokens import Doc
-from spacy.tokens import Token
+from spacy.tokens import Doc, Token
 
 
 class SyntaxTreeHeadsExtractor:

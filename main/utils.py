@@ -4,7 +4,7 @@ import string
 from os import path, remove
 
 
-def read_tmp_file(filename: str = 'temp.json'):
+def read_tmp_file(filename: str = 'temp.json') -> dict:
     data = None
 
     if path.exists(filename):

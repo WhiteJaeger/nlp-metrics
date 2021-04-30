@@ -2,7 +2,7 @@
 {% block content %}
     <legend> {{ legend }} </legend>
     <div class="content-section">
-        <p style="margin: 0">This page provides interface to build a sentence tree from the given sentence.</p>
+        <p style="margin: 0">This page provides an interface to build a sentence tree from a given sentence.</p>
     </div>
     <form class="form-control" method="post" action="{{ url_for('sentence_trees.process_sentence_tree') }}">
         {{ form.csrf_token }}

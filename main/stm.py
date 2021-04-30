@@ -1,12 +1,11 @@
 import os
 
-import spacy
 from flask import Blueprint, render_template, request, redirect, url_for, current_app
 
 from NLP.constants import METRICS_FUNCTIONS
 from NLP.text_utils import prepare_str
 from main.forms import InputForm
-from main.models import MODEL
+from main.models import MODEL, SENTIMENT_CLASSIFIER, GENRE_CLASSIFIER
 from main.utils import read_tmp_file, write_to_tmp_file, generate_salt
 
 bp = Blueprint('stm', __name__, url_prefix='/')
@@ -28,7 +27,8 @@ def process_stm():
     data = {
         'ref': request.form.get('text_reference'),
         'hyp': request.form.get('text_hypothesis'),
-        'depth': int(request.form.get('depth'))
+        'depth': int(request.form.get('depth')),
+        'sentiment': request.form.get('sentiment-sentence')
     }
 
     text_preparation_params = {
@@ -37,23 +37,34 @@ def process_stm():
         'lowercase': bool(request.form.get('lowercase', 0))
     }
 
-    ref = prepare_str(data['ref'],
-                      special_char_removal=text_preparation_params['spec-chars'],
-                      text_lower_case=text_preparation_params['lowercase'],
-                      contraction_expansion=text_preparation_params['contractions'])
-    hyp = prepare_str(data['hyp'],
-                      special_char_removal=text_preparation_params['spec-chars'],
-                      text_lower_case=text_preparation_params['lowercase'],
-                      contraction_expansion=text_preparation_params['contractions'])
+    ref: str = prepare_str(data['ref'],
+                           special_char_removal=text_preparation_params['spec-chars'],
+                           text_lower_case=text_preparation_params['lowercase'],
+                           contraction_expansion=text_preparation_params['contractions'])
+    hyp: str = prepare_str(data['hyp'],
+                           special_char_removal=text_preparation_params['spec-chars'],
+                           text_lower_case=text_preparation_params['lowercase'],
+                           contraction_expansion=text_preparation_params['contractions'])
 
-    result = METRICS_FUNCTIONS['stm'](ref, hyp, MODEL, data['depth'])
+    if data['sentiment']:
+        corpora = {
+            'references': [ref],
+            'hypotheses': [hyp]
+        }
+        score = METRICS_FUNCTIONS['stm_augmented'](corpora=corpora,
+                                                   nlp_model=MODEL,
+                                                   sentiment_classifier=SENTIMENT_CLASSIFIER,
+                                                   depth=data['depth'])
+    else:
+        score = METRICS_FUNCTIONS['stm'](ref, hyp, MODEL, data['depth'])
 
     output = {
         'ref': data['ref'],
         'hyp': data['hyp'],
         'metric': 'STM',
-        'value': result,
-        'depth': data['depth']
+        'value': score,
+        'depth': data['depth'],
+        'sentiment': data['sentiment']
     }
     write_to_tmp_file(output)
     return redirect(url_for('stm.stm'))
@@ -89,22 +100,41 @@ def process_stm_corpus():
     corpora = read_corpora(hypotheses_file_name, references_file_name)
 
     # TODO: Introduce errors
-    if not is_corpora_structure_correct(corpora):
+    if not are_corpora_structure_correct(corpora):
         pass
 
     # Prepare corpora
     corpora = prepare_corpora(corpora, text_preparation_params)
 
     # TODO: Rollback if something is wrong
-    if not is_corpora_structure_correct(corpora):
+    if not are_corpora_structure_correct(corpora):
         pass
 
-    score = calculate_stm_score_corpora(corpora, MODEL, depth)
+    if request.form.get('genre') and request.form.get('sentiment'):
+        score = METRICS_FUNCTIONS['stm_augmented'](corpora=corpora,
+                                                   nlp_model=MODEL,
+                                                   sentiment_classifier=SENTIMENT_CLASSIFIER,
+                                                   genre_classifier=GENRE_CLASSIFIER,
+                                                   depth=depth)
+    elif request.form.get('sentiment'):
+        score = METRICS_FUNCTIONS['stm_augmented'](corpora=corpora,
+                                                   nlp_model=MODEL,
+                                                   sentiment_classifier=SENTIMENT_CLASSIFIER,
+                                                   depth=depth)
+    elif request.form.get('genre'):
+        score = METRICS_FUNCTIONS['stm_augmented'](corpora=corpora,
+                                                   nlp_model=MODEL,
+                                                   genre_classifier=GENRE_CLASSIFIER,
+                                                   depth=depth)
+    else:
+        score = METRICS_FUNCTIONS['stm_corpora'](corpora, MODEL, depth)
 
     output = {
         'metric': 'STM',
         'value': score,
-        'depth': depth
+        'depth': depth,
+        'genre': request.form.get('genre'),
+        'sentiment': request.form.get('sentiment')
     }
     write_to_tmp_file(output)
 
@@ -149,18 +179,5 @@ def prepare_corpora(corpora: dict[str, str], params: dict[str, bool]) -> dict[st
     return result
 
 
-def is_corpora_structure_correct(corpora: dict) -> bool:
+def are_corpora_structure_correct(corpora: dict) -> bool:
     return len(corpora['hypotheses']) == len(corpora['references'])
-
-
-def calculate_stm_score_corpora(corpora: dict,
-                                model: spacy.Language,
-                                depth: int) -> float:
-    # TODO: add per-sentence report with lowest scores
-
-    score = 0
-
-    for reference_sentence, hypothesis_sentence in zip(corpora['references'], corpora['hypotheses']):
-        score += METRICS_FUNCTIONS['stm'](reference_sentence, hypothesis_sentence, model, depth)
-
-    return round(score / len(corpora['references']), 4)

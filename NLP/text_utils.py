@@ -1,4 +1,5 @@
 import re
+from typing import Union
 
 import nltk
 from nltk.tokenize.toktok import ToktokTokenizer
@@ -10,9 +11,13 @@ stopword_list.remove('no')
 stopword_list.remove('not')
 
 
-def prepare_str(text: str, contraction_expansion=True, text_lower_case=False,
+def prepare_str(text: str,
+                contraction_expansion=True,
+                text_lower_case=False,
                 special_char_removal=True,
-                stopword_removal=False, remove_digits=False, pos_preparation=False):
+                stopword_removal=False,
+                remove_digits=False,
+                pos_preparation=False) -> Union[list[list[dict]], str]:
     # expand contractions
     if contraction_expansion:
         text = expand_contractions(text)
@@ -73,7 +78,7 @@ def expand_contractions(text, contraction_mapping=CONTRACTION_MAP):
     return expanded_text
 
 
-def remove_special_characters(text, remove_digits=False):
+def remove_special_characters(text, remove_digits=False) -> str:
     """
     Utils function to remove special characters.
     """
@@ -82,7 +87,7 @@ def remove_special_characters(text, remove_digits=False):
     return text
 
 
-def remove_stopwords(text, is_lower_case=False):
+def remove_stopwords(text, is_lower_case=False) -> str:
     tokenizer = ToktokTokenizer()
     tokens = tokenizer.tokenize(text)
     tokens = [token.strip() for token in tokens]

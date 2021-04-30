@@ -5,7 +5,7 @@ from nltk.translate.meteor_score import single_meteor_score
 from nltk.translate.nist_score import sentence_nist
 from rouge import Rouge
 
-from NLP.stm import sentence_stm
+from NLP.stm import sentence_stm, corpus_stm, corpus_stm_augmented
 
 ROUGE = Rouge()
 
@@ -25,7 +25,9 @@ METRICS_FUNCTIONS = {
     'nist': sentence_nist,
     'meteor': single_meteor_score,
     'rouge': ROUGE.get_scores,
-    'stm': sentence_stm
+    'stm': sentence_stm,
+    'stm_corpora': corpus_stm,
+    'stm_augmented': corpus_stm_augmented
 }
 
 CONTRACTION_MAP = {
