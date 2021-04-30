@@ -18,7 +18,7 @@ This repository contains Flask web application which aims to help with measuring
     ```
 2. Download the following corpora: stopwords with NLTK downloader:
     ```bash
-    python -m nltk.downloader stopwords
+    python -m nltk.downloader stopwords punkt
     ```
 3. Run the application:
     1. In production mode: `python app.py`
