@@ -169,7 +169,7 @@ def corpus_stm(corpora: dict,
     return round(score / len(corpora['references']), 4)
 
 
-def corpus_stm_augmented(corpora: dict,
+def corpus_stm_augmented(corpora: dict[str, str],
                          nlp_model: Language,
                          sentiment_classifier: NaiveBayesClassifier = None,
                          genre_classifier: Pipeline = None,
@@ -178,18 +178,15 @@ def corpus_stm_augmented(corpora: dict,
 
     for reference_sentence, hypothesis_sentence in zip(corpora['references'], corpora['hypotheses']):
         stm_score = sentence_stm(reference_sentence, hypothesis_sentence, nlp_model, depth)
-        # TODO: move to a dedicated func
         if sentiment_classifier:
             sentiment_ref = predict(reference_sentence, sentiment_classifier)
             sentiment_hyp = predict(hypothesis_sentence, sentiment_classifier)
-            sentiment_score = int(sentiment_ref == sentiment_hyp)
-            score += 0.5 * sentiment_score
+            score += 0.5 * int(sentiment_ref == sentiment_hyp)
 
         if genre_classifier:
             genre_ref = genre_classifier.predict([reference_sentence])[0]
             genre_hyp = genre_classifier.predict([hypothesis_sentence])[0]
-            genre_score = int(genre_ref == genre_hyp)
-            score += 0.5 * genre_score
+            score += 0.5 * int(genre_ref == genre_hyp)
 
         score += stm_score
 
@@ -227,7 +224,7 @@ def corpus_stm_several_references(references: list[list[str]],
 
 if __name__ == '__main__':
     # Usage example
-    nlp: Language = spacy.load('en_core_web_sm')
+    nlp: Language = spacy.load('en_core_web_md')
     ref = 'It is a guide to action that ensures that the military will forever heed Party commands'
     hyp = 'It is a guide to action which ensures that the military always obeys the commands of the party'
     sentence_stm(ref,

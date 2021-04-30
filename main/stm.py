@@ -24,12 +24,11 @@ def stm():
 
 @bp.route('/api/handle-stm', methods=['POST'])
 def process_stm():
-    # TODO: add sentiment
-
     data = {
         'ref': request.form.get('text_reference'),
         'hyp': request.form.get('text_hypothesis'),
-        'depth': int(request.form.get('depth'))
+        'depth': int(request.form.get('depth')),
+        'sentiment': request.form.get('sentiment-sentence')
     }
 
     text_preparation_params = {
@@ -38,23 +37,34 @@ def process_stm():
         'lowercase': bool(request.form.get('lowercase', 0))
     }
 
-    ref = prepare_str(data['ref'],
-                      special_char_removal=text_preparation_params['spec-chars'],
-                      text_lower_case=text_preparation_params['lowercase'],
-                      contraction_expansion=text_preparation_params['contractions'])
-    hyp = prepare_str(data['hyp'],
-                      special_char_removal=text_preparation_params['spec-chars'],
-                      text_lower_case=text_preparation_params['lowercase'],
-                      contraction_expansion=text_preparation_params['contractions'])
+    ref: str = prepare_str(data['ref'],
+                           special_char_removal=text_preparation_params['spec-chars'],
+                           text_lower_case=text_preparation_params['lowercase'],
+                           contraction_expansion=text_preparation_params['contractions'])
+    hyp: str = prepare_str(data['hyp'],
+                           special_char_removal=text_preparation_params['spec-chars'],
+                           text_lower_case=text_preparation_params['lowercase'],
+                           contraction_expansion=text_preparation_params['contractions'])
 
-    result = METRICS_FUNCTIONS['stm'](ref, hyp, MODEL, data['depth'])
+    if data['sentiment']:
+        corpora = {
+            'references': [ref],
+            'hypotheses': [hyp]
+        }
+        score = METRICS_FUNCTIONS['stm_augmented'](corpora=corpora,
+                                                   nlp_model=MODEL,
+                                                   sentiment_classifier=SENTIMENT_CLASSIFIER,
+                                                   depth=data['depth'])
+    else:
+        score = METRICS_FUNCTIONS['stm'](ref, hyp, MODEL, data['depth'])
 
     output = {
         'ref': data['ref'],
         'hyp': data['hyp'],
         'metric': 'STM',
-        'value': result,
-        'depth': data['depth']
+        'value': score,
+        'depth': data['depth'],
+        'sentiment': data['sentiment']
     }
     write_to_tmp_file(output)
     return redirect(url_for('stm.stm'))
@@ -62,9 +72,6 @@ def process_stm():
 
 @bp.route('/api/handle-stm-corpus', methods=['POST'])
 def process_stm_corpus():
-    # TODO: add sentiment
-    # TODO: add genre
-
     text_preparation_params = {
         'contractions': bool(request.form.get('contractions', 0)),
         'spec-chars': bool(request.form.get('spec-chars', 0)),
@@ -122,7 +129,6 @@ def process_stm_corpus():
     else:
         score = METRICS_FUNCTIONS['stm_corpora'](corpora, MODEL, depth)
 
-    # TODO: add flags whether sentiment/genre were enabled
     output = {
         'metric': 'STM',
         'value': score,

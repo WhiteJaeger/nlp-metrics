@@ -6,9 +6,8 @@
     <legend> {{ legend }} </legend>
 
     <div class="content-section">
-        <p style="margin: 0">This page provides an interface to measure the performance of the given translation with
-            syntax trees based
-            metric.</p>
+        <p style="margin: 0">This page provides an interface to measure the performance of a given translation with
+            syntax trees based metric.</p>
     </div>
 
     <div class="container" id="text-type" style="padding: 0">
@@ -64,7 +63,9 @@
                 <input type="checkbox" id="sentiment-sentence" name="sentiment-sentence" value="1">
                 <span class="slider round"></span>
             </label>
-            <p class="analyzer-trivia">Trivia about sentiment analyzer</p>
+            <p class="analyzer-trivia">Enables sentiment analyzer trained on ~10000 tweets.
+                <br>It tries to predict the polarity (e.g. <i>positive/negative</i>) of the reference and hypothesis
+                and if the predictions match a <strong>0.5</strong> is added to the overall metric score.</p>
         </div>
 
         <div class="d-flex bd-highlight mb-3" id="sentence-boxes">
@@ -119,7 +120,9 @@
                 <input type="checkbox" id="sentiment" name="sentiment" value="1">
                 <span class="slider round"></span>
             </label>
-            <p class="analyzer-trivia">Trivia about sentiment analyzer</p>
+            <p class="analyzer-trivia">Enables sentiment analyzer trained on ~10000 tweets.
+                <br>It tries to predict the polarity (e.g. <i>positive/negative</i>) of the reference and hypothesis
+                and if the predictions match a <strong>0.5</strong> is added to the overall metric score.</p>
         </div>
 
         <div class="container border-top" id="genre-analysis" style="padding: 10px">
@@ -129,7 +132,10 @@
                 <input type="checkbox" id="genre" name="genre" value="1">
                 <span class="slider round"></span>
             </label>
-            <p class="analyzer-trivia">Trivia about genre analyzer</p>
+            <p class="analyzer-trivia">Enables genre analyzer trained on ~20000 books.
+                <br>It tries to predict the genre (e.g. <i>thriller/historical</i>) of the reference and hypothesis
+                corpora
+                and if the predictions match a <strong>0.5</strong> is added to the overall metric score.</p>
         </div>
 
         <div class="form-group content-section">
@@ -204,7 +210,8 @@
             <ul style="margin-bottom: 0">
                 <li>Both files should be in plain text;</li>
                 <li>Both files should have <strong>the same length in terms of sentences;</strong><br></li>
-                <li>Sentences are to be split by <strong>. &nbsp;</strong> (period sign <strong>and whitespace</strong>);</li>
+                <li>Sentences are to be split by <strong>. &nbsp;</strong> (period sign <strong>and whitespace</strong>);
+                </li>
                 <li>These sentences should be aligned one-to-one, i.e.:
                     <ul>
                         <li>reference1-hypothesis1</li>

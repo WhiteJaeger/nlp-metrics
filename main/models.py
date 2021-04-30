@@ -12,7 +12,7 @@ MODEL: spacy.Language = spacy.load('en_core_web_md')
 POS_TAGGING = load(os.path.join('models', 'crfWJSModel.joblib'))
 
 # Load sentiment classifier
-SENTIMENT_CLASSIFIER: NaiveBayesClassifier = load(os.path.join('models', 'classifier.joblib'))
+SENTIMENT_CLASSIFIER: NaiveBayesClassifier = load(os.path.join('models', 'sentiment_classifier.joblib'))
 
 # Load genre classifier
 GENRE_CLASSIFIER: Pipeline = load(os.path.join('models', 'genre_classifier.joblib'))

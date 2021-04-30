@@ -99,4 +99,4 @@ if __name__ == "__main__":
     print(custom_tweet, classifier.classify(dict([token, True] for token in custom_tokens)))
 
     # Save model
-    dump(classifier, 'classifier.joblib')
+    dump(classifier, 'sentiment_classifier.joblib')
