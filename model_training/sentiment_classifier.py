@@ -2,7 +2,7 @@ import random
 import re
 import string
 
-from joblib import dump, load
+from joblib import dump
 from nltk import FreqDist, classify, NaiveBayesClassifier
 from nltk.corpus import twitter_samples, stopwords
 from nltk.stem.wordnet import WordNetLemmatizer
@@ -28,8 +28,10 @@ def remove_noise(tokens_collection: list, stop_words: tuple = ()):
         lemmatizer = WordNetLemmatizer()
         token = lemmatizer.lemmatize(token, pos)
 
+        forbidden = ':) :-) :( :-( :d rt … ...'.split()
+
         if len(token) > 0 and token not in string.punctuation and token.lower() not in stop_words and \
-                token not in ':) :-) :( :-( :d':
+                token.lower() not in forbidden:
             cleaned_tokens.append(token.lower())
     return cleaned_tokens
 
@@ -66,6 +68,8 @@ if __name__ == "__main__":
     for tokens in neutral_tweet_tokens:
         neutral_cleaned_tokens.append(remove_noise(tokens, stop_words_eng))
 
+    neutral_cleaned_tokens = neutral_cleaned_tokens[:5000]
+
     all_cleaned_tokens = positive_cleaned_tokens + negative_cleaned_tokens + neutral_cleaned_tokens
 
     all_pos_words = get_all_words(all_cleaned_tokens)
@@ -87,11 +91,12 @@ if __name__ == "__main__":
                        for tweet_dict in neutral_tokens_for_model]
 
     dataset = positive_dataset + negative_dataset + neutral_dataset
+    print(f'DATASET SIZE: {len(dataset)}')
 
     random.shuffle(dataset)
 
-    train_data = dataset[:25000]
-    test_data = dataset[25000:]
+    train_data = dataset[:10000]
+    test_data = dataset[10000:]
 
     classifier = NaiveBayesClassifier.train(train_data)
 
@@ -99,14 +104,10 @@ if __name__ == "__main__":
 
     print(classifier.show_most_informative_features(10))
 
-    custom_tweet = 'I ordered just once from TerribleCo, they screwed up, never used the app again.'
+    custom_tweet = 'I ordered just once from Bad Company, they screwed up, never used the app again.'
 
     custom_tokens = remove_noise(word_tokenize(custom_tweet))
 
-    print(custom_tweet, classifier.classify(dict([token, True] for token in custom_tokens)))
-
-    custom_tweet = 'Just some ordinary text without sentiment'
-    custom_tokens = remove_noise(word_tokenize(custom_tweet))
     print(custom_tweet, classifier.classify(dict([token, True] for token in custom_tokens)))
 
     # Save model
