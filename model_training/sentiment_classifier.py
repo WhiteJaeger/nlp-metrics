@@ -2,7 +2,7 @@ import random
 import re
 import string
 
-from joblib import dump
+from joblib import dump, load
 from nltk import FreqDist, classify, NaiveBayesClassifier
 from nltk.corpus import twitter_samples, stopwords
 from nltk.stem.wordnet import WordNetLemmatizer
@@ -51,9 +51,11 @@ if __name__ == "__main__":
 
     positive_tweet_tokens = twitter_samples.tokenized('positive_tweets.json')
     negative_tweet_tokens = twitter_samples.tokenized('negative_tweets.json')
+    neutral_tweet_tokens = twitter_samples.tokenized('tweets.20150430-223406.json')
 
     positive_cleaned_tokens = []
     negative_cleaned_tokens = []
+    neutral_cleaned_tokens = []
 
     for tokens in positive_tweet_tokens:
         positive_cleaned_tokens.append(remove_noise(tokens, stop_words_eng))
@@ -61,13 +63,19 @@ if __name__ == "__main__":
     for tokens in negative_tweet_tokens:
         negative_cleaned_tokens.append(remove_noise(tokens, stop_words_eng))
 
-    all_pos_words = get_all_words(positive_cleaned_tokens)
+    for tokens in neutral_tweet_tokens:
+        neutral_cleaned_tokens.append(remove_noise(tokens, stop_words_eng))
+
+    all_cleaned_tokens = positive_cleaned_tokens + negative_cleaned_tokens + neutral_cleaned_tokens
+
+    all_pos_words = get_all_words(all_cleaned_tokens)
 
     freq_dist_pos = FreqDist(all_pos_words)
     print(freq_dist_pos.most_common(10))
 
     positive_tokens_for_model = get_tweets_for_model(positive_cleaned_tokens)
     negative_tokens_for_model = get_tweets_for_model(negative_cleaned_tokens)
+    neutral_tokens_for_model = get_tweets_for_model(neutral_cleaned_tokens)
 
     positive_dataset = [(tweet_dict, "Positive")
                         for tweet_dict in positive_tokens_for_model]
@@ -75,23 +83,30 @@ if __name__ == "__main__":
     negative_dataset = [(tweet_dict, "Negative")
                         for tweet_dict in negative_tokens_for_model]
 
-    dataset = positive_dataset + negative_dataset
+    neutral_dataset = [(tweet_dict, "Neutral")
+                       for tweet_dict in neutral_tokens_for_model]
+
+    dataset = positive_dataset + negative_dataset + neutral_dataset
 
     random.shuffle(dataset)
 
-    train_data = dataset[:7000]
-    test_data = dataset[7000:]
+    train_data = dataset[:25000]
+    test_data = dataset[25000:]
 
     classifier = NaiveBayesClassifier.train(train_data)
 
-    print("Accuracy is:", classify.accuracy(classifier, test_data))
+    print('Accuracy is: ', classify.accuracy(classifier, test_data))
 
     print(classifier.show_most_informative_features(10))
 
-    custom_tweet = "I ordered just once from TerribleCo, they screwed up, never used the app again."
+    custom_tweet = 'I ordered just once from TerribleCo, they screwed up, never used the app again.'
 
     custom_tokens = remove_noise(word_tokenize(custom_tweet))
 
+    print(custom_tweet, classifier.classify(dict([token, True] for token in custom_tokens)))
+
+    custom_tweet = 'Just some ordinary text without sentiment'
+    custom_tokens = remove_noise(word_tokenize(custom_tweet))
     print(custom_tweet, classifier.classify(dict([token, True] for token in custom_tokens)))
 
     # Save model
