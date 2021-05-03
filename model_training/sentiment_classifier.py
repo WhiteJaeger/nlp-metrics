@@ -28,7 +28,8 @@ def remove_noise(tokens_collection: list, stop_words: tuple = ()):
         lemmatizer = WordNetLemmatizer()
         token = lemmatizer.lemmatize(token, pos)
 
-        if len(token) > 0 and token not in string.punctuation and token.lower() not in stop_words:
+        if len(token) > 0 and token not in string.punctuation and token.lower() not in stop_words and \
+                token not in ':) :-) :( :-( :d':
             cleaned_tokens.append(token.lower())
     return cleaned_tokens
 
