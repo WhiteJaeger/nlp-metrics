@@ -156,7 +156,7 @@ def sentence_stm_several_references(references: list[str],
     return round(nominator / denominator, 4)
 
 
-def corpus_stm(corpora: dict,
+def corpus_stm(corpora: dict[str, list[str]],
                nlp_model: Language,
                depth: int) -> float:
     # TODO: add per-sentence report with lowest scores
@@ -169,7 +169,7 @@ def corpus_stm(corpora: dict,
     return round(score / len(corpora['references']), 4)
 
 
-def corpus_stm_augmented(corpora: dict[str, str],
+def corpus_stm_augmented(corpora: dict[str, list[str]],
                          nlp_model: Language,
                          sentiment_classifier: NaiveBayesClassifier = None,
                          genre_classifier: Pipeline = None,
@@ -183,14 +183,15 @@ def corpus_stm_augmented(corpora: dict[str, str],
             sentiment_hyp = predict(hypothesis_sentence, sentiment_classifier)
             score += 0.5 * int(sentiment_ref == sentiment_hyp)
 
-        if genre_classifier:
-            genre_ref = genre_classifier.predict([reference_sentence])[0]
-            genre_hyp = genre_classifier.predict([hypothesis_sentence])[0]
-            score += 0.5 * int(genre_ref == genre_hyp)
-
         score += stm_score
 
-    return round(score / len(corpora['references']), 4)
+    genre_score = 0
+    if genre_classifier:
+        genre_ref = genre_classifier.predict(corpora['references'])[0]
+        genre_hyp = genre_classifier.predict(corpora['hypotheses'])[0]
+        genre_score = 0.5 if genre_hyp == genre_ref else 0
+
+    return round(score / len(corpora['references']), 4) + genre_score
 
 
 def corpus_stm_several_references(references: list[list[str]],
