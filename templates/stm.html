@@ -121,8 +121,9 @@
                 <span class="slider round"></span>
             </label>
             <p class="analyzer-trivia">Enables sentiment analyzer trained on ~10000 tweets.
-                <br>It tries to predict the polarity (e.g. <i>positive/negative</i>) of the reference and hypothesis
-                and if the predictions match a <strong>0.5</strong> is added to the overall metric score.</p>
+                <br>It tries to predict the polarity (e.g. <i>positive/negative</i>) of each reference and hypothesis
+                sentence
+                and if the predictions match a <strong>0.5</strong> is added to the per-sentence metric score.</p>
         </div>
 
         <div class="container border-top" id="genre-analysis" style="padding: 10px">
@@ -156,38 +157,51 @@
     <hr>
 
     {# TODO: Consider displaying the syntax trees #}
-    {% if metric_info %}
+    {% if info %}
         <div id="output-info">
-            {% if metric_info.hyp %}
+            {% if info.hyp %}
                 <div class="container">
                     <div class="row">
                         <div class="col border">
-                            <strong>Hypothesis</strong>: <br>{{ metric_info.hyp }}
+                            <strong>Hypothesis</strong>: <br>{{ info.hyp }}
                         </div>
                         <div class="col border">
-                            <strong>Reference</strong>: <br>{{ metric_info.ref }}
+                            <strong>Reference</strong>: <br>{{ info.ref }}
                         </div>
                     </div>
                 </div>
             {% endif %}
             <div class="container-md">
                 <ul class="list-group">
-                    {% if metric_info.sentiment %}
+                    {% if info.sentiment %}
                         <li class="list-group-item text-center">
                             <strong>Sentiment analysis enabled:</strong> Yes
                         </li>
                     {% endif %}
-                    {% if metric_info.genre %}
+                    {% if info.genre %}
                         <li class="list-group-item text-center">
                             <strong>Genre analysis enabled:</strong> Yes
+                            <div class="container" id="corpora-genre">
+                                <div class="row">
+                                    <div class="col border">
+                                        <strong>Hypothesis corpora genre</strong>:
+                                        <br>{{ info.corpora_genre.hypothesis }}
+                                    </div>
+                                    <div class="col border">
+                                        <strong>Reference corpora genre</strong>: <br>{{ info.corpora_genre.reference }}
+                                    </div>
+                                </div>
+                            </div>
                         </li>
                     {% endif %}
                     <li class="list-group-item text-center">
-                        <strong>{{ metric_info.metric }} Score</strong>: {{ metric_info.value }}
+                        <strong>Depth</strong>: {{ info.depth }}<br>
+                        <strong>{{ info.metric }} Score</strong>: {{ info.value }}
                     </li>
                 </ul>
             </div>
         </div>
+        {#        TODO: per-sentence report, separate container #}
     {% endif %}
     <script type="text/javascript" src="{{ url_for('static', filename='js/metrics.js') }}"></script>
 {% endblock content %}

@@ -18,14 +18,13 @@ Ding Liu and Daniel Gildea, 2005, Association for Computational Linguistics, Pag
 from typing import Union, Optional
 
 import spacy
+from nltk import NaiveBayesClassifier
+from sklearn.pipeline import Pipeline
 from spacy import Language
 from spacy.tokens import Token
 
-from nltk import NaiveBayesClassifier
-from sklearn.pipeline import Pipeline
-
-from NLP.tree_constructor import SyntaxTreeHeadsExtractor, SyntaxTreeElementsExtractor
 from NLP.classifier_utils import predict
+from NLP.tree_constructor import SyntaxTreeHeadsExtractor, SyntaxTreeElementsExtractor
 
 
 def transform_into_tags(tokens: tuple[Token]) -> tuple:
@@ -205,25 +204,38 @@ def corpus_stm_augmented(corpora: dict[str, list[str]],
     """
     score = 0
 
-    per_sentence_summary: list[dict[str, Union[str, int]]] = []
+    per_sentence_summary: list[dict[str, Union[str, float]]] = []
 
+    idx = 0
     for reference_sentence, hypothesis_sentence in zip(corpora['references'], corpora['hypotheses']):
-        sentence_score = sentence_stm(reference_sentence, hypothesis_sentence, nlp_model, depth)
-        if sentiment_classifier:
-            sentiment_ref = predict(reference_sentence, sentiment_classifier)
-            sentiment_hyp = predict(hypothesis_sentence, sentiment_classifier)
-            sentence_score += 0.5 * int(sentiment_ref == sentiment_hyp)
+        sentence_score: float = sentence_stm(reference_sentence, hypothesis_sentence, nlp_model, depth)
 
         if make_summary:
             per_sentence_summary.append({
                 'reference': reference_sentence,
                 'hypothesis': hypothesis_sentence,
-                'score': sentence_score
+                'score': sentence_score,
+                'sentiment_ref': None,
+                'sentiment_hyp': None
             })
+
+        if sentiment_classifier:
+            sentiment_ref: str = predict(reference_sentence, sentiment_classifier)
+            sentiment_hyp: str = predict(hypothesis_sentence, sentiment_classifier)
+            sentence_score += 0.5 * int(sentiment_ref == sentiment_hyp)
+
+            if make_summary:
+                per_sentence_summary[idx]['sentiment_ref'] = sentiment_ref
+                per_sentence_summary[idx]['sentiment_hyp'] = sentiment_hyp
+                per_sentence_summary[idx]['score'] = sentence_score
 
         score += sentence_score
 
+        idx += 1
+
     genre_score = 0
+    genre_ref = None
+    genre_hyp = None
     if genre_classifier:
         genre_ref = genre_classifier.predict(corpora['references'])[0]
         genre_hyp = genre_classifier.predict(corpora['hypotheses'])[0]
@@ -231,7 +243,10 @@ def corpus_stm_augmented(corpora: dict[str, list[str]],
 
     if make_summary:
         return {'score': round(score / len(corpora['references']), 4) + genre_score,
-                'per_sentence_summary': per_sentence_summary}
+                'per_sentence_summary': per_sentence_summary,
+                'genre': {'reference': genre_ref,
+                          'hypothesis': genre_hyp}}
+
     return round(score / len(corpora['references']), 4) + genre_score
 
 
