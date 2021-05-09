@@ -15,6 +15,8 @@ Ding Liu and Daniel Gildea, 2005, Association for Computational Linguistics, Pag
     pages = "25--32",
 }
 """
+from typing import Union, Optional
+
 import spacy
 from spacy import Language
 from spacy.tokens import Token
@@ -159,8 +161,17 @@ def sentence_stm_several_references(references: list[str],
 def corpus_stm(corpora: dict[str, list[str]],
                nlp_model: Language,
                depth: int) -> float:
-    # TODO: add per-sentence report with lowest scores
+    """
 
+    :param corpora:
+    :type corpora:
+    :param nlp_model:
+    :type nlp_model:
+    :param depth:
+    :type depth:
+    :return:
+    :rtype:
+    """
     score = 0
 
     for reference_sentence, hypothesis_sentence in zip(corpora['references'], corpora['hypotheses']):
@@ -171,19 +182,46 @@ def corpus_stm(corpora: dict[str, list[str]],
 
 def corpus_stm_augmented(corpora: dict[str, list[str]],
                          nlp_model: Language,
-                         sentiment_classifier: NaiveBayesClassifier = None,
-                         genre_classifier: Pipeline = None,
-                         depth: int = 3) -> float:
+                         sentiment_classifier: Optional[NaiveBayesClassifier] = None,
+                         genre_classifier: Optional[Pipeline] = None,
+                         depth: int = 3,
+                         make_summary: bool = True) -> Union[float, dict[str, Union[int, list]]]:
+    """
+
+    :param corpora:
+    :type corpora:
+    :param nlp_model:
+    :type nlp_model:
+    :param sentiment_classifier:
+    :type sentiment_classifier:
+    :param genre_classifier:
+    :type genre_classifier:
+    :param depth:
+    :type depth:
+    :param make_summary:
+    :type make_summary:
+    :return:
+    :rtype:
+    """
     score = 0
 
+    per_sentence_summary: list[dict[str, Union[str, int]]] = []
+
     for reference_sentence, hypothesis_sentence in zip(corpora['references'], corpora['hypotheses']):
-        stm_score = sentence_stm(reference_sentence, hypothesis_sentence, nlp_model, depth)
+        sentence_score = sentence_stm(reference_sentence, hypothesis_sentence, nlp_model, depth)
         if sentiment_classifier:
             sentiment_ref = predict(reference_sentence, sentiment_classifier)
             sentiment_hyp = predict(hypothesis_sentence, sentiment_classifier)
-            score += 0.5 * int(sentiment_ref == sentiment_hyp)
+            sentence_score += 0.5 * int(sentiment_ref == sentiment_hyp)
 
-        score += stm_score
+        if make_summary:
+            per_sentence_summary.append({
+                'reference': reference_sentence,
+                'hypothesis': hypothesis_sentence,
+                'score': sentence_score
+            })
+
+        score += sentence_score
 
     genre_score = 0
     if genre_classifier:
@@ -191,6 +229,9 @@ def corpus_stm_augmented(corpora: dict[str, list[str]],
         genre_hyp = genre_classifier.predict(corpora['hypotheses'])[0]
         genre_score = 0.5 if genre_hyp == genre_ref else 0
 
+    if make_summary:
+        return {'score': round(score / len(corpora['references']), 4) + genre_score,
+                'per_sentence_summary': per_sentence_summary}
     return round(score / len(corpora['references']), 4) + genre_score
 
 
