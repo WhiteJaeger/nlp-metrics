@@ -20,6 +20,10 @@ function toggleInputForms() {
     if (!!document.getElementById('output-info')) {
         document.getElementById('output-info').setAttribute('class', 'd-none');
     }
+
+    if (!!document.getElementById('per-sentence-summary')) {
+        document.getElementById('per-sentence-summary').setAttribute('class', 'd-none');
+    }
 }
 
 document.getElementById('text-type-select').addEventListener('change', toggleInputForms)

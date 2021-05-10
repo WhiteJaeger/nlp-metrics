@@ -19,7 +19,7 @@ def stm():
                            title='STM',
                            form=form,
                            legend='Subtree Metric',
-                           metric_info=output)
+                           info=output)
 
 
 @bp.route('/api/handle-stm', methods=['POST'])
@@ -51,10 +51,11 @@ def process_stm():
             'references': [ref],
             'hypotheses': [hyp]
         }
-        score = METRICS_FUNCTIONS['stm_augmented'](corpora=corpora,
-                                                   nlp_model=MODEL,
-                                                   sentiment_classifier=SENTIMENT_CLASSIFIER,
-                                                   depth=data['depth'])
+        result = METRICS_FUNCTIONS['stm_augmented'](corpora=corpora,
+                                                    nlp_model=MODEL,
+                                                    sentiment_classifier=SENTIMENT_CLASSIFIER,
+                                                    depth=data['depth'])
+        score = result['score']
     else:
         score = METRICS_FUNCTIONS['stm'](ref, hyp, MODEL, data['depth'])
 
@@ -72,6 +73,8 @@ def process_stm():
 
 @bp.route('/api/handle-stm-corpus', methods=['POST'])
 def process_stm_corpus():
+    genre = None
+
     text_preparation_params = {
         'contractions': bool(request.form.get('contractions', 0)),
         'spec-chars': bool(request.form.get('spec-chars', 0)),
@@ -111,30 +114,45 @@ def process_stm_corpus():
         pass
 
     if request.form.get('genre') and request.form.get('sentiment'):
-        score = METRICS_FUNCTIONS['stm_augmented'](corpora=corpora,
-                                                   nlp_model=MODEL,
-                                                   sentiment_classifier=SENTIMENT_CLASSIFIER,
-                                                   genre_classifier=GENRE_CLASSIFIER,
-                                                   depth=depth)
+        result = METRICS_FUNCTIONS['stm_augmented'](corpora=corpora,
+                                                    nlp_model=MODEL,
+                                                    sentiment_classifier=SENTIMENT_CLASSIFIER,
+                                                    genre_classifier=GENRE_CLASSIFIER,
+                                                    depth=depth)
+        score = result['score']
+        per_sentence_report = result['per_sentence_summary']
+        genre = result['genre']
     elif request.form.get('sentiment'):
-        score = METRICS_FUNCTIONS['stm_augmented'](corpora=corpora,
-                                                   nlp_model=MODEL,
-                                                   sentiment_classifier=SENTIMENT_CLASSIFIER,
-                                                   depth=depth)
+        result = METRICS_FUNCTIONS['stm_augmented'](corpora=corpora,
+                                                    nlp_model=MODEL,
+                                                    sentiment_classifier=SENTIMENT_CLASSIFIER,
+                                                    depth=depth)
+        score = result['score']
+        per_sentence_report = result['per_sentence_summary']
+        genre = result['genre']
     elif request.form.get('genre'):
-        score = METRICS_FUNCTIONS['stm_augmented'](corpora=corpora,
-                                                   nlp_model=MODEL,
-                                                   genre_classifier=GENRE_CLASSIFIER,
-                                                   depth=depth)
+        result = METRICS_FUNCTIONS['stm_augmented'](corpora=corpora,
+                                                    nlp_model=MODEL,
+                                                    genre_classifier=GENRE_CLASSIFIER,
+                                                    depth=depth)
+        score = result['score']
+        per_sentence_report = result['per_sentence_summary']
+        genre = result['genre']
     else:
-        score = METRICS_FUNCTIONS['stm_corpora'](corpora, MODEL, depth)
+        result = METRICS_FUNCTIONS['stm_augmented'](corpora=corpora,
+                                                    nlp_model=MODEL,
+                                                    depth=depth)
+        score = result['score']
+        per_sentence_report = result['per_sentence_summary']
 
     output = {
         'metric': 'STM',
         'value': score,
         'depth': depth,
         'genre': request.form.get('genre'),
-        'sentiment': request.form.get('sentiment')
+        'sentiment': request.form.get('sentiment'),
+        'per_sentence_summary': get_pairs_with_lowest_scores(per_sentence_report) if per_sentence_report else None,
+        'corpora_genre': genre
     }
     write_to_tmp_file(output)
 
@@ -181,3 +199,7 @@ def prepare_corpora(corpora: dict[str, str], params: dict[str, bool]) -> dict[st
 
 def are_corpora_structure_correct(corpora: dict) -> bool:
     return len(corpora['hypotheses']) == len(corpora['references'])
+
+
+def get_pairs_with_lowest_scores(summary: list[dict], k: int = 5) -> list[dict]:
+    return sorted(summary, key=lambda x: x['score'])[:k]

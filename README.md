@@ -1,9 +1,12 @@
 # NLP Metrics
+
 ## N-gram based and Syntactic
 
-This repository contains Flask web application which aims to help with measuring the performance of machine & human translation. This app could be accessed either remotely - it is deployed at http://nlp-metrics.herokuapp.com/ - or locally - by following these steps.
+This repository contains a Flask web application which aims to help with measuring the performance of the machine &
+human translation. This app could be accessed either remotely - it is deployed at http://nlp-metrics.herokuapp.com/ - or
+locally - by following the steps below.
 
-## Running app locally
+## Running the app locally
 
 * Prerequisites:
 
@@ -16,7 +19,9 @@ This repository contains Flask web application which aims to help with measuring
     ```bash
     pip install -r requirements.txt
     ```
-2. Download the following corpora: stopwords with NLTK downloader:
+2. Download the following corpora: `stopwords punkt averaged_perceptron_tagger wordnet`
+
+   with NLTK downloader:
     ```bash
     python -m nltk.downloader stopwords punkt averaged_perceptron_tagger wordnet
     ```
