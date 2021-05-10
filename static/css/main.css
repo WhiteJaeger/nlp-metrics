@@ -143,3 +143,16 @@ input:checked + .slider:before {
 #corpora-genre {
     margin-top: 15px;
 }
+
+#per-sentence-summary {
+    margin-top: 15px;
+    padding: 10px 20px 20px;
+}
+
+.stm-score {
+    margin-bottom: 0;
+}
+
+.per-sentence-info {
+    margin: 5px;
+}

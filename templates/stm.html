@@ -123,7 +123,7 @@
             <p class="analyzer-trivia">Enables sentiment analyzer trained on ~10000 tweets.
                 <br>It tries to predict the polarity (e.g. <i>positive/negative</i>) of each reference and hypothesis
                 sentence
-                and if the predictions match a <strong>0.5</strong> is added to the per-sentence metric score.</p>
+                and if the predictions match a <strong>0.5</strong> is added to the <strong>per-sentence</strong> metric score.</p>
         </div>
 
         <div class="container border-top" id="genre-analysis" style="padding: 10px">
@@ -136,7 +136,7 @@
             <p class="analyzer-trivia">Enables genre analyzer trained on ~20000 books.
                 <br>It tries to predict the genre (e.g. <i>thriller/historical</i>) of the reference and hypothesis
                 corpora
-                and if the predictions match a <strong>0.5</strong> is added to the overall metric score.</p>
+                and if the predictions match a <strong>0.5</strong> is added to the <strong>overall</strong> metric score.</p>
         </div>
 
         <div class="form-group content-section">
@@ -188,7 +188,8 @@
                                         <br>{{ info.corpora_genre.hypothesis }}
                                     </div>
                                     <div class="col border">
-                                        <strong>Reference corpora genre</strong>: <br>{{ info.corpora_genre.reference }}
+                                        <strong>Reference corpora genre</strong>:
+                                        <br>{{ info.corpora_genre.reference }}
                                     </div>
                                 </div>
                             </div>
@@ -201,7 +202,26 @@
                 </ul>
             </div>
         </div>
-        {#        TODO: per-sentence report, separate container #}
+        {% if info.per_sentence_summary %}
+            <div class="content-section" id="per-sentence-summary">
+                <h5 class="display-5">Per-sentence summary</h5>
+                {% for sentence_info in info.per_sentence_summary %}
+                    <div class="content-section">
+                    <div class="row">
+                        <div class="col border per-sentence-info"><strong>Reference sentence</strong>: {{ sentence_info.reference }}</div>
+                        <div class="col border per-sentence-info"><strong>Hypothesis sentence</strong>: {{ sentence_info.hypothesis }}</div>
+                    </div>
+                        {% if info.sentiment %}
+                            <div class="row">
+                                <div class="col border per-sentence-info"><strong>Reference sentiment</strong>: {{ sentence_info.sentiment_ref }}</div>
+                                <div class="col border per-sentence-info"><strong>Hypothesis sentiment</strong>: {{ sentence_info.sentiment_hyp }}</div>
+                            </div>
+                        {% endif %}
+                        <p class="stm-score"><strong>STM Score</strong>: {{ sentence_info.score }} out of {% if info.sentiment %} 1.5 {% else %} 1.0 {% endif %}</p>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
     {% endif %}
     <script type="text/javascript" src="{{ url_for('static', filename='js/metrics.js') }}"></script>
 {% endblock content %}

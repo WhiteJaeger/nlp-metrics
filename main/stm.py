@@ -51,10 +51,11 @@ def process_stm():
             'references': [ref],
             'hypotheses': [hyp]
         }
-        score = METRICS_FUNCTIONS['stm_augmented'](corpora=corpora,
-                                                   nlp_model=MODEL,
-                                                   sentiment_classifier=SENTIMENT_CLASSIFIER,
-                                                   depth=data['depth'])
+        result = METRICS_FUNCTIONS['stm_augmented'](corpora=corpora,
+                                                    nlp_model=MODEL,
+                                                    sentiment_classifier=SENTIMENT_CLASSIFIER,
+                                                    depth=data['depth'])
+        score = result['score']
     else:
         score = METRICS_FUNCTIONS['stm'](ref, hyp, MODEL, data['depth'])
 
@@ -72,7 +73,6 @@ def process_stm():
 
 @bp.route('/api/handle-stm-corpus', methods=['POST'])
 def process_stm_corpus():
-    per_sentence_report = None
     genre = None
 
     text_preparation_params = {
@@ -139,7 +139,11 @@ def process_stm_corpus():
         per_sentence_report = result['per_sentence_summary']
         genre = result['genre']
     else:
-        score = METRICS_FUNCTIONS['stm_corpora'](corpora, MODEL, depth)
+        result = METRICS_FUNCTIONS['stm_augmented'](corpora=corpora,
+                                                    nlp_model=MODEL,
+                                                    depth=depth)
+        score = result['score']
+        per_sentence_report = result['per_sentence_summary']
 
     output = {
         'metric': 'STM',
