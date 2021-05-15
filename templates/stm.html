@@ -65,7 +65,7 @@
             </label>
             <p class="analyzer-trivia">Enables sentiment analyzer trained on ~10000 tweets.
                 <br>It tries to predict the polarity (e.g. <i>positive/negative</i>) of the reference and hypothesis
-                and if the predictions match a <strong>0.5</strong> is added to the overall metric score.</p>
+                and if the predictions match a <strong>0.5</strong> is added to the <strong>per-sentence</strong> metric score.</p>
         </div>
 
         <div class="d-flex bd-highlight mb-3" id="sentence-boxes">
@@ -135,8 +135,8 @@
             </label>
             <p class="analyzer-trivia">Enables genre analyzer trained on ~20000 books.
                 <br>It tries to predict the genre (e.g. <i>thriller/historical</i>) of the reference and hypothesis
-                corpora
-                and if the predictions match a <strong>0.5</strong> is added to the <strong>overall</strong> metric score.</p>
+                sentence
+                and if the predictions match a <strong>0.5</strong> is added to the <strong>per-sentence</strong> metric score.</p>
         </div>
 
         <div class="form-group content-section">
@@ -217,7 +217,15 @@
                                 <div class="col border per-sentence-info"><strong>Hypothesis sentiment</strong>: {{ sentence_info.sentiment_hyp }}</div>
                             </div>
                         {% endif %}
-                        <p class="stm-score"><strong>STM Score</strong>: {{ sentence_info.score }} out of {% if info.sentiment %} 1.5 {% else %} 1.0 {% endif %}</p>
+
+                        {% if info.genre %}
+                            <div class="row">
+                                <div class="col border per-sentence-info"><strong>Reference genre</strong>: {{ sentence_info.genre_ref }}</div>
+                                <div class="col border per-sentence-info"><strong>Hypothesis genre</strong>: {{ sentence_info.genre_hyp }}</div>
+                            </div>
+                        {% endif %}
+
+                        <p class="stm-score text-center"><strong>STM Score</strong>: {{ sentence_info.score }} out of {% if info.sentiment and info.genre %} 2.0 {% elif info.sentiment or info.genre %} 1.5 {% else %} 1.0 {% endif %}</p>
                     </div>
                 {% endfor %}
             </div>

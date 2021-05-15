@@ -208,7 +208,7 @@ def corpus_stm_augmented(corpora: dict[str, list[str]],
 
     idx = 0
     for reference_sentence, hypothesis_sentence in zip(corpora['references'], corpora['hypotheses']):
-        sentence_score: float = sentence_stm(reference_sentence, hypothesis_sentence, nlp_model, depth)
+        sentence_score: float = round(sentence_stm(reference_sentence, hypothesis_sentence, nlp_model, depth), 4)
 
         if make_summary:
             per_sentence_summary.append({
@@ -216,7 +216,9 @@ def corpus_stm_augmented(corpora: dict[str, list[str]],
                 'hypothesis': hypothesis_sentence,
                 'score': sentence_score,
                 'sentiment_ref': None,
-                'sentiment_hyp': None
+                'sentiment_hyp': None,
+                'genre_ref': None,
+                'genre_hyp': None
             })
 
         if sentiment_classifier:
@@ -229,25 +231,33 @@ def corpus_stm_augmented(corpora: dict[str, list[str]],
                 per_sentence_summary[idx]['sentiment_hyp'] = sentiment_hyp
                 per_sentence_summary[idx]['score'] = sentence_score
 
+        if genre_classifier:
+            genre_ref = genre_classifier.predict([reference_sentence])[0]
+            genre_hyp = genre_classifier.predict([hypothesis_sentence])[0]
+            sentence_score += 0.5 * int(genre_ref == genre_hyp)
+
+            if make_summary:
+                per_sentence_summary[idx]['genre_ref'] = genre_ref
+                per_sentence_summary[idx]['genre_hyp'] = genre_hyp
+                per_sentence_summary[idx]['score'] = sentence_score
+
         score += sentence_score
 
         idx += 1
 
-    genre_score = 0
     genre_ref = None
     genre_hyp = None
     if genre_classifier:
         genre_ref = genre_classifier.predict(corpora['references'])[0]
         genre_hyp = genre_classifier.predict(corpora['hypotheses'])[0]
-        genre_score = 0.5 if genre_hyp == genre_ref else 0
 
     if make_summary:
-        return {'score': round(score / len(corpora['references']), 4) + genre_score,
+        return {'score': round(score / len(corpora['references']), 4),
                 'per_sentence_summary': per_sentence_summary,
                 'genre': {'reference': genre_ref,
                           'hypothesis': genre_hyp}}
 
-    return round(score / len(corpora['references']), 4) + genre_score
+    return round(score / len(corpora['references']), 4)
 
 
 def corpus_stm_several_references(references: list[list[str]],
