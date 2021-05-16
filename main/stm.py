@@ -114,7 +114,8 @@ def process_stm_corpus():
         pass
 
     if request.form.get('genre') and request.form.get('sentiment'):
-        result = METRICS_FUNCTIONS['stm_augmented'](corpora=corpora,
+        result = METRICS_FUNCTIONS['stm_augmented'](references=corpora['references'],
+                                                    hypotheses=corpora['hypotheses'],
                                                     nlp_model=MODEL,
                                                     sentiment_classifier=SENTIMENT_CLASSIFIER,
                                                     genre_classifier=GENRE_CLASSIFIER,
@@ -123,7 +124,8 @@ def process_stm_corpus():
         per_sentence_report = result['per_sentence_summary']
         genre = result['genre']
     elif request.form.get('sentiment'):
-        result = METRICS_FUNCTIONS['stm_augmented'](corpora=corpora,
+        result = METRICS_FUNCTIONS['stm_augmented'](references=corpora['references'],
+                                                    hypotheses=corpora['hypotheses'],
                                                     nlp_model=MODEL,
                                                     sentiment_classifier=SENTIMENT_CLASSIFIER,
                                                     depth=depth)
@@ -131,7 +133,8 @@ def process_stm_corpus():
         per_sentence_report = result['per_sentence_summary']
         genre = result['genre']
     elif request.form.get('genre'):
-        result = METRICS_FUNCTIONS['stm_augmented'](corpora=corpora,
+        result = METRICS_FUNCTIONS['stm_augmented'](references=corpora['references'],
+                                                    hypotheses=corpora['hypotheses'],
                                                     nlp_model=MODEL,
                                                     genre_classifier=GENRE_CLASSIFIER,
                                                     depth=depth)
@@ -139,7 +142,8 @@ def process_stm_corpus():
         per_sentence_report = result['per_sentence_summary']
         genre = result['genre']
     else:
-        result = METRICS_FUNCTIONS['stm_augmented'](corpora=corpora,
+        result = METRICS_FUNCTIONS['stm_augmented'](references=corpora['references'],
+                                                    hypotheses=corpora['hypotheses'],
                                                     nlp_model=MODEL,
                                                     depth=depth)
         score = result['score']

@@ -157,13 +157,16 @@ def sentence_stm_several_references(references: list[str],
     return round(nominator / denominator, 4)
 
 
-def corpus_stm(corpora: dict[str, list[str]],
+def corpus_stm(references: list[str],
+               hypotheses: list[str],
                nlp_model: Language,
                depth: int) -> float:
     """
 
-    :param corpora:
-    :type corpora:
+    :param hypotheses:
+    :type hypotheses:
+    :param references:
+    :type references:
     :param nlp_model:
     :type nlp_model:
     :param depth:
@@ -171,15 +174,18 @@ def corpus_stm(corpora: dict[str, list[str]],
     :return:
     :rtype:
     """
+    # TODO: introduce sanity checks
+
     score = 0
 
-    for reference_sentence, hypothesis_sentence in zip(corpora['references'], corpora['hypotheses']):
+    for reference_sentence, hypothesis_sentence in zip(references, hypotheses):
         score += sentence_stm(reference_sentence, hypothesis_sentence, nlp_model, depth)
 
-    return round(score / len(corpora['references']), 4)
+    return round(score / len(references), 4)
 
 
-def corpus_stm_augmented(corpora: dict[str, list[str]],
+def corpus_stm_augmented(references: list[str],
+                         hypotheses: list[str],
                          nlp_model: Language,
                          sentiment_classifier: Optional[NaiveBayesClassifier] = None,
                          genre_classifier: Optional[Pipeline] = None,
@@ -187,8 +193,10 @@ def corpus_stm_augmented(corpora: dict[str, list[str]],
                          make_summary: bool = True) -> Union[float, dict[str, Union[int, list]]]:
     """
 
-    :param corpora:
-    :type corpora:
+    :param hypotheses:
+    :type hypotheses:
+    :param references:
+    :type references:
     :param nlp_model:
     :type nlp_model:
     :param sentiment_classifier:
@@ -202,19 +210,23 @@ def corpus_stm_augmented(corpora: dict[str, list[str]],
     :return:
     :rtype:
     """
+    # TODO: introduce sanity checks
     score = 0
 
     per_sentence_summary: list[dict[str, Union[str, float]]] = []
 
     idx = 0
-    for reference_sentence, hypothesis_sentence in zip(corpora['references'], corpora['hypotheses']):
-        sentence_score: float = round(sentence_stm(reference_sentence, hypothesis_sentence, nlp_model, depth), 4)
+    for reference_sentence, hypothesis_sentence in zip(references, hypotheses):
+        sentence_score: float = sentence_stm(reference_sentence, hypothesis_sentence, nlp_model, depth)
+
+        if sentiment_classifier or genre_classifier:
+            sentence_score *= .7
 
         if make_summary:
             per_sentence_summary.append({
                 'reference': reference_sentence,
                 'hypothesis': hypothesis_sentence,
-                'score': sentence_score,
+                'score': round(sentence_score, 4),
                 'sentiment_ref': None,
                 'sentiment_hyp': None,
                 'genre_ref': None,
@@ -224,22 +236,26 @@ def corpus_stm_augmented(corpora: dict[str, list[str]],
         if sentiment_classifier:
             sentiment_ref: str = predict(reference_sentence, sentiment_classifier)
             sentiment_hyp: str = predict(hypothesis_sentence, sentiment_classifier)
-            sentence_score += 0.5 * int(sentiment_ref == sentiment_hyp)
+
+            sentence_score += 0.15 * int(sentiment_ref == sentiment_hyp) if genre_classifier else 0.3 * int(
+                sentiment_ref == sentiment_hyp)
 
             if make_summary:
                 per_sentence_summary[idx]['sentiment_ref'] = sentiment_ref
                 per_sentence_summary[idx]['sentiment_hyp'] = sentiment_hyp
-                per_sentence_summary[idx]['score'] = sentence_score
+                per_sentence_summary[idx]['score'] = round(sentence_score, 4)
 
         if genre_classifier:
             genre_ref = genre_classifier.predict([reference_sentence])[0]
             genre_hyp = genre_classifier.predict([hypothesis_sentence])[0]
-            sentence_score += 0.5 * int(genre_ref == genre_hyp)
+
+            sentence_score += 0.15 * int(genre_ref == genre_hyp) if sentiment_classifier else 0.3 * int(
+                genre_ref == genre_hyp)
 
             if make_summary:
                 per_sentence_summary[idx]['genre_ref'] = genre_ref
                 per_sentence_summary[idx]['genre_hyp'] = genre_hyp
-                per_sentence_summary[idx]['score'] = sentence_score
+                per_sentence_summary[idx]['score'] = round(sentence_score, 4)
 
         score += sentence_score
 
@@ -248,16 +264,16 @@ def corpus_stm_augmented(corpora: dict[str, list[str]],
     genre_ref = None
     genre_hyp = None
     if genre_classifier:
-        genre_ref = genre_classifier.predict(corpora['references'])[0]
-        genre_hyp = genre_classifier.predict(corpora['hypotheses'])[0]
+        genre_ref = genre_classifier.predict(references)[0]
+        genre_hyp = genre_classifier.predict(hypotheses)[0]
 
     if make_summary:
-        return {'score': round(score / len(corpora['references']), 4),
+        return {'score': round(score / len(references), 4),
                 'per_sentence_summary': per_sentence_summary,
                 'genre': {'reference': genre_ref,
                           'hypothesis': genre_hyp}}
 
-    return round(score / len(corpora['references']), 4)
+    return round(score / len(references), 4)
 
 
 def corpus_stm_several_references(references: list[list[str]],
