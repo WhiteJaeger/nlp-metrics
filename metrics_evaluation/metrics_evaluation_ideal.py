@@ -2,7 +2,7 @@ from nltk.translate.bleu_score import corpus_bleu
 from nltk.translate.meteor_score import meteor_score
 from nltk.translate.nist_score import corpus_nist
 
-from NLP.stm import corpus_stm, corpus_stm_augmented
+from NLP.stm_package.subtree_metric.stm import corpus_stm, corpus_stm_augmented
 from main.models import GENRE_CLASSIFIER, SENTIMENT_CLASSIFIER, MODEL
 
 
@@ -41,7 +41,7 @@ if __name__ == '__main__':
     reference_corpora_4_for_ngram = [[sentence.split()] for sentence in reference_corpora_4][:500]
     hypothesis_corpora_4_for_ngram = [sentence.split() for sentence in reference_corpora_4][:500]
 
-    ## STM digestible
+    ## stm_package digestible
     reference_corpora_1_for_stm = reference_corpora_1[:500]
     reference_corpora_2_for_stm = reference_corpora_2[:500]
     reference_corpora_3_for_stm = reference_corpora_3[:500]
@@ -168,47 +168,47 @@ if __name__ == '__main__':
 # BLEU: 0.9982658457109393
 # NIST: 13.368063436646528
 # METEOR: 0.990656415293831
-# STM: 0.978
-# STM-A: 0.9846
+# stm_package: 0.978
+# stm_package-A: 0.9846
 # ****************************************************************************************************
 # FIRST vs. SECOND
 # BLEU: 0.3131650301477595
 # NIST: 6.842192206781902
 # METEOR: 0.619288750881706
-# STM: 0.5471
-# STM-A: 0.6272
+# stm_package: 0.5471
+# stm_package-A: 0.6272
 # ****************************************************************************************************
 # FIRST vs. THIRD
 # BLEU: 0.24805461218182004
 # NIST: 5.8718347913668145
 # METEOR: 0.559153052520805
-# STM: 0.5002
-# STM-A: 0.5778
+# stm_package: 0.5002
+# stm_package-A: 0.5778
 # ****************************************************************************************************
 # FIRST vs. FOURTH
 # BLEU: 0.5076389102316189
 # NIST: 9.22117726382084
 # METEOR: 0.7857194322505343
-# STM: 0.6836
-# STM-A: 0.7395
+# stm_package: 0.6836
+# stm_package-A: 0.7395
 # ****************************************************************************************************
 # SECOND vs. THIRD
 # BLEU: 0.23689570084576927
 # NIST: 5.694706837152382
 # METEOR: 0.5329311830287575
-# STM: 0.5001
-# STM-A: 0.5748
+# stm_package: 0.5001
+# stm_package-A: 0.5748
 # ****************************************************************************************************
 # SECOND vs. FOURTH
 # BLEU: 0.37067794028495965
 # NIST: 7.656434932184833
 # METEOR: 0.650511115690221
-# STM: 0.5832
-# STM-A: 0.6545
+# stm_package: 0.5832
+# stm_package-A: 0.6545
 # ****************************************************************************************************
 # THIRD vs. FOURTH
 # BLEU: 0.2665348537463917
 # NIST: 6.439588648675369
 # METEOR: 0.5534725866134054
-# STM: 0.5385
-# STM-A: 0.607
+# stm_package: 0.5385
+# stm_package-A: 0.607
