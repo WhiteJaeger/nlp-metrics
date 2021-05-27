@@ -2,7 +2,7 @@ from nltk.translate.bleu_score import corpus_bleu
 from nltk.translate.meteor_score import meteor_score
 from nltk.translate.nist_score import corpus_nist
 
-from NLP.stm_package.subtree_metric.stm import corpus_stm, corpus_stm_augmented
+from subtree_metric.stm import corpus_stm, corpus_stm_augmented
 from main.models import GENRE_CLASSIFIER, SENTIMENT_CLASSIFIER, MODEL
 
 
