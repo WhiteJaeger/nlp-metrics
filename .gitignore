@@ -3,3 +3,6 @@ __pycache__/
 .idea
 metrics_evaluation/NMTenv
 metrics_evaluation/metrics_evaluation_translated_back.py
+dist/
+*.egg-info
+build/

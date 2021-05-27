@@ -23,8 +23,8 @@ from sklearn.pipeline import Pipeline
 from spacy import Language
 from spacy.tokens import Token
 
-from NLP.classifier_utils import predict
-from NLP.tree_constructor import SyntaxTreeHeadsExtractor, SyntaxTreeElementsExtractor
+from subtree_metric.classifier_utils import predict
+from subtree_metric.tree_constructor import SyntaxTreeHeadsExtractor, SyntaxTreeElementsExtractor
 
 
 def transform_into_tags(tokens: tuple[Token]) -> tuple:
@@ -78,7 +78,7 @@ def are_descendants_identical(ref_extractor: SyntaxTreeElementsExtractor,
 
 def sentence_stm(reference: str, hypothesis: str, nlp_model: Language, depth: int = 3) -> float:
     """
-    Calculate sentence-level STM score.
+    Calculate sentence-level stm_package score.
         >>> hypothesis = 'It is a guide to action which ensures that the military always obeys the commands of the party'
         >>> reference = 'It is the guiding to action that ensures that the military will forever heed Party commands'
         >>> sentence_stm(reference, hypothesis, spacy_model, depth=3)
@@ -165,7 +165,7 @@ def sentence_stm_several_references(references: list[str],
                                     nlp_model: Language,
                                     depth: int = 3) -> float:
     """
-    Calculate sentence-level STM score with several references vs. one hypothesis
+    Calculate sentence-level stm_package score with several references vs. one hypothesis
     :param references: reference sentences
     :type references: list[str]
     :param hypothesis: hypothesis sentence
@@ -174,7 +174,7 @@ def sentence_stm_several_references(references: list[str],
     :type nlp_model: Language
     :param depth: depth of the subtrees to take into account
     :type depth: int
-    :return: STM score
+    :return: stm_package score
     :rtype: float
     """
     nominator = 0
@@ -189,7 +189,7 @@ def corpus_stm(references: list[str],
                nlp_model: Language,
                depth: int) -> float:
     """
-    Calculate corpus-level STM score
+    Calculate corpus-level stm_package score
     :param hypotheses: hypotheses
     :type hypotheses: list[str]
     :param references: references
@@ -198,7 +198,7 @@ def corpus_stm(references: list[str],
     :type nlp_model: Language
     :param depth: depth of the subtrees to take into account
     :type depth: int
-    :return: Corpus STM score
+    :return: Corpus stm_package score
     :rtype: float
     """
     # TODO: introduce sanity checks
@@ -219,7 +219,7 @@ def corpus_stm_augmented(references: list[str],
                          depth: int = 3,
                          make_summary: bool = True) -> Union[float, dict[str, Union[int, list]]]:
     """
-    Calculate corpus-level STM score with additional weights from sentiment and genre classifiers - STM-Augmented
+    Calculate corpus-level stm_package score with additional weights from sentiment and genre classifiers - stm_package-Augmented
     :param hypotheses: hypotheses
     :type hypotheses: list[str]
     :param references: references
@@ -234,7 +234,7 @@ def corpus_stm_augmented(references: list[str],
     :type depth: int
     :param make_summary: whether to make a per-sentence summary
     :type make_summary: bool
-    :return: STM-A score
+    :return: stm_package-A score
     :rtype: float
     """
     # TODO: introduce sanity checks
@@ -308,12 +308,12 @@ if __name__ == '__main__':
     nlp: Language = spacy.load('en_core_web_md')
     ref = 'It is a guide to action that ensures that the military will forever heed Party commands'
     hyp = 'It is a guide to action which ensures that the military always obeys the commands of the party'
-    sentence_stm(ref,
-                 hyp,
-                 nlp)
+    print(sentence_stm(ref,
+                       hyp,
+                       nlp))
 
     ref = 'It is a guide to action that ensures that the military will forever heed Party commands'
     hyp = 'It is to insure the troops forever hearing the activity guidebook that party direct'
-    sentence_stm(ref,
-                 hyp,
-                 nlp)
+    print(sentence_stm(ref,
+                       hyp,
+                       nlp))
