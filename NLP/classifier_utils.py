@@ -7,7 +7,7 @@ from nltk.tag import pos_tag
 from nltk.tokenize import word_tokenize
 
 
-def remove_noise(tweet_tokens, stop_words=()) -> list:
+def remove_noise(tweet_tokens: list, stop_words=()) -> list:
     cleaned_tokens = []
 
     for token, tag in pos_tag(tweet_tokens):

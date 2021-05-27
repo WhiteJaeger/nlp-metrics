@@ -28,11 +28,25 @@ from NLP.tree_constructor import SyntaxTreeHeadsExtractor, SyntaxTreeElementsExt
 
 
 def transform_into_tags(tokens: tuple[Token]) -> tuple:
+    """
+    Return a tag collection for the given tokens.
+    :param tokens: tokens for which to get tags
+    :type tokens: tuple[Token]
+    :return: a collection of tags
+    :rtype: tuple
+    """
     # TODO: align some tags: e.g. VBZ - VB
     return tuple([token.tag_ for token in tokens])
 
 
 def get_freq_dict_for_tags(tags: tuple) -> dict:
+    """
+    Construct a frequency dictionary for the given tags
+    :param tags:
+    :type tags: tuple
+    :return: a frequency dictionary
+    :rtype: dict
+    """
     result = {}
     for tag in tags:
         result[tag] = result.get(tag, 0) + 1
@@ -41,6 +55,15 @@ def get_freq_dict_for_tags(tags: tuple) -> dict:
 
 def are_descendants_identical(ref_extractor: SyntaxTreeElementsExtractor,
                               hyp_extractor: SyntaxTreeElementsExtractor) -> bool:
+    """
+    Check whether children of the given heads are identical
+    :param ref_extractor: already filled in extractor (containing head -> children) for the reference
+    :type ref_extractor: SyntaxTreeElementsExtractor
+    :param hyp_extractor: already filled in extractor (containing head -> children) for the hypothesis
+    :type hyp_extractor: SyntaxTreeElementsExtractor
+    :return: whether children of these heads are identical
+    :rtype: bool
+    """
     ref_children_tags = transform_into_tags(ref_extractor.children)
     hyp_children_tags = transform_into_tags(hyp_extractor.children)
 
@@ -55,19 +78,23 @@ def are_descendants_identical(ref_extractor: SyntaxTreeElementsExtractor,
 
 def sentence_stm(reference: str, hypothesis: str, nlp_model: Language, depth: int = 3) -> float:
     """
-
-    :param reference:
-    :type reference:
-    :param hypothesis:
-    :type hypothesis:
-    :param nlp_model:
-    :type nlp_model:
-    :param depth:
-    :type depth:
-    :return:
-    :rtype:
+    Calculate sentence-level STM score.
+        >>> hypothesis = 'It is a guide to action which ensures that the military always obeys the commands of the party'
+        >>> reference = 'It is the guiding to action that ensures that the military will forever heed Party commands'
+        >>> sentence_stm(reference, hypothesis, spacy_model, depth=3)
+        0.4444
+    :param reference: reference sentence
+    :type reference: str
+    :param hypothesis: hypothesis sentence
+    :type hypothesis: str
+    :param nlp_model: one of the SpaCy NLP models with support of the DependencyParser (https://spacy.io/models)
+    :type nlp_model: Language
+    :param depth: depth of the subtrees to take into account
+    :type depth: int
+    :return: stm score
+    :rtype: float
     """
-    score = 0
+    score = 0.0
     # Get output from SpaCy model
     reference_preprocessed = nlp_model(reference)
     hypothesis_preprocessed = nlp_model(hypothesis)
@@ -138,17 +165,17 @@ def sentence_stm_several_references(references: list[str],
                                     nlp_model: Language,
                                     depth: int = 3) -> float:
     """
-
-    :param references:
-    :type references:
-    :param hypothesis:
-    :type hypothesis:
-    :param nlp_model:
-    :type nlp_model:
-    :param depth:
-    :type depth:
-    :return:
-    :rtype:
+    Calculate sentence-level STM score with several references vs. one hypothesis
+    :param references: reference sentences
+    :type references: list[str]
+    :param hypothesis: hypothesis sentence
+    :type hypothesis: str
+    :param nlp_model: one of the SpaCy NLP models with support of the DependencyParser (https://spacy.io/models)
+    :type nlp_model: Language
+    :param depth: depth of the subtrees to take into account
+    :type depth: int
+    :return: STM score
+    :rtype: float
     """
     nominator = 0
     denominator = len(references)
@@ -162,17 +189,17 @@ def corpus_stm(references: list[str],
                nlp_model: Language,
                depth: int) -> float:
     """
-
-    :param hypotheses:
-    :type hypotheses:
-    :param references:
-    :type references:
-    :param nlp_model:
-    :type nlp_model:
-    :param depth:
-    :type depth:
-    :return:
-    :rtype:
+    Calculate corpus-level STM score
+    :param hypotheses: hypotheses
+    :type hypotheses: list[str]
+    :param references: references
+    :type references: list[str]
+    :param nlp_model: one of the SpaCy NLP models with support of the DependencyParser (https://spacy.io/models)
+    :type nlp_model: Language
+    :param depth: depth of the subtrees to take into account
+    :type depth: int
+    :return: Corpus STM score
+    :rtype: float
     """
     # TODO: introduce sanity checks
 
@@ -192,23 +219,23 @@ def corpus_stm_augmented(references: list[str],
                          depth: int = 3,
                          make_summary: bool = True) -> Union[float, dict[str, Union[int, list]]]:
     """
-
-    :param hypotheses:
-    :type hypotheses:
-    :param references:
-    :type references:
-    :param nlp_model:
-    :type nlp_model:
-    :param sentiment_classifier:
-    :type sentiment_classifier:
-    :param genre_classifier:
-    :type genre_classifier:
-    :param depth:
-    :type depth:
-    :param make_summary:
-    :type make_summary:
-    :return:
-    :rtype:
+    Calculate corpus-level STM score with additional weights from sentiment and genre classifiers - STM-Augmented
+    :param hypotheses: hypotheses
+    :type hypotheses: list[str]
+    :param references: references
+    :type references: list[str]
+    :param nlp_model: one of the SpaCy NLP models with support of the DependencyParser (https://spacy.io/models)
+    :type nlp_model: Language
+    :param sentiment_classifier: a machine learning model that can predict the sentiment of the given sentence
+    :type sentiment_classifier: NaiveBayesClassifier
+    :param genre_classifier: a machine learning model that can predict the genre of the given sentence
+    :type genre_classifier: Pipeline
+    :param depth: depth of the subtrees to take into account
+    :type depth: int
+    :param make_summary: whether to make a per-sentence summary
+    :type make_summary: bool
+    :return: STM-A score
+    :rtype: float
     """
     # TODO: introduce sanity checks
     score = 0
@@ -274,35 +301,6 @@ def corpus_stm_augmented(references: list[str],
                           'hypothesis': genre_hyp}}
 
     return round(score / len(references), 4)
-
-
-def corpus_stm_several_references(references: list[list[str]],
-                                  hypotheses: list[str],
-                                  model: Language,
-                                  depth: int = 3) -> float:
-    """
-
-    :param references:
-    :type references:
-    :param hypotheses:
-    :type hypotheses:
-    :param model:
-    :type model:
-    :param depth:
-    :type depth:
-    :return:
-    :rtype:
-    """
-    if len(references) != len(hypotheses):
-        # TODO: error-handling
-        raise AssertionError
-
-    # There can be several references for one hypothesis
-    nominator = 0
-    denominator = len(references)
-    for refs, hypothesis in zip(references, hypotheses):
-        nominator += sentence_stm_several_references(refs, hypothesis, model, depth)
-    return round(nominator / denominator, 4)
 
 
 if __name__ == '__main__':

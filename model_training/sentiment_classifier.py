@@ -10,7 +10,7 @@ from nltk.tag import pos_tag
 from nltk.tokenize import word_tokenize
 
 
-def remove_noise(tokens_collection: list, stop_words: tuple = ()):
+def remove_noise(tokens_collection: list, stop_words: tuple = ()) -> list:
     cleaned_tokens = []
 
     for token, tag in pos_tag(tokens_collection):
@@ -36,13 +36,13 @@ def remove_noise(tokens_collection: list, stop_words: tuple = ()):
     return cleaned_tokens
 
 
-def get_all_words(cleaned_tokens: list):
+def get_all_words(cleaned_tokens: list) -> str:
     for tokens_collection in cleaned_tokens:
         for token in tokens_collection:
             yield token
 
 
-def get_tweets_for_model(cleaned_tokens: list):
+def get_tweets_for_model(cleaned_tokens: list) -> dict:
     for tokens_collection in cleaned_tokens:
         yield dict([token, True] for token in tokens_collection)
 
