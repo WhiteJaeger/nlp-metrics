@@ -18,6 +18,9 @@ def prepare_str(text: str,
                 stopword_removal=False,
                 remove_digits=False,
                 pos_preparation=False) -> Union[list[list[dict]], str]:
+    """
+    Preprocess the given string
+    """
     # expand contractions
     if contraction_expansion:
         text = expand_contractions(text)
