@@ -5,7 +5,7 @@ from nltk.translate.meteor_score import single_meteor_score
 from nltk.translate.nist_score import sentence_nist
 from rouge import Rouge
 
-from NLP.stm import sentence_stm, corpus_stm, corpus_stm_augmented
+from subtree_metric.stm import sentence_stm, corpus_stm, corpus_stm_augmented
 
 ROUGE = Rouge()
 
