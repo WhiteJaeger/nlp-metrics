@@ -165,17 +165,28 @@
 
     <hr>
 
-    {# TODO: Consider displaying the syntax trees #}
     {% if info %}
         <div id="output-info">
+            <ul class="list-group">
+                <li class="list-group-item text-center">
+                    <strong>Depth</strong>: {{ info.depth }}<br>
+                    <strong>{{ info.metric }} Score</strong>: {{ info.value }}
+                </li>
+            </ul>
             {% if info.hyp %}
                 <div class="container">
                     <div class="row">
-                        <div class="col border">
-                            <strong>Hypothesis</strong>: <br>{{ info.hyp }}
+                        <div class="content-section border">
+                            <strong>Hypothesis sentence</strong>: <br>{{ info.hyp }}
+                            <hr>
+                            <strong>Sentence Tree:</strong>
+                            <img src="{{ info.hypothesis_syntax_tree_path }}" alt="syntax_tree">
                         </div>
-                        <div class="col border">
-                            <strong>Reference</strong>: <br>{{ info.ref }}
+                        <div class="content-section border">
+                            <strong>Reference sentence</strong>: <br>{{ info.ref }}
+                            <hr>
+                            <strong>Sentence Tree:</strong>
+                            <img src="{{ info.reference_syntax_tree_path }}" alt="syntax_tree">
                         </div>
                     </div>
                 </div>
@@ -204,10 +215,6 @@
                             </div>
                         </li>
                     {% endif %}
-                    <li class="list-group-item text-center">
-                        <strong>Depth</strong>: {{ info.depth }}<br>
-                        <strong>{{ info.metric }} Score</strong>: {{ info.value }}
-                    </li>
                 </ul>
             </div>
         </div>

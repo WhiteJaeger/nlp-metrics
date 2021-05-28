@@ -23,7 +23,9 @@
                 <li class="list-group-item"><p><strong>Original Sentence:</strong></p>
                     <p>{{ output.sentence }}</p></li>
             </ul>
-            <img src="{{ output.syntax_tree_svg_path }}" alt="syntax_tree">
+            <div class="col border">
+                <img src="{{ output.syntax_tree_svg_path }}" alt="syntax_tree">
+            </div>
 
         </div>
     {% endif %}

@@ -33,7 +33,7 @@ def process_sentence_tree():
     output_path = os.path.join(svg_dir, f'syntax_tree_{generate_salt()}.svg')
     svg_tree = displacy.render(doc, style='dep', options={'bg': '#fafafa'})
 
-    old_svgs = os.listdir(os.path.dirname(output_path))
+    old_svgs = os.listdir(svg_dir)
     if len(old_svgs) > 20:
         for old_svg in old_svgs:
             os.remove(os.path.join(svg_dir, old_svg))

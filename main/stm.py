@@ -1,6 +1,7 @@
 import os
 
 from flask import Blueprint, render_template, request, redirect, url_for, current_app
+from spacy import displacy
 
 from NLP.constants import METRICS_FUNCTIONS
 from NLP.text_utils import prepare_str
@@ -59,13 +60,34 @@ def process_stm():
     else:
         score = METRICS_FUNCTIONS['stm'](ref, hyp, MODEL, data['depth'])
 
+    # Save syntax trees
+    svg_dir = os.path.join('static', 'images')
+    old_svgs = os.listdir(svg_dir)
+    if len(old_svgs) > 20:
+        for old_svg in old_svgs:
+            os.remove(os.path.join(svg_dir, old_svg))
+
+    parsed_hyp = MODEL(hyp)
+    output_path_hyp = os.path.join(svg_dir, f'syntax_tree_hyp_{generate_salt()}.svg')
+    svg_tree_hyp = displacy.render(parsed_hyp, style='dep', options={'bg': '#fafafa', 'compact': True})
+    with open(output_path_hyp, 'w', encoding='utf-8') as tree_file:
+        tree_file.write(svg_tree_hyp)
+
+    parsed_ref = MODEL(ref)
+    output_path_ref = os.path.join(svg_dir, f'syntax_tree_ref_{generate_salt()}.svg')
+    svg_tree_ref = displacy.render(parsed_ref, style='dep', options={'bg': '#fafafa', 'compact': True})
+    with open(output_path_ref, 'w', encoding='utf-8') as tree_file:
+        tree_file.write(svg_tree_ref)
+
     output = {
         'ref': data['ref'],
         'hyp': data['hyp'],
         'metric': 'STM',
         'value': score,
         'depth': data['depth'],
-        'sentiment': data['sentiment']
+        'sentiment': data['sentiment'],
+        'reference_syntax_tree_path': output_path_ref,
+        'hypothesis_syntax_tree_path': output_path_hyp
     }
     write_to_tmp_file(output)
     return redirect(url_for('stm.stm'))
