@@ -8,8 +8,8 @@ from main.utils import read_tmp_file, write_to_tmp_file
 bp = Blueprint('metrics', __name__, url_prefix='/')
 
 
-@bp.route('/metrics-sentence-level')
-def sl_metrics():
+@bp.route('/n-gram-metrics')
+def n_gram_metrics():
     form = InputForm()
     metric_info = read_tmp_file()
 
@@ -56,7 +56,7 @@ def process_input_metric():
         'ref': data['ref'],
         'hyp': data['hyp'],
         'metric': METRICS_MAP[metric],
-        'value': result
+        'value': result if result > .001 else 0
     }
     write_to_tmp_file(output)
-    return redirect(url_for('metrics.sl_metrics'))
+    return redirect(url_for('metrics.n_gram_metrics'))

@@ -1,5 +1,8 @@
 import os
+import time
+from datetime import datetime
 
+import flask_restful as restful
 from flask import Blueprint, render_template, request, redirect, url_for, current_app
 from spacy import displacy
 
@@ -7,7 +10,7 @@ from NLP.constants import METRICS_FUNCTIONS
 from NLP.text_utils import prepare_str
 from main.forms import InputForm
 from main.models import MODEL, SENTIMENT_CLASSIFIER, GENRE_CLASSIFIER
-from main.utils import read_tmp_file, write_to_tmp_file, generate_salt
+from main.utils import read_tmp_file, write_to_tmp_file, generate_salt, purge_old_files
 
 bp = Blueprint('stm', __name__, url_prefix='/')
 
@@ -62,10 +65,7 @@ def process_stm():
 
     # Save syntax trees
     svg_dir = os.path.join('static', 'images')
-    old_svgs = os.listdir(svg_dir)
-    if len(old_svgs) > 20:
-        for old_svg in old_svgs:
-            os.remove(os.path.join(svg_dir, old_svg))
+    purge_old_files(svg_dir)
 
     parsed_hyp = MODEL(hyp)
     output_path_hyp = os.path.join(svg_dir, f'syntax_tree_hyp_{generate_salt()}.svg')
@@ -108,7 +108,7 @@ def process_stm_corpus():
     references_file = request.files['references-file']
 
     # Rm old files
-    remove_old_corpora()
+    purge_old_files(current_app.config['UPLOAD_PATH'])
 
     # Save hypotheses file
     # if not secure_filename(hypotheses_file.filename).split('.')[-1] in APP.config['UPLOAD_EXTENSIONS']:
@@ -185,13 +185,6 @@ def process_stm_corpus():
     return redirect(url_for('stm.stm'))
 
 
-def remove_old_corpora():
-    old_corpora = os.listdir(current_app.config['UPLOAD_PATH'])
-    if len(old_corpora) > 20:
-        for old_corpus in old_corpora:
-            os.remove(os.path.join(current_app.config['UPLOAD_PATH'], old_corpus))
-
-
 def read_corpora(hypotheses_file_name: str, references_file_name: str) -> dict:
     corpora = {}
 
@@ -229,3 +222,47 @@ def are_corpora_structure_correct(corpora: dict) -> bool:
 
 def get_pairs_with_lowest_scores(summary: list[dict], k: int = 5) -> list[dict]:
     return sorted(summary, key=lambda x: x['score'])[:k]
+
+
+############################## POLLING ###########################
+class DataUpdate(restful.Resource):
+
+    def _is_updated(self, request_time):
+        """
+        Returns if resource is updated or it's the first
+        time it has been requested.
+        args:
+            request_time: last request timestamp
+        """
+        return os.stat('data.txt').st_mtime > request_time
+
+    def get(self):
+        """
+        Returns 'data.txt' content when the resource has
+        changed after the request time
+        """
+        request_time = time.time()
+        while not self._is_updated(request_time):
+            time.sleep(0.5)
+        content = ''
+        with open('data.txt') as data:
+            content = data.read()
+        return {'content': content,
+                'date': datetime.now().strftime('%Y/%m/%d %H:%M:%S')}
+
+
+class Data(restful.Resource):
+
+    def get(self):
+        """
+        Returns the current data content
+        """
+        content = ''
+        with open('data.txt') as data:
+            content = data.read()
+        return {'content': content}
+
+
+@bp.route('/test-polling')
+def polling():
+    return render_template('polling.html')

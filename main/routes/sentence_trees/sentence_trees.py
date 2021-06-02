@@ -5,7 +5,7 @@ from spacy import displacy
 
 from main.forms import InputForm
 from main.models import MODEL
-from main.utils import read_tmp_file, write_to_tmp_file, generate_salt
+from main.utils import read_tmp_file, write_to_tmp_file, generate_salt, purge_old_files
 
 bp = Blueprint('sentence_trees', __name__, url_prefix='/')
 
@@ -33,10 +33,7 @@ def process_sentence_tree():
     output_path = os.path.join(svg_dir, f'syntax_tree_{generate_salt()}.svg')
     svg_tree = displacy.render(doc, style='dep', options={'bg': '#fafafa'})
 
-    old_svgs = os.listdir(svg_dir)
-    if len(old_svgs) > 20:
-        for old_svg in old_svgs:
-            os.remove(os.path.join(svg_dir, old_svg))
+    purge_old_files(svg_dir)
 
     with open(output_path, 'w', encoding='utf-8') as tree_file:
         tree_file.write(svg_tree)

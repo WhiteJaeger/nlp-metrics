@@ -1,6 +1,8 @@
 import os
 import secrets
 
+import flask_restful as restful
+
 from flask import Flask, render_template
 from waitress import serve
 
@@ -21,11 +23,19 @@ def create_app():
     app.config['UPLOAD_PATH'] = 'uploads'
 
     # Blueprints & Routes
-    from main import n_gram_metrics, sentence_trees, stm, pos
+    from main.routes.part_of_speech import pos
+    from main.routes.subtree_metric import stm
+    from main.routes.sentence_trees import sentence_trees
+    from main.routes.n_gram_metrics import n_gram_metrics
     app.register_blueprint(n_gram_metrics.bp)
     app.register_blueprint(sentence_trees.bp)
     app.register_blueprint(stm.bp)
     app.register_blueprint(pos.bp)
+
+    # REST API
+    api = restful.Api(app)
+    api.add_resource(stm.Data, '/data')
+    api.add_resource(stm.DataUpdate, '/data-update')
 
     return app
 
