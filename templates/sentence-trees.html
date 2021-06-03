@@ -26,18 +26,6 @@
             <img src="" alt="syntax_tree" id="syntax-tree">
         </div>
     </div>
-{#    {% if output %}#}
-{#        <div class="container-md">#}
-{#            <ul class="list-group">#}
-{#                <li class="list-group-item"><p><strong>Original Sentence:</strong></p>#}
-{#                    <p>{{ output.sentence }}</p></li>#}
-{#            </ul>#}
-{#            <div class="col border">#}
-{#                <img src="{{ output.syntax_tree_svg_path }}" alt="syntax_tree">#}
-{#            </div>#}
-{##}
-{#        </div>#}
-{#    {% endif %}#}
 
     <script type="text/javascript" src="{{ url_for('static', filename='js/sentence-trees.js') }}"></script>
 {% endblock %}
