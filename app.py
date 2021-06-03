@@ -34,8 +34,10 @@ def create_app():
 
     # REST API
     from main.routes.part_of_speech.processing import POSAPI
+    from main.routes.sentence_trees.processing import SentenceTreesAPI
     api = restful.Api(app)
     api.add_resource(POSAPI, '/api/pos')
+    api.add_resource(SentenceTreesAPI, '/api/sentence-trees')
 
     return app
 
