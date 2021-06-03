@@ -1,7 +1,3 @@
-function setValue() {
-    $('#file').attr('value', 'randomString');
-}
-
 /**
  * Simple long polling client based on JQuery
  */
@@ -37,20 +33,22 @@ function load() {
     });
 }
 
-function testPOST() {
-    console.log(123);
+function postData() {
+    const inputText = $('#text_pos').val();
+    $.blockUI();
+
     $.ajax({
         url: '/data-update-pos',
         method: 'POST',
-        data: JSON.stringify({'abc': 123, 'dcv': 435}),
+        data: JSON.stringify({'text': inputText}),
         mimeType: 'application/json',
-        processData: false
+        processData: false,
+        success: function (data) {
+            console.log(data);
+            $.unblockUI()
+        }
     });
+    console.log('After request');
 }
 
-
-$(document).ready(function () {
-    setValue();
-    testPOST();
-    load();
-})
+document.getElementById('test-id').addEventListener('click', postData)

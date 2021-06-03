@@ -11,12 +11,11 @@ bp = Blueprint('pos', __name__, url_prefix='/')
 @bp.route('/pos-tagger')
 def pos():
     form = InputForm()
-    output = read_tmp_file(filename='temp_pos.json')
+    # output = read_tmp_file(filename='temp_pos.json')
     return render_template('pos.html',
                            form=form,
                            title='POS Tagger',
-                           legend='Context POS Tagger',
-                           output=output)
+                           legend='Context POS Tagger')
 
 
 @bp.route('/api/handle-pos-input', methods=['POST'])

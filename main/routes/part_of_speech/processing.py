@@ -5,6 +5,20 @@ from flask import request, json
 import flask_restful as restful
 
 
+
+
+class POSData(restful.Resource):
+
+    def post(self):
+        data = request.get_data().decode('utf-8')
+        data = json.loads(data)
+
+
+
+
+
+
+
 # POLLING #
 ############################## POLLING ###########################
 class POSDataUpdate(restful.Resource):
@@ -33,17 +47,19 @@ class POSDataUpdate(restful.Resource):
                 'date': datetime.now().strftime('%Y/%m/%d %H:%M:%S')}
 
     def post(self):
+        time.sleep(10)
         a = request.get_data().decode('utf-8')
         print(json.loads(a))
+        return 123
 
-
-class POSData(restful.Resource):
-
-    def get(self):
-        """
-        Returns the current data content
-        """
-        content = ''
-        with open('main/routes/part_of_speech/data.txt') as data:
-            content = data.read()
-        return {'content': content}
+#
+# class POSData(restful.Resource):
+#
+#     def get(self):
+#         """
+#         Returns the current data content
+#         """
+#         content = ''
+#         with open('main/routes/part_of_speech/data.txt') as data:
+#             content = data.read()
+#         return {'content': content}
