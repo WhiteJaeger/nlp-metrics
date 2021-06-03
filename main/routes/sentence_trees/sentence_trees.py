@@ -13,7 +13,7 @@ bp = Blueprint('sentence_trees', __name__, url_prefix='/')
 @bp.route('/sentence-trees')
 def sentence_trees():
     form = InputForm()
-    output = read_tmp_file()
+    output = read_tmp_file(filename='temp_sentence_trees.json')
 
     return render_template('sentence-trees.html',
                            legend='Sentence Trees Builder',
@@ -42,5 +42,5 @@ def process_sentence_tree():
         'sentence': sentence,
         'syntax_tree_svg_path': output_path
     }
-    write_to_tmp_file(output)
+    write_to_tmp_file(output, filename='temp_sentence_trees.json')
     return redirect(url_for('sentence_trees.sentence_trees'))

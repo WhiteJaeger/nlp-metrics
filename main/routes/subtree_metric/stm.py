@@ -18,7 +18,7 @@ bp = Blueprint('stm', __name__, url_prefix='/')
 @bp.route('/stm')
 def stm():
     form = InputForm()
-    output = read_tmp_file()
+    output = read_tmp_file(filename='temp_stm.json')
     return render_template('stm.html',
                            title='STM',
                            form=form,
@@ -89,7 +89,7 @@ def process_stm():
         'reference_syntax_tree_path': output_path_ref,
         'hypothesis_syntax_tree_path': output_path_hyp
     }
-    write_to_tmp_file(output)
+    write_to_tmp_file(output, filename='temp_stm.json')
     return redirect(url_for('stm.stm'))
 
 
@@ -180,7 +180,7 @@ def process_stm_corpus():
         'per_sentence_summary': get_pairs_with_lowest_scores(per_sentence_report) if per_sentence_report else None,
         'corpora_genre': genre
     }
-    write_to_tmp_file(output)
+    write_to_tmp_file(output, filename='temp_stm.json')
 
     return redirect(url_for('stm.stm'))
 

@@ -33,9 +33,12 @@ def create_app():
     app.register_blueprint(pos.bp)
 
     # REST API
+    from main.routes.part_of_speech.polling import POSData, POSDataUpdate
     api = restful.Api(app)
     api.add_resource(stm.Data, '/data')
     api.add_resource(stm.DataUpdate, '/data-update')
+    api.add_resource(POSData, '/data-pos')
+    api.add_resource(POSDataUpdate, '/data-update-pos')
 
     return app
 

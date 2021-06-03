@@ -11,7 +11,7 @@ bp = Blueprint('pos', __name__, url_prefix='/')
 @bp.route('/pos-tagger')
 def pos():
     form = InputForm()
-    output = read_tmp_file()
+    output = read_tmp_file(filename='temp_pos.json')
     return render_template('pos.html',
                            form=form,
                            title='POS Tagger',
@@ -28,8 +28,9 @@ def process_pos():
 
     output = {
         'text': data,
-        'pos': map_word_pos(data, predicted_pos)
+        'pos': map_word_pos(data, predicted_pos),
+        'file_id': request.form.get('file')
     }
-    write_to_tmp_file(output)
+    write_to_tmp_file(output, filename='temp_pos.json')
 
     return redirect(url_for('pos.pos'))

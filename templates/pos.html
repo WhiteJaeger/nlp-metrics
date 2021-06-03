@@ -20,9 +20,12 @@
                 <p>{{ form.text_pos }}</p>
             </div>
         </div>
-
+        <input name="file" hidden id="file">
         <input class="btn btn-outline-secondary mb-2" id="submit-button" type="submit" value="Submit">
     </form>
+
+    <p id="dateChange"></p>
+    <pre id="content"></pre>
 
     <hr>
 
@@ -51,6 +54,7 @@
             </table>
         </div>
     {% endif %}
+    <script type="text/javascript" src="{{ url_for('static', filename='js/polling_pos.js') }}"></script>
 {% endblock content %}
 
 {% block sidebar %}
