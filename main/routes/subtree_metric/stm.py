@@ -1,8 +1,5 @@
 import os
-import time
-from datetime import datetime
 
-import flask_restful as restful
 from flask import Blueprint, render_template, request, redirect, url_for, current_app
 from spacy import displacy
 
@@ -222,47 +219,3 @@ def are_corpora_structure_correct(corpora: dict) -> bool:
 
 def get_pairs_with_lowest_scores(summary: list[dict], k: int = 5) -> list[dict]:
     return sorted(summary, key=lambda x: x['score'])[:k]
-
-
-############################## POLLING ###########################
-class DataUpdate(restful.Resource):
-
-    def _is_updated(self, request_time):
-        """
-        Returns if resource is updated or it's the first
-        time it has been requested.
-        args:
-            request_time: last request timestamp
-        """
-        return os.stat('data.txt').st_mtime > request_time
-
-    def get(self):
-        """
-        Returns 'data.txt' content when the resource has
-        changed after the request time
-        """
-        request_time = time.time()
-        while not self._is_updated(request_time):
-            time.sleep(0.5)
-        content = ''
-        with open('data.txt') as data:
-            content = data.read()
-        return {'content': content,
-                'date': datetime.now().strftime('%Y/%m/%d %H:%M:%S')}
-
-
-class Data(restful.Resource):
-
-    def get(self):
-        """
-        Returns the current data content
-        """
-        content = ''
-        with open('data.txt') as data:
-            content = data.read()
-        return {'content': content}
-
-
-@bp.route('/test-polling')
-def polling():
-    return render_template('polling.html')
