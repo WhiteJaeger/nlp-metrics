@@ -36,10 +36,12 @@ def create_app():
     from main.routes.part_of_speech.processing import POSAPI
     from main.routes.sentence_trees.processing import SentenceTreesAPI
     from main.routes.n_gram_metrics.processing import NGramMetricsAPI
+    from main.routes.subtree_metric.processing import SubtreeMetricAPI
     api = restful.Api(app)
     api.add_resource(POSAPI, '/api/pos')
     api.add_resource(SentenceTreesAPI, '/api/sentence-trees')
     api.add_resource(NGramMetricsAPI, '/api/n-gram-metrics')
+    api.add_resource(SubtreeMetricAPI, '/api/stm')
 
     return app
 

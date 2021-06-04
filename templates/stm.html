@@ -23,7 +23,7 @@
         </div>
     </div>
 
-    <form id="sentence-level" class="form-control d-none" method="post" action="{{ url_for('stm.process_stm') }}">
+    <form id="sentence-level" class="form-control d-none" onsubmit="return preventSubmission(event);">
         <div class="container border-bottom" id="preprocessing">
             <h5 class="display-5">Text pre-processing</h5>
             <div class="form-check form-check-inline">
@@ -40,8 +40,6 @@
             </div>
         </div>
 
-        {{ form.csrf_token }}
-
         <div class="container border-bottom" id="depth-select" style="padding: 0">
             <div class="input-group mb-3 options" style="margin-left: 0">
                 <div class="input-group-prepend">
@@ -49,9 +47,9 @@
                 </div>
                 <select class="custom-select" id="depth" name="depth" required style="margin-right: 0">
                     <option selected disabled value="">Select Depth</option>
-                    <option>1</option>
-                    <option>2</option>
-                    <option>3</option>
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
                 </select>
             </div>
         </div>
@@ -71,17 +69,17 @@
 
         <div class="d-flex bd-highlight mb-3" id="sentence-boxes">
             <div class="p-2 bd-highlight">Type your hypothesis translation here:
-                <p>{{ form.text_hypothesis }}</p>
+                <p><textarea id="input-text-hypothesis"></textarea></p>
             </div>
             <div class="ml-auto p-2 bd-highlight">Type your reference translation here:
-                <p>{{ form.text_reference }}</p>
+                <p><textarea id="input-text-reference"></textarea></p>
             </div>
         </div>
 
-        <input class="btn btn-outline-secondary mb-2" id="submit-button" type="submit" value="Evaluate">
+        <input class="btn btn-outline-secondary mb-2" id="submit-button" type="submit" value="Evaluate" disabled>
     </form>
 
-    <form id="corpus-level" class="form-control d-none" method="post" action="{{ url_for('stm.process_stm_corpus') }}"
+    <form id="corpus-level" class="form-control d-none" onsubmit="return preventSubmission(event);"
           enctype="multipart/form-data">
 
         <div class="container border-bottom" id="preprocessing">
@@ -159,102 +157,93 @@
             <input type="file" name="references-file" class="form-control-file" required id="references-upload"
                    accept=".txt">
         </div>
-        <input class="btn btn-outline-secondary mb-2" id="submit-button" type="submit" value="Evaluate"
+        <input class="btn btn-outline-secondary mb-2" id="submit-button" type="submit" value="Evaluate" disabled
                style="margin: 0">
     </form>
 
     <hr>
 
-    {% if info %}
-        <div id="output-info">
-            <ul class="list-group">
-                <li class="list-group-item text-center">
-                    <strong>Depth</strong>: {{ info.depth }}<br>
-                    <strong>{{ info.metric }} Score</strong>: {{ info.value }}
-                </li>
-            </ul>
-            {% if info.hyp %}
-                <div class="container">
-                    <div class="row">
-                        <div class="content-section border">
-                            <strong>Hypothesis sentence</strong>: <br>{{ info.hyp }}
-                            <hr>
-                            <strong>Sentence Tree:</strong>
-                            <img src="{{ info.hypothesis_syntax_tree_path }}" alt="syntax_tree">
-                        </div>
-                        <div class="content-section border">
-                            <strong>Reference sentence</strong>: <br>{{ info.ref }}
-                            <hr>
-                            <strong>Sentence Tree:</strong>
-                            <img src="{{ info.reference_syntax_tree_path }}" alt="syntax_tree">
-                        </div>
+    <div class="d-none" id="output-container">
+        <ul class="list-group">
+            <li class="list-group-item text-center">
+                <strong>Depth</strong>: <span id="depth-value"></span><br>
+                <strong>STM Score</strong>: <span id="metric-score"></span>
+            </li>
+        </ul>
+        {# Sentence-level #}
+            <div class="container d-none" id="sentence-level-output">
+                <div class="row">
+                    <div class="content-section border">
+                        <strong>Hypothesis sentence</strong>: <br><span id="hypothesis-sentence"></span>
+                        <hr>
+                        <strong>Sentence Tree:</strong>
+                        <img src="" alt="syntax_tree" id="hypothesis-syntax-tree">
+                    </div>
+                    <div class="content-section border">
+                        <strong>Reference sentence</strong>: <br><span id="reference-sentence"></span>
+                        <hr>
+                        <strong>Sentence Tree:</strong>
+                        <img src="" alt="syntax_tree" id="reference-syntax-tree">
                     </div>
                 </div>
-            {% endif %}
-            <div class="container-md">
+            </div>
+        {# Analyzers #}
+            <div class="container-md d-none" id="analyzers">
                 <ul class="list-group">
-                    {% if info.sentiment %}
-                        <li class="list-group-item text-center">
-                            <strong>Sentiment analysis enabled:</strong> Yes
-                        </li>
-                    {% endif %}
-                    {% if info.genre %}
-                        <li class="list-group-item text-center">
-                            <strong>Genre analysis enabled:</strong> Yes
-                            <div class="container" id="corpora-genre">
-                                <div class="row">
-                                    <div class="col border">
-                                        <strong>Hypothesis corpora genre</strong>:
-                                        <br>{{ info.corpora_genre.hypothesis }}
-                                    </div>
-                                    <div class="col border">
-                                        <strong>Reference corpora genre</strong>:
-                                        <br>{{ info.corpora_genre.reference }}
-                                    </div>
+                    <li class="list-group-item text-center">
+                        <strong>Sentiment analysis enabled:</strong> <span id="sentiment-analyzer-enabled"></span>
+                    </li>
+                    <li class="list-group-item text-center">
+                        <strong>Genre analysis enabled:</strong> <span id="genre-analyzer-enabled"></span>
+                        <div class="container" id="corpora-genre">
+                            <div class="row">
+                                <div class="col border">
+                                    <strong>Hypothesis corpora genre</strong>: <span id="hypothesis-corpora-genre"></span>
+                                </div>
+                                <div class="col border">
+                                    <strong>Reference corpora genre</strong>: <span id="reference-corpora-genre"></span>
                                 </div>
                             </div>
-                        </li>
-                    {% endif %}
+                        </div>
+                    </li>
                 </ul>
             </div>
-        </div>
-        {% if info.per_sentence_summary %}
-            <div class="content-section" id="per-sentence-summary">
-                <h5 class="display-5">Per-sentence summary</h5>
-                {% for sentence_info in info.per_sentence_summary %}
-                    <div class="content-section">
-                        <div class="row">
-                            <div class="col border per-sentence-info"><strong>Reference
-                                sentence</strong>: {{ sentence_info.reference }}</div>
-                            <div class="col border per-sentence-info"><strong>Hypothesis
-                                sentence</strong>: {{ sentence_info.hypothesis }}</div>
-                        </div>
-                        {% if info.sentiment %}
-                            <div class="row">
-                                <div class="col border per-sentence-info"><strong>Reference
-                                    sentiment</strong>: {{ sentence_info.sentiment_ref }}</div>
-                                <div class="col border per-sentence-info"><strong>Hypothesis
-                                    sentiment</strong>: {{ sentence_info.sentiment_hyp }}</div>
-                            </div>
-                        {% endif %}
+        {# Per-sentence summary #}
+        {# TODO: Per-sentence summary #}
+{#            <div class="content-section d-none" id="per-sentence-summary">#}
+{#                <h5 class="display-5">Per-sentence summary</h5>#}
+{#                    <div class="content-section">#}
+{#                        <div class="row">#}
+{#                            <div class="col border per-sentence-info"><strong>Reference#}
+{#                                sentence</strong>: {{ sentence_info.reference }}</div>#}
+{#                            <div class="col border per-sentence-info"><strong>Hypothesis#}
+{#                                sentence</strong>: {{ sentence_info.hypothesis }}</div>#}
+{#                        </div>#}
+{#                        {% if info.sentiment %}#}
+{#                            <div class="row">#}
+{#                                <div class="col border per-sentence-info"><strong>Reference#}
+{#                                    sentiment</strong>: {{ sentence_info.sentiment_ref }}</div>#}
+{#                                <div class="col border per-sentence-info"><strong>Hypothesis#}
+{#                                    sentiment</strong>: {{ sentence_info.sentiment_hyp }}</div>#}
+{#                            </div>#}
+{#                        {% endif %}#}
+{##}
+{#                        {% if info.genre %}#}
+{#                            <div class="row">#}
+{#                                <div class="col border per-sentence-info"><strong>Reference#}
+{#                                    genre</strong>: {{ sentence_info.genre_ref }}</div>#}
+{#                                <div class="col border per-sentence-info"><strong>Hypothesis#}
+{#                                    genre</strong>: {{ sentence_info.genre_hyp }}</div>#}
+{#                            </div>#}
+{#                        {% endif %}#}
+{##}
+{#                        <p class="stm-score text-center"><strong>STM Score</strong>: {{ sentence_info.score }} out of#}
+{#                            1.0</p>#}
+{#                    </div>#}
+{#            </div>#}
+    </div>
 
-                        {% if info.genre %}
-                            <div class="row">
-                                <div class="col border per-sentence-info"><strong>Reference
-                                    genre</strong>: {{ sentence_info.genre_ref }}</div>
-                                <div class="col border per-sentence-info"><strong>Hypothesis
-                                    genre</strong>: {{ sentence_info.genre_hyp }}</div>
-                            </div>
-                        {% endif %}
-
-                        <p class="stm-score text-center"><strong>STM Score</strong>: {{ sentence_info.score }} out of
-                            1.0</p>
-                    </div>
-                {% endfor %}
-            </div>
-        {% endif %}
-    {% endif %}
-    <script type="text/javascript" src="{{ url_for('static', filename='js/metrics.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/stm.js') }}"></script>
 {% endblock content %}
 
 {% block sidebar %}
