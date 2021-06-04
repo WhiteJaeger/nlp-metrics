@@ -1,16 +1,11 @@
 function populateWithOutput(output) {
-    const originalText = output.text;
-    const wordToPOS = output.pos;
-    $('#output-container').attr('class', 'container-md');
-    $('#original-text').text(originalText);
+    const {reference, hypothesis, metric, score} = output;
 
-    for (let wordPOSMap of wordToPOS) {
-        const row = `<tr>
-<td class="text-center">${wordPOSMap[0]}</td>
-<td class="text-center">${wordPOSMap[1]}</td>
-</tr>`
-        $('#word-pos-table').append(row)
-    }
+    $('#output-container').removeClass('d-none');
+    $('#hypothesis-sentence').text(hypothesis);
+    $('#reference-sentence').text(reference);
+    $('#metric-name').text(metric);
+    $('#metric-score').text(score);
 }
 
 function postData() {
@@ -27,6 +22,12 @@ function postData() {
     const specCharsEl = $('#spec-chars');
     const lowercaseEl = $('#lowercase');
 
+    const preprocessing = {
+        'contractions': contractionsEl.is(':checked') ? 1 : 0,
+        'spec-chars': specCharsEl.is(':checked') ? 1 : 0,
+        'lowercase': lowercaseEl.is(':checked') ? 1 : 0
+    }
+
     inputFormReference.val('');
     inputFormHypothesis.val('');
     metricNameForm.val('').change();
@@ -38,13 +39,14 @@ function postData() {
     const data = {
         'reference': inputTextReference,
         'hypothesis': inputTextHypothesis,
-        'metric': metricName
+        'metric': metricName,
+        'preprocessing': preprocessing
     }
 
     $.ajax({
         url: '/api/n-gram-metrics',
         method: 'POST',
-        data: JSON.stringify({'text': inputText}),
+        data: JSON.stringify(data),
         mimeType: 'application/json',
         processData: false,
         success: function (data) {
@@ -62,7 +64,9 @@ function toggleSubmitButton() {
     $('#submit-button').prop('disabled', isRefEmpty || isHypEmpty || !isMetricSelected)
 }
 
-$('#submit-button').click(postData);
-$('#input-text-hypothesis').keyup(toggleSubmitButton);
-$('#input-text-reference').keyup(toggleSubmitButton);
-$('#metric-select').on('change', toggleSubmitButton);
+$(document).ready(function () {
+    $('#submit-button').click(postData);
+    $('#input-text-hypothesis').keyup(toggleSubmitButton);
+    $('#input-text-reference').keyup(toggleSubmitButton);
+    $('#metric-select').on('change', toggleSubmitButton);
+})

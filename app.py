@@ -32,12 +32,14 @@ def create_app():
     app.register_blueprint(stm.bp)
     app.register_blueprint(pos.bp)
 
-    # REST API
+    # API
     from main.routes.part_of_speech.processing import POSAPI
     from main.routes.sentence_trees.processing import SentenceTreesAPI
+    from main.routes.n_gram_metrics.processing import NGramMetricsAPI
     api = restful.Api(app)
     api.add_resource(POSAPI, '/api/pos')
     api.add_resource(SentenceTreesAPI, '/api/sentence-trees')
+    api.add_resource(NGramMetricsAPI, '/api/n-gram-metrics')
 
     return app
 

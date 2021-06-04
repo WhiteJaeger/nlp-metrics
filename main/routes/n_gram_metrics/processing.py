@@ -10,11 +10,12 @@ class NGramMetricsAPI(restful.Resource):
     def post(self):
         data = json.loads(request.get_data().decode('utf-8'))
         metric = data['metric']
+        preprocessing = data['preprocessing']
 
         text_preparation_params = {
-            'contractions': bool(data.get('contractions')),
-            'spec-chars': bool(data.get('spec-chars')),
-            'lowercase': bool(data.get('lowercase'))
+            'contractions': bool(preprocessing.get('contractions')),
+            'spec-chars': bool(preprocessing.get('spec-chars')),
+            'lowercase': bool(preprocessing.get('lowercase'))
         }
 
         ref = prepare_str(data['reference'],
