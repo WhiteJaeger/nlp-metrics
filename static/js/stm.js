@@ -196,7 +196,6 @@ function postCorpusLevel() {
 
 function postData() {
     const type = $('select[name=text-type] option').filter(':selected').val();
-    console.log(type);
     if (type === 'sentence') {
         postSentenceLevel();
     } else if (type === 'corpus') {
@@ -220,22 +219,17 @@ function toggleSubmitButton() {
     }
 }
 
-// TODO: actually destroy output, clear fields
-function hideOldOutput() {
-    $('#output-container').addClass('d-none');
-    $('#analyzers').addClass('d-none');
-    $('#genre-analysis-output').addClass('d-none');
-    $('#corpora-genre').addClass('d-none');
-    $('#sentence-level-output').addClass('d-none');
-    $('#per-sentence-summary').addClass('d-none');
+
+function removeOldOutput() {
+    // Reload the output part of the page
+    $('#output-container-outer').load($SCRIPT_ROOT + 'stm #output-container')
 }
 
 // TODO: extract common parts in HTML
 $(document).ready(function () {
+    $(document).ajaxStart(removeOldOutput);
     $('#submit-button-corpus').click(postData);
-    $('#submit-button-corpus').click(hideOldOutput);
     $('#submit-button-sentence').click(postData);
-    $('#submit-button-sentence').click(hideOldOutput);
 
     // Sentence level check
     $('#input-text-hypothesis').keyup(toggleSubmitButton);
@@ -247,7 +241,6 @@ $(document).ready(function () {
     $('#hypotheses-upload').on('change', toggleSubmitButton)
     $('#corpus-level #depth').on('change', toggleSubmitButton);
 
-    // TODO: add onClick event for submit buttons so that they remove old output
 })
 
 

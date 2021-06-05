@@ -1,7 +1,6 @@
 function populateWithOutput(output) {
     const originalText = output.text;
     const pathToSentenceTree = output['syntax_tree_svg_path'];
-    console.log(pathToSentenceTree);
     $('#output-container').attr('class', 'container-md');
     $('#original-text').text(originalText);
     $('#syntax-tree').attr('src', pathToSentenceTree)

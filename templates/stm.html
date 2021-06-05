@@ -5,6 +5,10 @@
 
     <legend> {{ legend }} </legend>
 
+    <script type="text/javascript">
+        $SCRIPT_ROOT = {{ request.script_root|tojson }};
+    </script>
+
     <div class="content-section">
         <p style="margin: 0">This page provides an interface to measure the performance of a given translation with
             syntax trees based metric.</p>
@@ -163,53 +167,56 @@
 
     <hr>
 
-    <div class="d-none" id="output-container">
-        <ul class="list-group">
-            <li class="list-group-item text-center">
-                <strong>Depth</strong>: <span id="depth-value"></span><br>
-                <strong>STM Score</strong>: <span id="metric-score"></span>
-            </li>
-        </ul>
-        {# Analyzers #}
-            <div class="container-md d-none" id="analyzers" style="margin-bottom: 10px">
-                <ul class="list-group">
-                    <li class="list-group-item text-center">
-                        <strong>Sentiment analysis enabled:</strong> <span id="sentiment-analyzer-enabled"></span>
-                    </li>
-                    <li class="list-group-item text-center d-none" id="genre-analysis-output">
-                        <strong>Genre analysis enabled:</strong> <span id="genre-analyzer-enabled"></span>
-                        <div class="container d-none" id="corpora-genre">
-                            <div class="row">
-                                <div class="col border">
-                                    <strong>Hypothesis corpora genre</strong>: <span id="hypothesis-corpora-genre"></span>
-                                </div>
-                                <div class="col border">
-                                    <strong>Reference corpora genre</strong>: <span id="reference-corpora-genre"></span>
+    <div id="output-container-outer">
+        <div class="d-none" id="output-container">
+            <ul class="list-group">
+                <li class="list-group-item text-center">
+                    <strong>Depth</strong>: <span id="depth-value"></span><br>
+                    <strong>STM Score</strong>: <span id="metric-score"></span>
+                </li>
+            </ul>
+            {# Analyzers #}
+                <div class="container-md d-none" id="analyzers" style="margin-bottom: 10px">
+                    <ul class="list-group">
+                        <li class="list-group-item text-center">
+                            <strong>Sentiment analysis enabled:</strong> <span id="sentiment-analyzer-enabled"></span>
+                        </li>
+                        <li class="list-group-item text-center d-none" id="genre-analysis-output">
+                            <strong>Genre analysis enabled:</strong> <span id="genre-analyzer-enabled"></span>
+                            <div class="container d-none" id="corpora-genre">
+                                <div class="row">
+                                    <div class="col border">
+                                        <strong>Hypothesis corpora genre</strong>: <span id="hypothesis-corpora-genre"></span>
+                                    </div>
+                                    <div class="col border">
+                                        <strong>Reference corpora genre</strong>: <span id="reference-corpora-genre"></span>
+                                    </div>
                                 </div>
                             </div>
+                        </li>
+                    </ul>
+                </div>
+            {# Sentence-level #}
+                <div class="container d-none" id="sentence-level-output" style="padding: 0">
+                        <div class="content-section border">
+                            <strong>Hypothesis sentence</strong>: <br><span id="hypothesis-sentence"></span>
+                            <hr>
+                            <strong>Sentence Tree:</strong>
+                            <img src="" alt="syntax_tree" id="hypothesis-syntax-tree">
                         </div>
-                    </li>
-                </ul>
-            </div>
-        {# Sentence-level #}
-            <div class="container d-none" id="sentence-level-output" style="padding: 0">
-                    <div class="content-section border">
-                        <strong>Hypothesis sentence</strong>: <br><span id="hypothesis-sentence"></span>
-                        <hr>
-                        <strong>Sentence Tree:</strong>
-                        <img src="" alt="syntax_tree" id="hypothesis-syntax-tree">
-                    </div>
-                    <div class="content-section border">
-                        <strong>Reference sentence</strong>: <br><span id="reference-sentence"></span>
-                        <hr>
-                        <strong>Sentence Tree:</strong>
-                        <img src="" alt="syntax_tree" id="reference-syntax-tree">
-                    </div>
-            </div>
-        {# Per-sentence summary #}
-            <div class="content-section d-none" id="per-sentence-summary" style="padding: 0">
-                <h5 class="display-5">Per-sentence summary</h5>
-            </div>
+                        <div class="content-section border">
+                            <strong>Reference sentence</strong>: <br><span id="reference-sentence"></span>
+                            <hr>
+                            <strong>Sentence Tree:</strong>
+                            <img src="" alt="syntax_tree" id="reference-syntax-tree">
+                        </div>
+                </div>
+            {# Per-sentence summary #}
+                <hr>
+                <div class="d-none" id="per-sentence-summary" style="padding: 0">
+                    <h5 class="display-5 text-center" style="margin-top: 10px">Per-sentence summary</h5>
+                </div>
+        </div>
     </div>
 
     <script type="text/javascript" src="{{ url_for('static', filename='js/stm.js') }}"></script>
