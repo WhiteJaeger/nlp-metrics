@@ -133,9 +133,12 @@ function postSentenceLevel() {
                 el.prop('checked', false)
             });
             $(`${formPrefix} #depth`).val('').change();
-            populateWithOutputSentenceLevel(JSON.parse(data));
-            $('#submit-button-sentence').prop('disabled', true);
-            $.unblockUI();
+            removeOldOutput();
+            $.ajaxStop(function () {
+                populateWithOutputSentenceLevel(JSON.parse(data));
+                $('#submit-button-sentence').prop('disabled', true);
+                $.unblockUI();
+            })
         }
     });
 }
@@ -187,9 +190,12 @@ function postCorpusLevel() {
             $(`${formPrefix} #depth`).val('').change();
             $('#hypotheses-upload').val('')
             $('#references-upload').val('')
-            populateWithOutputCorpusLevel(JSON.parse(data));
-            $('#submit-button-corpus').prop('disabled', true);
-            $.unblockUI();
+            removeOldOutput()
+            $.ajaxStop(function () {
+                populateWithOutputCorpusLevel(JSON.parse(data));
+                $('#submit-button-corpus').prop('disabled', true);
+                $.unblockUI();
+            })
         }
     });
 }
@@ -227,7 +233,7 @@ function removeOldOutput() {
 
 // TODO: extract common parts in HTML
 $(document).ready(function () {
-    $(document).ajaxStart(removeOldOutput);
+    // $(document).ajaxStart(removeOldOutput);
     $('#submit-button-corpus').click(postData);
     $('#submit-button-sentence').click(postData);
 
