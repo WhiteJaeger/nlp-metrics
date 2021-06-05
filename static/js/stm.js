@@ -134,7 +134,7 @@ function postSentenceLevel() {
             });
             $(`${formPrefix} #depth`).val('').change();
             removeOldOutput();
-            $.ajaxStop(function () {
+            $(document).ajaxStop(function () {
                 populateWithOutputSentenceLevel(JSON.parse(data));
                 $('#submit-button-sentence').prop('disabled', true);
                 $.unblockUI();
@@ -191,7 +191,7 @@ function postCorpusLevel() {
             $('#hypotheses-upload').val('')
             $('#references-upload').val('')
             removeOldOutput()
-            $.ajaxStop(function () {
+            $(document).ajaxStop(function () {
                 populateWithOutputCorpusLevel(JSON.parse(data));
                 $('#submit-button-corpus').prop('disabled', true);
                 $.unblockUI();
