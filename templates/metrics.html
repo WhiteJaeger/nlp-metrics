@@ -9,14 +9,14 @@
             N-gram based metrics.</p>
     </div>
 
-    <form class="form-control" method="post" action="{{ url_for('metrics.process_input_metric') }}">
+    <form class="form-control" onsubmit="return preventSubmission(event)">
 
         <div class="input-group mb-3 options">
             <div class="input-group-prepend">
                 <label class="input-group-text" for="metric-select">Metrics</label>
             </div>
             <select class="custom-select" id="metric-select" name="metric" required style="margin-right: 16px">
-                <option selected disabled value="">Choose Metric</option>
+                <option selected disabled value="" id="metric-placeholder">Choose Metric</option>
                 {% for metric, metric_name in metrics.items() %}
                     <option value="{{ metric }}">{{ metric_name }}</option>
                 {% endfor %}
@@ -37,39 +37,40 @@
                 <label class="form-check-label" for="lowercase">Lowercase</label>
             </div>
         </div>
-        {{ form.csrf_token }}
         <div class="d-flex bd-highlight mb-3">
             <div class="p-2 bd-highlight">Type your hypothesis translation here:
-                <p>{{ form.text_hypothesis }}</p>
+                <p><textarea id="input-text-hypothesis"></textarea></p>
             </div>
             <div class="ml-auto p-2 bd-highlight">Type your reference translation here:
-                <p>{{ form.text_reference }}</p>
+                <p><textarea id="input-text-reference"></textarea></p>
             </div>
         </div>
 
-        <input class="btn btn-outline-secondary mb-2" id="submit-button" type="submit" value="Evaluate">
+        <input class="btn btn-outline-secondary mb-2" id="submit-button" type="submit" value="Evaluate" disabled>
     </form>
 
     <hr>
 
-    {% if metric_info %}
+    <div class="d-none" id="output-container">
         <div class="container">
             <div class="row">
                 <div class="col border">
-                    <strong>Hypothesis</strong>: <br>{{ metric_info.hyp }}
+                    <strong>Hypothesis</strong>: <br><span id="hypothesis-sentence"></span>
                 </div>
                 <div class="col border">
-                    <strong>Reference</strong>: <br>{{ metric_info.ref }}
+                    <strong>Reference</strong>: <br> <span id="reference-sentence"></span>
                 </div>
             </div>
         </div>
         <div class="container-md">
             <ul class="list-group">
                 <li class="list-group-item text-center">
-                    <strong>{{ metric_info.metric }}</strong>: {{ metric_info.value }} </li>
+                    <strong><span id="metric-name"></span></strong>: <span id="metric-score"></span></li>
             </ul>
         </div>
-    {% endif %}
+    </div>
+
+    <script type="text/javascript" src="{{ url_for('static', filename='js/n-gram-metrics.js') }}"></script>
 {% endblock content %}
 
 {% block sidebar %}

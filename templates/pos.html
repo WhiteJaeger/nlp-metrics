@@ -3,7 +3,6 @@
 
 {% block content %}
     <legend> {{ legend }} </legend>
-
     <div class="content-section">
         <p style="margin: 0">This Part-of-Speech tagger is based on the Continuous Random Fields model.
             <br>
@@ -13,44 +12,35 @@
         </p>
     </div>
 
-    <form class="form-control" method="post" action="{{ url_for('pos.process_pos') }}">
-        {{ form.csrf_token }}
+    <form class="form-control" onsubmit="return preventSubmission(event)">
         <div class="d-flex bd-highlight mb-3">
             <div class="p-2 bd-highlight">Type your text here:
-                <p>{{ form.text_pos }}</p>
+                <p><textarea id="input-text"></textarea></p>
             </div>
         </div>
-
-        <input class="btn btn-outline-secondary mb-2" id="submit-button" type="submit" value="Submit">
+        <input class="btn btn-outline-secondary mb-2" id="submit-button" type="submit" value="Submit" disabled>
     </form>
 
     <hr>
 
-    {% if output %}
-        <div class="container-md">
-            <ul class="list-group">
-                <li class="list-group-item"><p><strong>Original Text:</strong></p>
-                    <p>{{ output.text }}</p></li>
-            </ul>
+    <div class="container-md d-none" id="output-container">
+        <ul class="list-group">
+            <li class="list-group-item"><p><strong>Original Text:</strong></p>
+                <p id="original-text"></p></li>
+        </ul>
 
-            <table class="table table-bordered table-sm">
-                <thead>
-                <tr>
-                    <th scope="col" class="text-center">Word</th>
-                    <th scope="col" class="text-center">POS Tag</th>
-                </tr>
-                </thead>
-                <tbody>
-                {% for word_tag in output.pos %}
-                    <tr>
-                        <td class="text-center">{{ word_tag[0] }}</td>
-                        <td class="text-center">{{ word_tag[1] }}</td>
-                    </tr>
-                {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    {% endif %}
+        <table class="table table-bordered table-sm">
+            <thead>
+            <tr>
+                <th scope="col" class="text-center">Word</th>
+                <th scope="col" class="text-center">POS Tag</th>
+            </tr>
+            </thead>
+            <tbody id="word-pos-table"></tbody>
+        </table>
+    </div>
+
+    <script type="text/javascript" src="{{ url_for('static', filename='js/pos.js') }}"></script>
 {% endblock content %}
 
 {% block sidebar %}
