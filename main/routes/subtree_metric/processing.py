@@ -74,6 +74,12 @@ class SubtreeMetricAPI(restful.Resource):
         return json.dumps(output)
 
         # TODO: CORPUS
+        print(request.form.get('isSentimentEnabled'))
+        print(request.form.get('depth'))
+        print(json.loads(request.form.get('preprocessing')))
+        hypotheses_file = request.files['hypothesis']
+        hypotheses_file.save(os.path.join(current_app.config['UPLOAD_PATH'], 'text.txt'))
+        return 123
         genre = None
 
         text_preparation_params = {

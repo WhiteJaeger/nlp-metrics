@@ -12,6 +12,7 @@ function populateWithOutputSentenceLevel(output) {
     // TODO: check for corpus-level container
     $('#output-container').removeClass('d-none');
     $('#sentence-level-output').removeClass('d-none');
+    $('#analyzers').removeClass('d-none')
 
     $('#hypothesis-sentence').text(hypothesis);
     $('#reference-sentence').text(reference);
@@ -19,7 +20,7 @@ function populateWithOutputSentenceLevel(output) {
     $('#depth-value').text(depth);
     $('#hypothesis-syntax-tree').attr('src', hypothesisSyntaxTreePath)
     $('#reference-syntax-tree').attr('src', referenceSyntaxTreePath)
-    const sentimentAnalyzerEnabled = isSentimentEnabled ? 'Yes' : 'No';
+    const sentimentAnalyzerEnabled = Number(isSentimentEnabled) ? 'Yes' : 'No';
     $('#sentiment-analyzer-enabled').text(sentimentAnalyzerEnabled)
 }
 
@@ -32,7 +33,7 @@ function postSentenceLevel() {
     const inputFormHypothesis = $(`${formPrefix} #input-text-hypothesis`);
     const inputTextHypothesis = inputFormHypothesis.val();
 
-    const depth = $('#sentence-level select[name=depth] option').filter(':selected').val();
+    const depth = $(`${formPrefix} select[name=depth] option`).filter(':selected').val();
 
     const sentimentEl = $(`${formPrefix} #sentiment-sentence`);
     const isSentimentEnabled = sentimentEl.is(':checked') ? 1 : 0;
@@ -64,6 +65,12 @@ function postSentenceLevel() {
         mimeType: 'application/json',
         processData: false,
         success: function (data) {
+            inputFormReference.val('');
+            inputFormHypothesis.val('');
+            [contractionsEl, specCharsEl, lowercaseEl, sentimentEl].forEach(function (el) {
+                el.prop('checked', false)
+            });
+            $(`${formPrefix} #depth`).val('').change();
             populateWithOutputSentenceLevel(JSON.parse(data));
             $('#submit-button').prop('disabled', true);
             $.unblockUI();
@@ -78,29 +85,53 @@ function postCorpusLevel() {
     const specCharsEl = $(`${formPrefix} #spec-chars`);
     const lowercaseEl = $(`${formPrefix} #lowercase`);
 
-    const depth = $('#corpus-level select[name=depth] option').filter(':selected').val();
+    const depth = $(`${formPrefix} select[name=depth] option`).filter(':selected').val();
 
     const sentimentEl = $(`${formPrefix} #sentiment`);
-    const isSentimentEnabled = sentimentEl.is(':checked') ? 1 : 0;
+    const isSentimentEnabled = sentimentEl.is(':checked') ? '1' : '0';
 
     const genreEl = $(`${formPrefix} #genre`);
-    const isGenreEnabled = genreEl.is(':checked') ? 1 : 0;
-
-    // Files
-    const files = new FormData();
-    files.append('file', $('#hypotheses-upload')[0].files[0])
-    files.append('file', $('#references-upload')[0].files[0])
-
+    const isGenreEnabled = genreEl.is(':checked') ? '1' : '0';
     const preprocessing = {
         'contractions': contractionsEl.is(':checked') ? 1 : 0,
         'spec-chars': specCharsEl.is(':checked') ? 1 : 0,
         'lowercase': lowercaseEl.is(':checked') ? 1 : 0
     }
+
+    // Files
+    const data = new FormData();
+    data.append('hypothesis', $('#hypotheses-upload')[0].files[0], 'hypothesis.txt')
+    data.append('reference', $('#references-upload')[0].files[0], 'reference.txt')
+    data.append('preprocessing', JSON.stringify(preprocessing))
+    data.append('isSentimentEnabled', isSentimentEnabled);
+    data.append('isGenreEnabled', isGenreEnabled);
+    data.append('depth', depth);
+
+    $.blockUI();
+
+    $.ajax({
+        url: '/api/stm',
+        method: 'POST',
+        data: data,
+        mimeType: 'application/json',
+        processData: false,
+        contentType: false,
+        success: function (data) {
+            [contractionsEl, specCharsEl, lowercaseEl, sentimentEl, genreEl].forEach(function (el) {
+                el.prop('checked', false)
+            });
+            $(`${formPrefix} #depth`).val('').change();
+            // populateWithOutputSentenceLevel(JSON.parse(data));
+            $('#submit-button').prop('disabled', true);
+            $.unblockUI();
+        }
+    });
 }
 
 function postData() {
 
-    const type = $('select[name=text-type] option').filter(':selected').val()
+    const type = $('select[name=text-type] option').filter(':selected').val();
+    console.log(type);
     if (type === 'sentence') {
         postSentenceLevel();
     } else if (type === 'corpus') {
@@ -148,11 +179,12 @@ function toggleSubmitButton() {
     $('#submit-button').prop('disabled', isRefEmpty || isHypEmpty || !isMetricSelected)
 }
 
+// TODO: DIFFERENT BUTTONS
 $(document).ready(function () {
-    $('#submit-button').click(postData);
-    $('#input-text-hypothesis').keyup(toggleSubmitButton);
-    $('#input-text-reference').keyup(toggleSubmitButton);
-    $('#metric-select').on('change', toggleSubmitButton);
+    $('#corpus-level #submit-button').click(postData);
+    // $('#input-text-hypothesis').keyup(toggleSubmitButton);
+    // $('#input-text-reference').keyup(toggleSubmitButton);
+    // $('#metric-select').on('change', toggleSubmitButton);
 })
 
 
