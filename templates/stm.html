@@ -76,7 +76,7 @@
             </div>
         </div>
 
-        <input class="btn btn-outline-secondary mb-2" id="submit-button" type="submit" value="Evaluate" disabled>
+        <input class="btn btn-outline-secondary mb-2" id="submit-button-sentence" type="submit" value="Evaluate" disabled>
     </form>
 
     <form id="corpus-level" class="form-control d-none" onsubmit="return preventSubmission(event);"
@@ -157,7 +157,7 @@
             <input type="file" name="references-file" class="form-control-file" required id="references-upload"
                    accept=".txt">
         </div>
-        <input class="btn btn-outline-secondary mb-2" id="submit-button" type="submit" value="Evaluate"
+        <input class="btn btn-outline-secondary mb-2" id="submit-button-corpus" type="submit" value="Evaluate" disabled
                style="margin: 0">
     </form>
 
@@ -176,9 +176,9 @@
                     <li class="list-group-item text-center">
                         <strong>Sentiment analysis enabled:</strong> <span id="sentiment-analyzer-enabled"></span>
                     </li>
-                    <li class="list-group-item text-center d-none" id="genre-analysis">
+                    <li class="list-group-item text-center d-none" id="genre-analysis-output">
                         <strong>Genre analysis enabled:</strong> <span id="genre-analyzer-enabled"></span>
-                        <div class="container" id="corpora-genre">
+                        <div class="container d-none" id="corpora-genre">
                             <div class="row">
                                 <div class="col border">
                                     <strong>Hypothesis corpora genre</strong>: <span id="hypothesis-corpora-genre"></span>
@@ -207,38 +207,9 @@
                     </div>
             </div>
         {# Per-sentence summary #}
-        {# TODO: Per-sentence summary #}
-{#            <div class="content-section d-none" id="per-sentence-summary">#}
-{#                <h5 class="display-5">Per-sentence summary</h5>#}
-{#                    <div class="content-section">#}
-{#                        <div class="row">#}
-{#                            <div class="col border per-sentence-info"><strong>Reference#}
-{#                                sentence</strong>: {{ sentence_info.reference }}</div>#}
-{#                            <div class="col border per-sentence-info"><strong>Hypothesis#}
-{#                                sentence</strong>: {{ sentence_info.hypothesis }}</div>#}
-{#                        </div>#}
-{#                        {% if info.sentiment %}#}
-{#                            <div class="row">#}
-{#                                <div class="col border per-sentence-info"><strong>Reference#}
-{#                                    sentiment</strong>: {{ sentence_info.sentiment_ref }}</div>#}
-{#                                <div class="col border per-sentence-info"><strong>Hypothesis#}
-{#                                    sentiment</strong>: {{ sentence_info.sentiment_hyp }}</div>#}
-{#                            </div>#}
-{#                        {% endif %}#}
-{##}
-{#                        {% if info.genre %}#}
-{#                            <div class="row">#}
-{#                                <div class="col border per-sentence-info"><strong>Reference#}
-{#                                    genre</strong>: {{ sentence_info.genre_ref }}</div>#}
-{#                                <div class="col border per-sentence-info"><strong>Hypothesis#}
-{#                                    genre</strong>: {{ sentence_info.genre_hyp }}</div>#}
-{#                            </div>#}
-{#                        {% endif %}#}
-{##}
-{#                        <p class="stm-score text-center"><strong>STM Score</strong>: {{ sentence_info.score }} out of#}
-{#                            1.0</p>#}
-{#                    </div>#}
-{#            </div>#}
+            <div class="content-section d-none" id="per-sentence-summary" style="padding: 0">
+                <h5 class="display-5">Per-sentence summary</h5>
+            </div>
     </div>
 
     <script type="text/javascript" src="{{ url_for('static', filename='js/stm.js') }}"></script>

@@ -1,8 +1,8 @@
+import flask_restful as restful
 from flask import request, json
 
 from NLP.constants import METRICS_FUNCTIONS, METRICS_MAP
 from NLP.text_utils import prepare_str
-import flask_restful as restful
 
 
 class NGramMetricsAPI(restful.Resource):

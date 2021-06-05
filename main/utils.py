@@ -1,23 +1,6 @@
-import json
 import random
 import string
-from os import path, remove, listdir, remove
-
-
-def read_tmp_file(filename: str = 'temp.json') -> dict:
-    data = None
-
-    if path.exists(filename):
-        with open(filename, 'r') as temp:
-            data = json.load(temp)
-        remove(filename)
-
-    return data
-
-
-def write_to_tmp_file(output, filename: str = 'temp.json'):
-    with open(filename, 'w') as temp:
-        json.dump(output, temp)
+from os import path, listdir, remove
 
 
 def generate_salt() -> str:

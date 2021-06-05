@@ -2,7 +2,6 @@ function populateWithOutputSentenceLevel(output) {
     const {
         reference,
         hypothesis,
-        metric,
         score,
         depth,
         isSentimentEnabled,
@@ -24,7 +23,70 @@ function populateWithOutputSentenceLevel(output) {
     $('#sentiment-analyzer-enabled').text(sentimentAnalyzerEnabled)
 }
 
+function populateWithOutputCorpusLevel(output) {
+    const {
+        score,
+        depth,
+        isGenreEnabled,
+        isSentimentEnabled,
+        per_sentence_summary: perSentenceSummary,
+        corpora_genres: corporaGenres
+    } = output;
+    if (perSentenceSummary) {
+        $('#per-sentence-summary').removeClass('d-none')
+        for (let summary of perSentenceSummary) {
+            let row = `
+<div class="content-section">
+    <div class="row">
+        <div class="col border per-sentence-info"><strong>Reference sentence</strong>: ${summary.reference}</div>
+        <div class="col border per-sentence-info"><strong>Hypothesis sentence</strong>: ${summary.hypothesis}</div>
+    </div>`;
+            if (Number(isSentimentEnabled)) {
+                row = `${row} <div class="row">
+                                <div class="col border per-sentence-info"><strong>Reference
+                                    sentiment</strong>: ${summary.sentiment_ref}</div>
+                                <div class="col border per-sentence-info"><strong>Hypothesis
+                                    sentiment</strong>: ${summary.sentiment_hyp}</div>
+                            </div>`
+            }
+            if (Number(isGenreEnabled)) {
+                row = `${row} <div class="row">
+                                <div class="col border per-sentence-info"><strong>Reference
+                                    genre</strong>: ${summary.genre_ref}</div>
+                                <div class="col border per-sentence-info"><strong>Hypothesis
+                                    genre</strong>: ${summary.genre_hyp}</div>
+                            </div>`
+            }
+            row = `${row} <p class="stm-score text-center"><strong>STM Score</strong>: ${summary.score} out of
+                            1.0</p>`
+            row = `${row} </div>`
+            $('#per-sentence-summary').append(row);
+        }
+    }
+    // TODO: check for sentence-level container
+    $('#output-container').removeClass('d-none');
+    $('#analyzers').removeClass('d-none')
+    $('#genre-analysis-output').removeClass('d-none')
+
+    $('#metric-score').text(score);
+    $('#depth-value').text(depth);
+    const sentimentAnalyzerEnabled = Number(isSentimentEnabled) ? 'Yes' : 'No';
+    $('#sentiment-analyzer-enabled').text(sentimentAnalyzerEnabled)
+
+    if (Number(isGenreEnabled)) {
+        $('#genre-analyzer-enabled').text('Yes')
+        $('#corpora-genre').removeClass('d-none')
+        $('#hypothesis-corpora-genre').text(corporaGenres.hypothesis)
+        $('#reference-corpora-genre').text(corporaGenres.reference)
+    } else {
+        $('#genre-analyzer-enabled').text('No')
+    }
+}
+
 function postSentenceLevel() {
+
+    $.blockUI();
+
     const formPrefix = '#sentence-level';
 
     const inputFormReference = $(`${formPrefix} #input-text-reference`);
@@ -36,7 +98,7 @@ function postSentenceLevel() {
     const depth = $(`${formPrefix} select[name=depth] option`).filter(':selected').val();
 
     const sentimentEl = $(`${formPrefix} #sentiment-sentence`);
-    const isSentimentEnabled = sentimentEl.is(':checked') ? 1 : 0;
+    const isSentimentEnabled = sentimentEl.is(':checked') ? '1' : '0';
 
     const contractionsEl = $(`${formPrefix} #contractions`);
     const specCharsEl = $(`${formPrefix} #spec-chars`);
@@ -48,22 +110,22 @@ function postSentenceLevel() {
         'lowercase': lowercaseEl.is(':checked') ? 1 : 0
     }
 
-    const data = {
-        'reference': inputTextReference,
-        'hypothesis': inputTextHypothesis,
-        'depth': depth,
-        'preprocessing': preprocessing,
-        'isSentimentEnabled': isSentimentEnabled
-    }
-
-    $.blockUI();
+    // Data
+    const data = new FormData();
+    data.append('type', 'sentence-level')
+    data.append('reference', inputTextReference);
+    data.append('hypothesis', inputTextHypothesis);
+    data.append('depth', depth);
+    data.append('preprocessing', JSON.stringify(preprocessing));
+    data.append('isSentimentEnabled', isSentimentEnabled);
 
     $.ajax({
         url: '/api/stm',
         method: 'POST',
-        data: JSON.stringify(data),
+        data: data,
         mimeType: 'application/json',
         processData: false,
+        contentType: false,
         success: function (data) {
             inputFormReference.val('');
             inputFormHypothesis.val('');
@@ -72,13 +134,16 @@ function postSentenceLevel() {
             });
             $(`${formPrefix} #depth`).val('').change();
             populateWithOutputSentenceLevel(JSON.parse(data));
-            $('#submit-button').prop('disabled', true);
+            $('#submit-button-sentence').prop('disabled', true);
             $.unblockUI();
         }
     });
 }
 
 function postCorpusLevel() {
+
+    $.blockUI();
+
     const formPrefix = '#corpus-level';
 
     const contractionsEl = $(`${formPrefix} #contractions`);
@@ -98,16 +163,15 @@ function postCorpusLevel() {
         'lowercase': lowercaseEl.is(':checked') ? 1 : 0
     }
 
-    // Files
+    // Data
     const data = new FormData();
+    data.append('type', 'corpus-level')
     data.append('hypothesis', $('#hypotheses-upload')[0].files[0], 'hypothesis.txt')
     data.append('reference', $('#references-upload')[0].files[0], 'reference.txt')
     data.append('preprocessing', JSON.stringify(preprocessing))
     data.append('isSentimentEnabled', isSentimentEnabled);
     data.append('isGenreEnabled', isGenreEnabled);
     data.append('depth', depth);
-
-    $.blockUI();
 
     $.ajax({
         url: '/api/stm',
@@ -121,15 +185,16 @@ function postCorpusLevel() {
                 el.prop('checked', false)
             });
             $(`${formPrefix} #depth`).val('').change();
-            // populateWithOutputSentenceLevel(JSON.parse(data));
-            $('#submit-button').prop('disabled', true);
+            $('#hypotheses-upload').val('')
+            $('#references-upload').val('')
+            populateWithOutputCorpusLevel(JSON.parse(data));
+            $('#submit-button-corpus').prop('disabled', true);
             $.unblockUI();
         }
     });
 }
 
 function postData() {
-
     const type = $('select[name=text-type] option').filter(':selected').val();
     console.log(type);
     if (type === 'sentence') {
@@ -137,91 +202,56 @@ function postData() {
     } else if (type === 'corpus') {
         postCorpusLevel();
     }
-
-    // TODO: RETURN ELEMENTS TO THEIR STATE
-
-    // [contractionsEl, specCharsEl, lowercaseEl].forEach(function (el) {
-    //     el.prop('checked', false)
-    // })
-    //
-    //
-    // inputFormReference.val('');
-    // inputFormHypothesis.val('');
-    // $('#text-type-select').val('').change();
-
-    // $.blockUI();
-    //
-    // const data = {
-    //     'reference': inputTextReference,
-    //     'hypothesis': inputTextHypothesis,
-    //     'metric': metricName,
-    //     'preprocessing': preprocessing
-    // }
-    //
-    // $.ajax({
-    //     url: '/api/n-gram-metrics',
-    //     method: 'POST',
-    //     data: JSON.stringify(data),
-    //     mimeType: 'application/json',
-    //     processData: false,
-    //     success: function (data) {
-    //         populateWithOutput(JSON.parse(data));
-    //         $('#submit-button').prop('disabled', true);
-    //         $.unblockUI();
-    //     }
-    // });
 }
+
 
 function toggleSubmitButton() {
-    const isRefEmpty = $('#input-text-reference').val() === '';
-    const isHypEmpty = $('#input-text-hypothesis').val() === '';
-    const isMetricSelected = $('select[name=metric] option').filter(':selected').val() !== '';
-    $('#submit-button').prop('disabled', isRefEmpty || isHypEmpty || !isMetricSelected)
+    const type = $('select[name=text-type] option').filter(':selected').val();
+    if (type === 'sentence') {
+        const isRefEmpty = $('#input-text-reference').val() === '';
+        const isHypEmpty = $('#input-text-hypothesis').val() === '';
+        const isDepthSelected = $('#sentence-level select[name=depth] option').filter(':selected').val() !== '';
+        $('#submit-button-sentence').prop('disabled', isRefEmpty || isHypEmpty || !isDepthSelected)
+    } else if (type === 'corpus') {
+        const isRefEmpty = $('#references-upload').get(0).files.length === 0;
+        const isHypEmpty = $('#hypotheses-upload').get(0).files.length === 0;
+        const isDepthSelected = $('#corpus-level select[name=depth] option').filter(':selected').val() !== '';
+        $('#submit-button-corpus').prop('disabled', isRefEmpty || isHypEmpty || !isDepthSelected)
+    }
 }
 
-// TODO: DIFFERENT BUTTONS
+// TODO: actually destroy output, clear fields
+function hideOldOutput() {
+    $('#output-container').addClass('d-none');
+    $('#analyzers').addClass('d-none');
+    $('#genre-analysis-output').addClass('d-none');
+    $('#corpora-genre').addClass('d-none');
+    $('#sentence-level-output').addClass('d-none');
+    $('#per-sentence-summary').addClass('d-none');
+}
+
+// TODO: extract common parts in HTML
 $(document).ready(function () {
-    $('#corpus-level #submit-button').click(postData);
-    // $('#input-text-hypothesis').keyup(toggleSubmitButton);
-    // $('#input-text-reference').keyup(toggleSubmitButton);
-    // $('#metric-select').on('change', toggleSubmitButton);
+    $('#submit-button-corpus').click(postData);
+    $('#submit-button-corpus').click(hideOldOutput);
+    $('#submit-button-sentence').click(postData);
+    $('#submit-button-sentence').click(hideOldOutput);
+
+    // Sentence level check
+    $('#input-text-hypothesis').keyup(toggleSubmitButton);
+    $('#input-text-reference').keyup(toggleSubmitButton);
+    $('#sentence-level #depth').on('change', toggleSubmitButton);
+
+    // Corpus level check
+    $('#references-upload').on('change', toggleSubmitButton)
+    $('#hypotheses-upload').on('change', toggleSubmitButton)
+    $('#corpus-level #depth').on('change', toggleSubmitButton);
+
+    // TODO: add onClick event for submit buttons so that they remove old output
 })
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+// TODO: rewrite
 function toggleInputForms() {
 
     const sentenceLevelFormClass = 'form-control';

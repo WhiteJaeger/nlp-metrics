@@ -1,30 +1,23 @@
-from flask import request, json, current_app
-
-from NLP.text_utils import prepare_str
-import flask_restful as restful
-
 import os
 
+import flask_restful as restful
+from flask import request, json, current_app
 from spacy import displacy
+from werkzeug.datastructures import ImmutableMultiDict, MultiDict
 
-from NLP.constants import METRICS_FUNCTIONS, METRICS_MAP
+from NLP.constants import METRICS_FUNCTIONS
+from NLP.text_utils import prepare_str
 from main.models import MODEL, SENTIMENT_CLASSIFIER, GENRE_CLASSIFIER
 from main.utils import generate_salt, purge_old_files
 
 
 class SubtreeMetricAPI(restful.Resource):
 
-    def post(self):
-
-        data = json.loads(request.get_data().decode('utf-8'))
-        preprocessing = data['preprocessing']
+    @staticmethod
+    def _handle_sentence_level(data: ImmutableMultiDict):
+        preprocessing = json.loads(data['preprocessing'])
+        text_preparation_params = {k: bool(preprocessing[k]) for k in preprocessing}
         depth = int(data['depth'])
-
-        text_preparation_params = {
-            'contractions': bool(preprocessing.get('contractions')),
-            'spec-chars': bool(preprocessing.get('spec-chars')),
-            'lowercase': bool(preprocessing.get('lowercase'))
-        }
 
         ref: str = prepare_str(data['reference'],
                                special_char_removal=text_preparation_params['spec-chars'],
@@ -64,7 +57,6 @@ class SubtreeMetricAPI(restful.Resource):
         output = {
             'reference': data['reference'],
             'hypothesis': data['hypothesis'],
-            'metric': 'STM',
             'score': score,
             'depth': depth,
             'isSentimentEnabled': data['isSentimentEnabled'],
@@ -73,24 +65,18 @@ class SubtreeMetricAPI(restful.Resource):
         }
         return json.dumps(output)
 
-        # TODO: CORPUS
-        print(request.form.get('isSentimentEnabled'))
-        print(request.form.get('depth'))
-        print(json.loads(request.form.get('preprocessing')))
-        hypotheses_file = request.files['hypothesis']
-        hypotheses_file.save(os.path.join(current_app.config['UPLOAD_PATH'], 'text.txt'))
-        return 123
+    @staticmethod
+    def _handle_corpus_level(data: ImmutableMultiDict, files: MultiDict):
         genre = None
+        enable_genre_analyzer = data.get('isGenreEnabled')
+        enable_sentiment_analyzer = data.get('isSentimentEnabled')
 
-        text_preparation_params = {
-            'contractions': bool(request.form.get('contractions', 0)),
-            'spec-chars': bool(request.form.get('spec-chars', 0)),
-            'lowercase': bool(request.form.get('lowercase', 0))
-        }
+        preprocessing = json.loads(data.get('preprocessing'))
+        text_preparation_params = {k: bool(preprocessing[k]) for k in preprocessing}
 
-        depth = int(request.form.get('depth'))
-        hypotheses_file = request.files['hypothesis-file']
-        references_file = request.files['references-file']
+        depth = int(data.get('depth'))
+        hypotheses_file = files['hypothesis']
+        references_file = files['reference']
 
         # Rm old files
         purge_old_files(current_app.config['UPLOAD_PATH'])
@@ -120,7 +106,7 @@ class SubtreeMetricAPI(restful.Resource):
         if not are_corpora_structure_correct(corpora):
             pass
 
-        if request.form.get('genre') and request.form.get('sentiment'):
+        if enable_genre_analyzer and enable_sentiment_analyzer:
             result = METRICS_FUNCTIONS['stm_augmented'](references=corpora['references'],
                                                         hypotheses=corpora['hypotheses'],
                                                         nlp_model=MODEL,
@@ -129,8 +115,8 @@ class SubtreeMetricAPI(restful.Resource):
                                                         depth=depth)
             score = result['score']
             per_sentence_report = result['per_sentence_summary']
-            genre = result['genre']
-        elif request.form.get('sentiment'):
+            genre: dict = result['genre']
+        elif enable_sentiment_analyzer:
             result = METRICS_FUNCTIONS['stm_augmented'](references=corpora['references'],
                                                         hypotheses=corpora['hypotheses'],
                                                         nlp_model=MODEL,
@@ -138,8 +124,8 @@ class SubtreeMetricAPI(restful.Resource):
                                                         depth=depth)
             score = result['score']
             per_sentence_report = result['per_sentence_summary']
-            genre = result['genre']
-        elif request.form.get('genre'):
+            genre: dict = result['genre']
+        elif enable_genre_analyzer:
             result = METRICS_FUNCTIONS['stm_augmented'](references=corpora['references'],
                                                         hypotheses=corpora['hypotheses'],
                                                         nlp_model=MODEL,
@@ -147,7 +133,7 @@ class SubtreeMetricAPI(restful.Resource):
                                                         depth=depth)
             score = result['score']
             per_sentence_report = result['per_sentence_summary']
-            genre = result['genre']
+            genre: dict = result['genre']
         else:
             result = METRICS_FUNCTIONS['stm_augmented'](references=corpora['references'],
                                                         hypotheses=corpora['hypotheses'],
@@ -157,48 +143,20 @@ class SubtreeMetricAPI(restful.Resource):
             per_sentence_report = result['per_sentence_summary']
 
         output = {
-            'metric': 'STM',
-            'value': score,
+            'score': score,
             'depth': depth,
-            'genre': request.form.get('genre'),
-            'sentiment': request.form.get('sentiment'),
+            'isGenreEnabled': enable_genre_analyzer,
+            'isSentimentEnabled': enable_sentiment_analyzer,
             'per_sentence_summary': get_pairs_with_lowest_scores(per_sentence_report) if per_sentence_report else None,
-            'corpora_genre': genre
+            'corpora_genres': genre
         }
-        # data = json.loads(request.get_data().decode('utf-8'))
-        # metric = data['metric']
-        # preprocessing = data['preprocessing']
-        #
-        # text_preparation_params = {
-        #     'contractions': bool(preprocessing.get('contractions')),
-        #     'spec-chars': bool(preprocessing.get('spec-chars')),
-        #     'lowercase': bool(preprocessing.get('lowercase'))
-        # }
-        #
-        # ref = prepare_str(data['reference'],
-        #                   text_lower_case=text_preparation_params['lowercase'],
-        #                   special_char_removal=text_preparation_params['spec-chars'],
-        #                   contraction_expansion=text_preparation_params['contractions'])
-        # hyp = prepare_str(data['hypothesis'],
-        #                   text_lower_case=text_preparation_params['lowercase'],
-        #                   special_char_removal=text_preparation_params['spec-chars'],
-        #                   contraction_expansion=text_preparation_params['contractions'])
-        #
-        # if metric in ('rouge', 'meteor', 'chrf'):
-        #     result = METRICS_FUNCTIONS[metric](ref, hyp)
-        # else:
-        #     hyp = hyp.split()
-        #     ref = ref.split()
-        #     result = METRICS_FUNCTIONS[metric]([ref], hyp)
-        #
-        # output = {
-        #     'reference': data['reference'],
-        #     'hypothesis': data['hypothesis'],
-        #     'metric': METRICS_MAP[metric],
-        #     'score': result if result > .001 else 0
-        # }
-        #
-        # return json.dumps(output)
+        return json.dumps(output)
+
+    def post(self):
+        if request.form.get('type') == 'sentence-level':
+            return self._handle_sentence_level(request.form)
+        elif request.form.get('type') == 'corpus-level':
+            return self._handle_corpus_level(request.form, request.files)
 
 
 def read_corpora(hypotheses_file_name: str, references_file_name: str) -> dict:
