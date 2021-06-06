@@ -119,28 +119,27 @@ function postSentenceLevel() {
     data.append('preprocessing', JSON.stringify(preprocessing));
     data.append('isSentimentEnabled', isSentimentEnabled);
 
-    $.ajax({
-        url: '/api/stm',
-        method: 'POST',
-        data: data,
-        mimeType: 'application/json',
-        processData: false,
-        contentType: false,
-        success: function (data) {
-            inputFormReference.val('');
-            inputFormHypothesis.val('');
-            [contractionsEl, specCharsEl, lowercaseEl, sentimentEl].forEach(function (el) {
-                el.prop('checked', false)
-            });
-            $(`${formPrefix} #depth`).val('').change();
-            removeOldOutput();
-            $(document).ajaxStop(function () {
+    $.when(removeOldOutput()).done(function () {
+        $.ajax({
+            url: '/api/stm',
+            method: 'POST',
+            data: data,
+            mimeType: 'application/json',
+            processData: false,
+            contentType: false,
+            success: function (data) {
+                inputFormReference.val('');
+                inputFormHypothesis.val('');
+                [contractionsEl, specCharsEl, lowercaseEl, sentimentEl].forEach(function (el) {
+                    el.prop('checked', false)
+                });
+                $(`${formPrefix} #depth`).val('').change();
                 populateWithOutputSentenceLevel(JSON.parse(data));
                 $('#submit-button-sentence').prop('disabled', true);
                 $.unblockUI();
-            })
-        }
-    });
+            }
+        });
+    })
 }
 
 function postCorpusLevel() {
@@ -176,28 +175,27 @@ function postCorpusLevel() {
     data.append('isGenreEnabled', isGenreEnabled);
     data.append('depth', depth);
 
-    $.ajax({
-        url: '/api/stm',
-        method: 'POST',
-        data: data,
-        mimeType: 'application/json',
-        processData: false,
-        contentType: false,
-        success: function (data) {
-            [contractionsEl, specCharsEl, lowercaseEl, sentimentEl, genreEl].forEach(function (el) {
-                el.prop('checked', false)
-            });
-            $(`${formPrefix} #depth`).val('').change();
-            $('#hypotheses-upload').val('')
-            $('#references-upload').val('')
-            removeOldOutput()
-            $(document).ajaxStop(function () {
+    $.when(removeOldOutput()).done(function () {
+        $.ajax({
+            url: '/api/stm',
+            method: 'POST',
+            data: data,
+            mimeType: 'application/json',
+            processData: false,
+            contentType: false,
+            success: function (data) {
+                [contractionsEl, specCharsEl, lowercaseEl, sentimentEl, genreEl].forEach(function (el) {
+                    el.prop('checked', false)
+                });
+                $(`${formPrefix} #depth`).val('').change();
+                $('#hypotheses-upload').val('')
+                $('#references-upload').val('')
                 populateWithOutputCorpusLevel(JSON.parse(data));
                 $('#submit-button-corpus').prop('disabled', true);
                 $.unblockUI();
-            })
-        }
-    });
+            }
+        });
+    })
 }
 
 function postData() {
@@ -228,12 +226,12 @@ function toggleSubmitButton() {
 
 function removeOldOutput() {
     // Reload the output part of the page
-    $('#output-container-outer').load($SCRIPT_ROOT + 'stm #output-container')
+    $('#output-container-outer').load($SCRIPT_ROOT + 'stm #output-container');
+    return true;
 }
 
 // TODO: extract common parts in HTML
 $(document).ready(function () {
-    // $(document).ajaxStart(removeOldOutput);
     $('#submit-button-corpus').click(postData);
     $('#submit-button-sentence').click(postData);
 
