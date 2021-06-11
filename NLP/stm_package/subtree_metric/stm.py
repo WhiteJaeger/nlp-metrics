@@ -15,7 +15,8 @@ Ding Liu and Daniel Gildea, 2005, Association for Computational Linguistics, Pag
     pages = "25--32",
 }
 """
-from typing import Union, Optional
+
+from typing import Union, Optional, Tuple, List, Dict
 
 import spacy
 from nltk import NaiveBayesClassifier
@@ -27,7 +28,7 @@ from subtree_metric.classifier_utils import predict
 from subtree_metric.tree_constructor import SyntaxTreeHeadsExtractor, SyntaxTreeElementsExtractor
 
 
-def transform_into_tags(tokens: tuple[Token]) -> tuple:
+def transform_into_tags(tokens: Tuple[Token]) -> tuple:
     """
     Return a tag collection for the given tokens.
     :param tokens: tokens for which to get tags
@@ -160,14 +161,14 @@ def sentence_stm(reference: str, hypothesis: str, nlp_model: Language, depth: in
     return round(score / depth, 4)
 
 
-def sentence_stm_several_references(references: list[str],
+def sentence_stm_several_references(references: List[str],
                                     hypothesis: str,
                                     nlp_model: Language,
                                     depth: int = 3) -> float:
     """
     Calculate sentence-level stm_package score with several references vs. one hypothesis
     :param references: reference sentences
-    :type references: list[str]
+    :type references: List[str]
     :param hypothesis: hypothesis sentence
     :type hypothesis: str
     :param nlp_model: one of the SpaCy NLP models with support of the DependencyParser (https://spacy.io/models)
@@ -184,8 +185,8 @@ def sentence_stm_several_references(references: list[str],
     return round(nominator / denominator, 4)
 
 
-def corpus_stm(references: list[str],
-               hypotheses: list[str],
+def corpus_stm(references: List[str],
+               hypotheses: List[str],
                nlp_model: Language,
                depth: int) -> float:
     """
@@ -211,13 +212,13 @@ def corpus_stm(references: list[str],
     return round(score / len(references), 4)
 
 
-def corpus_stm_augmented(references: list[str],
-                         hypotheses: list[str],
+def corpus_stm_augmented(references: List[str],
+                         hypotheses: List[str],
                          nlp_model: Language,
                          sentiment_classifier: Optional[NaiveBayesClassifier] = None,
                          genre_classifier: Optional[Pipeline] = None,
                          depth: int = 3,
-                         make_summary: bool = True) -> Union[float, dict[str, Union[int, list]]]:
+                         make_summary: bool = True) -> Union[float, Dict[str, Union[int, list]]]:
     """
     Calculate corpus-level stm_package score with additional weights from sentiment and genre classifiers - stm_package-Augmented
     :param hypotheses: hypotheses
@@ -240,7 +241,7 @@ def corpus_stm_augmented(references: list[str],
     # TODO: introduce sanity checks
     score = 0
 
-    per_sentence_summary: list[dict[str, Union[str, float]]] = []
+    per_sentence_summary: List[Dict[str, Union[str, float]]] = []
 
     idx = 0
     for reference_sentence, hypothesis_sentence in zip(references, hypotheses):

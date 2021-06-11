@@ -14,7 +14,7 @@ with open('README.md', 'r', encoding='utf-8') as df:
 
 setuptools.setup(
     name='subtree-metric',
-    version='0.2.3',
+    version='0.2.4',
     author='Kashchikhin Andrej',
     author_email='logerk3@gmail.com',
     description='Subtree Metric for the translation evaluation',
@@ -23,7 +23,7 @@ setuptools.setup(
     url='https://github.com/WhiteJaeger/nlp-metrics',
     project_urls={
         'Bug Tracker': 'https://github.com/WhiteJaeger/nlp-metrics/issues',
-        'Web Application': 'http://nlp-metrics.herokuapp.com'
+        'Web Application': 'https://nlp-metrics.herokuapp.com'
     },
     classifiers=[
         "Programming Language :: Python :: 3",
