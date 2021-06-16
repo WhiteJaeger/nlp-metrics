@@ -83,32 +83,54 @@ function populateWithOutputCorpusLevel(output) {
     }
 }
 
-function postSentenceLevel() {
-
-    $.blockUI();
-
-    const formPrefix = '#sentence-level';
-
-    const inputFormReference = $(`${formPrefix} #input-text-reference`);
-    const inputTextReference = inputFormReference.val();
-
-    const inputFormHypothesis = $(`${formPrefix} #input-text-hypothesis`);
-    const inputTextHypothesis = inputFormHypothesis.val();
-
-    const depth = $(`${formPrefix} select[name=depth] option`).filter(':selected').val();
-
-    const sentimentEl = $(`${formPrefix} #sentiment-sentence`);
-    const isSentimentEnabled = sentimentEl.is(':checked') ? '1' : '0';
-
-    const contractionsEl = $(`${formPrefix} #contractions`);
-    const specCharsEl = $(`${formPrefix} #spec-chars`);
-    const lowercaseEl = $(`${formPrefix} #lowercase`);
+function extractCommonParameters() {
+    // Preprocessing
+    const contractionsEl = $(`#contractions`);
+    const specCharsEl = $(`#spec-chars`);
+    const lowercaseEl = $(`#lowercase`);
 
     const preprocessing = {
         'contractions': contractionsEl.is(':checked') ? 1 : 0,
         'spec-chars': specCharsEl.is(':checked') ? 1 : 0,
         'lowercase': lowercaseEl.is(':checked') ? 1 : 0
     }
+
+    // Depth
+    const depth = $(`select[name=depth] option`).filter(':selected').val();
+
+    return {
+        'preprocessing': preprocessing,
+        'depth': depth
+    }
+}
+
+function returnCommonElementsToOriginalState() {
+    // Preprocessing
+    const contractionsEl = $(`#contractions`);
+    const specCharsEl = $(`#spec-chars`);
+    const lowercaseEl = $(`#lowercase`);
+    [contractionsEl, specCharsEl, lowercaseEl].forEach(function (el) {
+        el.prop('checked', false)
+    });
+
+    // Depth
+    $(`#depth`).val('').change();
+}
+
+function postSentenceLevel() {
+
+    $.blockUI();
+
+    const inputFormReference = $(`#input-text-reference`);
+    const inputTextReference = inputFormReference.val();
+
+    const inputFormHypothesis = $(`#input-text-hypothesis`);
+    const inputTextHypothesis = inputFormHypothesis.val();
+
+    const sentimentEl = $(`#sentiment-sentence`);
+    const isSentimentEnabled = sentimentEl.is(':checked') ? '1' : '0';
+
+    const {preprocessing, depth} = extractCommonParameters()
 
     // Data
     const data = new FormData();
@@ -128,14 +150,15 @@ function postSentenceLevel() {
             processData: false,
             contentType: false,
             success: function (data) {
+                returnCommonElementsToOriginalState();
                 inputFormReference.val('');
                 inputFormHypothesis.val('');
-                [contractionsEl, specCharsEl, lowercaseEl, sentimentEl].forEach(function (el) {
-                    el.prop('checked', false)
-                });
-                $(`${formPrefix} #depth`).val('').change();
-                populateWithOutputSentenceLevel(JSON.parse(data));
+                sentimentEl.prop('checked', false);
                 $('#submit-button-sentence').prop('disabled', true);
+
+                populateWithOutputSentenceLevel(JSON.parse(data));
+            },
+            complete: function () {
                 $.unblockUI();
             }
         });
@@ -146,24 +169,13 @@ function postCorpusLevel() {
 
     $.blockUI();
 
-    const formPrefix = '#corpus-level';
-
-    const contractionsEl = $(`${formPrefix} #contractions`);
-    const specCharsEl = $(`${formPrefix} #spec-chars`);
-    const lowercaseEl = $(`${formPrefix} #lowercase`);
-
-    const depth = $(`${formPrefix} select[name=depth] option`).filter(':selected').val();
-
-    const sentimentEl = $(`${formPrefix} #sentiment`);
+    const sentimentEl = $(`#sentiment-corpus`);
     const isSentimentEnabled = sentimentEl.is(':checked') ? '1' : '0';
 
-    const genreEl = $(`${formPrefix} #genre`);
+    const genreEl = $(`#genre`);
     const isGenreEnabled = genreEl.is(':checked') ? '1' : '0';
-    const preprocessing = {
-        'contractions': contractionsEl.is(':checked') ? 1 : 0,
-        'spec-chars': specCharsEl.is(':checked') ? 1 : 0,
-        'lowercase': lowercaseEl.is(':checked') ? 1 : 0
-    }
+
+    const {preprocessing, depth} = extractCommonParameters()
 
     // Data
     const data = new FormData();
@@ -184,14 +196,20 @@ function postCorpusLevel() {
             processData: false,
             contentType: false,
             success: function (data) {
-                [contractionsEl, specCharsEl, lowercaseEl, sentimentEl, genreEl].forEach(function (el) {
+                returnCommonElementsToOriginalState();
+                [sentimentEl, genreEl].forEach(function (el) {
                     el.prop('checked', false)
                 });
-                $(`${formPrefix} #depth`).val('').change();
                 $('#hypotheses-upload').val('')
                 $('#references-upload').val('')
-                populateWithOutputCorpusLevel(JSON.parse(data));
                 $('#submit-button-corpus').prop('disabled', true);
+
+                populateWithOutputCorpusLevel(JSON.parse(data));
+
+                // Use submit button as the top el so that the header does not cover the results
+                $(window).scrollTop($('#submit-button-corpus').offset().top);
+            },
+            complete: function () {
                 $.unblockUI();
             }
         });
@@ -213,12 +231,12 @@ function toggleSubmitButton() {
     if (type === 'sentence') {
         const isRefEmpty = $('#input-text-reference').val() === '';
         const isHypEmpty = $('#input-text-hypothesis').val() === '';
-        const isDepthSelected = $('#sentence-level select[name=depth] option').filter(':selected').val() !== '';
+        const isDepthSelected = $('select[name=depth] option').filter(':selected').val() !== '';
         $('#submit-button-sentence').prop('disabled', isRefEmpty || isHypEmpty || !isDepthSelected)
     } else if (type === 'corpus') {
         const isRefEmpty = $('#references-upload').get(0).files.length === 0;
         const isHypEmpty = $('#hypotheses-upload').get(0).files.length === 0;
-        const isDepthSelected = $('#corpus-level select[name=depth] option').filter(':selected').val() !== '';
+        const isDepthSelected = $('select[name=depth] option').filter(':selected').val() !== '';
         $('#submit-button-corpus').prop('disabled', isRefEmpty || isHypEmpty || !isDepthSelected)
     }
 }
@@ -230,51 +248,39 @@ function removeOldOutput() {
     return true;
 }
 
-// TODO: extract common parts in HTML
+function toggleInputForms() {
+
+    const sentenceLevelForm = $('#sentence-level');
+    const corpusLevelForm = $('#corpus-level');
+    const commonPartsForm = $('#common');
+
+    commonPartsForm.removeClass('d-none');
+
+    if ($('#text-type-select').val() === 'corpus') {
+        sentenceLevelForm.addClass('d-none');
+        corpusLevelForm.removeClass('d-none');
+
+        $('#file-structure').removeClass('d-none');
+    } else {
+        corpusLevelForm.addClass('d-none');
+        sentenceLevelForm.removeClass('d-none');
+        $('#file-structure').addClass('d-none');
+    }
+}
+
 $(document).ready(function () {
     $('#submit-button-corpus').click(postData);
     $('#submit-button-sentence').click(postData);
 
+    $('#depth').on('change', toggleSubmitButton);
+
     // Sentence level check
     $('#input-text-hypothesis').keyup(toggleSubmitButton);
     $('#input-text-reference').keyup(toggleSubmitButton);
-    $('#sentence-level #depth').on('change', toggleSubmitButton);
 
     // Corpus level check
     $('#references-upload').on('change', toggleSubmitButton)
     $('#hypotheses-upload').on('change', toggleSubmitButton)
-    $('#corpus-level #depth').on('change', toggleSubmitButton);
 
+    $('#text-type-select').on('change', toggleInputForms)
 })
-
-
-// TODO: rewrite
-function toggleInputForms() {
-
-    const sentenceLevelFormClass = 'form-control';
-    const corpusLevelFormClass = 'form-control';
-
-    const sentenceLevelForm = document.getElementById('sentence-level');
-    const corpusLevelForm = document.getElementById('corpus-level');
-
-    if (document.getElementById('text-type-select').value === 'corpus') {
-        sentenceLevelForm.setAttribute('class', 'd-none');
-        corpusLevelForm.setAttribute('class', corpusLevelFormClass);
-
-        document.getElementById('file-structure').setAttribute('class', 'content-section');
-    } else {
-        corpusLevelForm.setAttribute('class', 'd-none');
-        sentenceLevelForm.setAttribute('class', sentenceLevelFormClass);
-        document.getElementById('file-structure').setAttribute('class', 'd-none');
-    }
-
-    if (!!document.getElementById('output-info')) {
-        document.getElementById('output-info').setAttribute('class', 'd-none');
-    }
-
-    if (!!document.getElementById('per-sentence-summary')) {
-        document.getElementById('per-sentence-summary').setAttribute('class', 'd-none');
-    }
-}
-
-document.getElementById('text-type-select').addEventListener('change', toggleInputForms)
