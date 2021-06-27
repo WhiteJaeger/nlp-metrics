@@ -36,25 +36,25 @@ function populateWithOutputCorpusLevel(output) {
         $('#per-sentence-summary').removeClass('d-none')
         for (let summary of perSentenceSummary) {
             let row = `
-<div class="content-section">
+<div class="content-section per-sentence-container">
     <div class="row">
-        <div class="col border per-sentence-info"><strong>Reference sentence</strong>: ${summary.reference}</div>
-        <div class="col border per-sentence-info"><strong>Hypothesis sentence</strong>: ${summary.hypothesis}</div>
+        <div class="col border per-sentence-info"><strong>Reference sentence:</strong> <span class="reference-sentence">${summary.reference}</span></div>
+        <div class="col border per-sentence-info"><strong>Hypothesis sentence:</strong> <span class="hypothesis-sentence">${summary.hypothesis}</span></div>
     </div>`;
             if (Number(isSentimentEnabled)) {
-                row = `${row} <div class="row">
+                row = `${row} <div class="row sentence-sentiment">
                                 <div class="col border per-sentence-info"><strong>Reference
-                                    sentiment</strong>: ${summary.sentiment_ref}</div>
+                                    sentiment:</strong> <span class="reference-sentiment">${summary.sentiment_ref}</span></div>
                                 <div class="col border per-sentence-info"><strong>Hypothesis
-                                    sentiment</strong>: ${summary.sentiment_hyp}</div>
+                                    sentiment:</strong> <span class="hypothesis-sentiment">${summary.sentiment_hyp}</span></div>
                             </div>`
             }
             if (Number(isGenreEnabled)) {
-                row = `${row} <div class="row">
+                row = `${row} <div class="row sentence-genre">
                                 <div class="col border per-sentence-info"><strong>Reference
-                                    genre</strong>: ${summary.genre_ref}</div>
+                                    genre:</strong> <span class="reference-genre">${summary.genre_ref}</span></div>
                                 <div class="col border per-sentence-info"><strong>Hypothesis
-                                    genre</strong>: ${summary.genre_hyp}</div>
+                                    genre:</strong> <span class="hypothesis-genre">${summary.genre_hyp}</span></div>
                             </div>`
             }
             row = `${row} <p class="stm-score text-center"><strong>STM Score</strong>: ${summary.score} out of
@@ -208,6 +208,9 @@ function postCorpusLevel() {
 
                 // Use submit button as the top el so that the header does not cover the results
                 $(window).scrollTop($('#submit-button-corpus').offset().top);
+
+                // Per-sentence summary
+                $('#download-summary').click(downloadSummary);
             },
             complete: function () {
                 $.unblockUI();
@@ -266,6 +269,68 @@ function toggleInputForms() {
         sentenceLevelForm.removeClass('d-none');
         $('#file-structure').addClass('d-none');
     }
+}
+
+function downloadSummary() {
+    // Collect per-sentence summary
+    const dataToSend = {}
+    dataToSend['depth'] = $('#depth-value').text();
+    dataToSend['per-sentence-reports'] = []
+
+    const perSentenceContainers = $('#per-sentence-summary').find('.per-sentence-container');
+    perSentenceContainers.each(function () {
+        // Extract data
+        const perSentenceReport = {}
+        perSentenceReport['hypothesis-sentence'] = $(this).find('.hypothesis-sentence').text();
+        perSentenceReport['reference-sentence'] = $(this).find('.reference-sentence').text();
+
+        if ($('.sentence-sentiment').length) {
+            perSentenceReport['reference-sentence-sentiment'] = $(this).find('.reference-sentiment').text();
+            perSentenceReport['hypothesis-sentence-sentiment'] = $(this).find('.hypothesis-sentiment').text();
+        }
+
+        if ($('.sentence-genre').length) {
+            perSentenceReport['reference-sentence-genre'] = $(this).find('.reference-genre').text();
+            perSentenceReport['hypothesis-sentence-genre'] = $(this).find('.hypothesis-genre').text();
+        }
+
+        // Append data
+        dataToSend['per-sentence-reports'].push(perSentenceReport);
+    })
+    // for (let perSentenceContainer of perSentenceContainers) {
+    //     // Extract data
+    //     const perSentenceReport = {}
+    //     perSentenceReport['hypothesis-sentence'] = perSentenceContainer.find('.hypothesis-sentence').text();
+    //     perSentenceReport['reference-sentence'] = perSentenceContainer.find('.reference-sentence').text();
+    //
+    //     if ($('.sentence-sentiment').length) {
+    //         perSentenceReport['reference-sentence-sentiment'] = perSentenceContainer.find('.reference-sentiment').text();
+    //         perSentenceReport['hypothesis-sentence-sentiment'] = perSentenceContainer.find('.hypothesis-sentiment').text();
+    //     }
+    //
+    //     if ($('.sentence-genre').length) {
+    //         perSentenceReport['reference-sentence-genre'] = perSentenceContainer.find('.reference-genre').text();
+    //         perSentenceReport['hypothesis-sentence-genre'] = perSentenceContainer.find('.hypothesis-genre').text();
+    //     }
+    //
+    //     // Append data
+    //     dataToSend['per-sentence-reports'].push(perSentenceReport);
+    // }
+
+    $.blockUI();
+
+    // Send data
+    $.ajax({
+        url: '/api/download-summary',
+        method: 'POST',
+        data: JSON.stringify(dataToSend),
+        mimeType: 'application/json',
+        processData: false,
+        contentType: false,
+        complete: function () {
+            $.unblockUI();
+        }
+    });
 }
 
 $(document).ready(function () {
