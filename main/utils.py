@@ -4,7 +4,7 @@ from os import path, listdir, remove
 
 
 def generate_salt() -> str:
-    return ''.join(random.choices(string.ascii_uppercase + string.digits, k=10))
+    return ''.join(random.choices(string.ascii_uppercase + string.digits, k=5))
 
 
 def purge_old_files(dir_with_files: str):

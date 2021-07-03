@@ -57,7 +57,7 @@ function populateWithOutputCorpusLevel(output) {
                                     genre:</strong> <span class="hypothesis-genre">${summary.genre_hyp}</span></div>
                             </div>`
             }
-            row = `${row} <p class="stm-score text-center"><strong>STM Score</strong>: ${summary.score} out of
+            row = `${row} <p class="stm-score text-center"><strong>STM Score</strong>: <span class="score">${summary.score}</span> out of
                             1.0</p>`
             row = `${row} </div>`
             $('#per-sentence-summary').append(row);
@@ -275,7 +275,9 @@ function downloadSummary() {
     // Collect per-sentence summary
     const dataToSend = {}
     dataToSend['depth'] = $('#depth-value').text();
-    dataToSend['per-sentence-reports'] = []
+    dataToSend['sentiment-analyzer-enabled'] = $('#sentiment-analyzer-enabled').text();
+    dataToSend['genre-analyzer-enabled'] = $('#genre-analyzer-enabled').text();
+    dataToSend['per-sentence-reports'] = [];
 
     const perSentenceContainers = $('#per-sentence-summary').find('.per-sentence-container');
     perSentenceContainers.each(function () {
@@ -283,6 +285,7 @@ function downloadSummary() {
         const perSentenceReport = {}
         perSentenceReport['hypothesis-sentence'] = $(this).find('.hypothesis-sentence').text();
         perSentenceReport['reference-sentence'] = $(this).find('.reference-sentence').text();
+        perSentenceReport['score'] = $(this).find('.score').text();
 
         if ($('.sentence-sentiment').length) {
             perSentenceReport['reference-sentence-sentiment'] = $(this).find('.reference-sentiment').text();
@@ -297,25 +300,6 @@ function downloadSummary() {
         // Append data
         dataToSend['per-sentence-reports'].push(perSentenceReport);
     })
-    // for (let perSentenceContainer of perSentenceContainers) {
-    //     // Extract data
-    //     const perSentenceReport = {}
-    //     perSentenceReport['hypothesis-sentence'] = perSentenceContainer.find('.hypothesis-sentence').text();
-    //     perSentenceReport['reference-sentence'] = perSentenceContainer.find('.reference-sentence').text();
-    //
-    //     if ($('.sentence-sentiment').length) {
-    //         perSentenceReport['reference-sentence-sentiment'] = perSentenceContainer.find('.reference-sentiment').text();
-    //         perSentenceReport['hypothesis-sentence-sentiment'] = perSentenceContainer.find('.hypothesis-sentiment').text();
-    //     }
-    //
-    //     if ($('.sentence-genre').length) {
-    //         perSentenceReport['reference-sentence-genre'] = perSentenceContainer.find('.reference-genre').text();
-    //         perSentenceReport['hypothesis-sentence-genre'] = perSentenceContainer.find('.hypothesis-genre').text();
-    //     }
-    //
-    //     // Append data
-    //     dataToSend['per-sentence-reports'].push(perSentenceReport);
-    // }
 
     $.blockUI();
 
